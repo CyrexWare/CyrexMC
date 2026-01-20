@@ -39,3 +39,14 @@
 
 # debug information files
 *.dwo
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+build/
+
+# Ninja
+build.ninja
+
+# Visual Studio
+.vs
