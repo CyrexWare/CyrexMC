@@ -38,18 +38,16 @@ Server::~Server() {
 	stop();
 }
 
-Server::Server(Server&& server) noexcept :
-	peer { std::move(server.peer)}
+Server::Server(Server&& other) noexcept :
+	peer { other.peer }
 {
-	server.peer = nullptr;
+	other.peer = nullptr;
 }
 
-Server& Server::operator=(Server&& server) noexcept {
-	// move(x) = move(x)
-	if (this == &server) return *this;
+Server& Server::operator=(Server&& other) noexcept {
 	stop();
-	peer = std::move(server.peer);
-	server.peer = nullptr;
+	peer = other.peer;
+	other.peer = nullptr;
 	return *this;
 }
 
