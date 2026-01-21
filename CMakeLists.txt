@@ -9,8 +9,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add executable
 add_executable(CyrexMC
-    cyrexmc/main.cpp
-)
+    "cyrexmc/main.cpp"
+ "cyrexmc/server.cpp" )
 
 # Include headers
 target_include_directories(CyrexMC PRIVATE cyrexmc)
