@@ -14,7 +14,7 @@ static void debug_client() {
 	bool active = true;
 	RakNet::SocketDescriptor socket_descriptor;
 	peer->Startup(1, &socket_descriptor, 1);
-	peer->Connect("127.0.0.1", 25565, nullptr, 0);
+	peer->Connect("127.0.0.1", static_cast<unsigned short>(DefaultMinecraftPorts::BedrockEdition), nullptr, 0);
 
 	while (active) {
 		for (RakNet::Packet* packet{};
@@ -34,7 +34,7 @@ static void debug_client() {
 
 static void server() {
 	try {
-		Server server(Server::Config::make_default_mc());
+		Server server(Server::Config::make_default_mc_be());
 		server.run();
 	} catch (const Server::InitFailedError& init_failed_error) {
 		std::cerr << "Server Initialization Failed: " << init_failed_error.what() << '\n';

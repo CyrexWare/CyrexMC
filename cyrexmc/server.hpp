@@ -3,6 +3,11 @@
 // RakNet
 #include <RakNet/RakPeerInterface.h>
 
+enum class DefaultMinecraftPorts : unsigned short {
+	JavaEdition = 25565,
+	BedrockEdition = 19132
+};
+
 class Server {
 public:
 	struct Config {
@@ -10,10 +15,10 @@ public:
 		unsigned int max_users{};
 		unsigned short max_incoming_connections{};
 
-		// Default configuration for a typical minecraft server
-		constexpr static Config make_default_mc() {
+		// Default configuration for a typical minecraft bedrock server
+		constexpr static Config make_default_mc_be() {
 			return {
-				.port = 25565,
+				.port = static_cast<unsigned short>(DefaultMinecraftPorts::BedrockEdition),
 				.max_users = 20,
 				.max_incoming_connections = 5
 			};
