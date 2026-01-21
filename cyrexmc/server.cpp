@@ -1,6 +1,8 @@
 #include "server.hpp"
 #include <iostream>
 
+#include <magic_enum/magic_enum.hpp>
+
 // Raknet
 #include <RakNet/MessageIdentifiers.h>
 #include <RakNet/RakSleep.h>
@@ -17,21 +19,7 @@ Server::Server(const Config& config) {
 		return;
 	}
 
-#define X(e) case e: throw Server::InitFailedError(#e)
-	switch (startup_result) {
-		X(RakNet::RAKNET_ALREADY_STARTED);
-		X(RakNet::INVALID_SOCKET_DESCRIPTORS);
-		X(RakNet::INVALID_MAX_CONNECTIONS);
-		X(RakNet::SOCKET_FAMILY_NOT_SUPPORTED);
-		X(RakNet::SOCKET_PORT_ALREADY_IN_USE);
-		X(RakNet::SOCKET_FAILED_TO_BIND);
-		X(RakNet::SOCKET_FAILED_TEST_SEND);
-		X(RakNet::PORT_CANNOT_BE_ZERO);
-		X(RakNet::FAILED_TO_CREATE_NETWORK_THREAD);
-		X(RakNet::COULD_NOT_GENERATE_GUID);
-		X(RakNet::STARTUP_OTHER_FAILURE);
-	}
-#undef X
+	throw InitFailedError(std::string(magic_enum::enum_name(startup_result)));
 }
 
 Server::~Server() {
