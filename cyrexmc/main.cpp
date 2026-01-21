@@ -1,9 +1,13 @@
+// STD
 #include <iostream>
+// RakNet
 #include <RakNet/RakPeerInterface.h>
 #include <RakNet/MessageIdentifiers.h>
 #include <RakNet/RakSleep.h>
+// Server
 #include "server.hpp"
 
+// Just for testing for now
 static void debug_client() {
 	RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
 	if (peer == nullptr) return;
@@ -17,8 +21,8 @@ static void debug_client() {
 			(packet = peer->Receive()) != nullptr;
 			peer->DeallocatePacket(packet)) {
 			switch (packet->data[0]) {
-				case ID_CONNECTION_REQUEST_ACCEPTED: puts("client connected to server"); break;
-				case ID_CONNECTION_ATTEMPT_FAILED:	 puts("failed to connect to the server"); active = false;  break;
+				case ID_CONNECTION_REQUEST_ACCEPTED: std::cerr << "client connected to server\n"; break;
+				case ID_CONNECTION_ATTEMPT_FAILED:	 std::cerr << "failed to connect to the server\n"; active = false;  break;
 			}
 			if (!active) break;
 		}
@@ -29,13 +33,12 @@ static void debug_client() {
 }
 
 static void server() {
-	Server server;
-	
-	if (server.init(Server::Config::make_typical())) {
+	try {
+		Server server(Server::Config::make_default_mc());
 		server.run();
+	} catch (const Server::InitFailedError& init_failed_error) {
+		std::cerr << "Server Initialization Failed: " << init_failed_error.what() << '\n';
 	}
-
-	server.stop();
 }
 
 int main() {
