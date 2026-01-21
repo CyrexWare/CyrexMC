@@ -14,6 +14,7 @@ add_executable(CyrexMC
 
 # Include headers
 target_include_directories(CyrexMC PRIVATE cyrexmc)
+target_include_directories(CyrexMC PRIVATE raknet)
 
 # RakNet
 if (EXISTS "${CMAKE_SOURCE_DIR}/RakNet/RakNet/CMakeLists.txt")
