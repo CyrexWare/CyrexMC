@@ -9,7 +9,7 @@
 
 namespace
 {
-void debug_client()
+void debugClient()
 {
     RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
     if (peer == nullptr)
@@ -17,8 +17,8 @@ void debug_client()
         return;
     }
     bool active = true;
-    RakNet::SocketDescriptor socket_descriptor;
-    peer->Startup(1, &socket_descriptor, 1);
+    RakNet::SocketDescriptor socketDescriptor;
+    peer->Startup(1, &socketDescriptor, 1);
     peer->Connect("127.0.0.1", 19132, nullptr, 0);
 
     while (active)
@@ -48,11 +48,11 @@ void server()
 {
     try
     {
-        Server server(Server::Config::make_default_mc_be());
+        Server server(Server::Config::makeDefault());
         server.run();
-    } catch (const Server::InitFailedError& init_failed_error)
+    } catch (const Server::InitFailedError& initFailedError)
     {
-        std::cerr << "Server Initialization Failed: " << init_failed_error.what() << '\n';
+        std::cerr << "Server Initialization Failed: " << initFailedError.what() << '\n';
     }
 }
 } // namespace
@@ -63,7 +63,7 @@ int main()
     const std::int32_t ch = getchar();
     if (ch == 'c')
     {
-        debug_client();
+        debugClient();
     }
     else if (ch == 's')
     {

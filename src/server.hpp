@@ -1,5 +1,9 @@
 #pragma once
+
 #include <stdexcept>
+
+#include <cstdint>
+
 // RakNet
 #include <RakNet/RakPeerInterface.h>
 
@@ -9,14 +13,14 @@ public:
     struct Config
     {
         std::uint16_t port{};
-        std::uint32_t max_users{};
-        std::uint16_t max_incoming_connections{};
+        std::uint32_t maxUsers{};
+        std::uint16_t maxIncomingConnections{};
 
         // Default configuration for a typical minecraft bedrock server
-        static constexpr Config make_default_mc_be()
+        static constexpr Config makeDefault()
         {
-            return {.port = 19132, .max_users = 20, .max_incoming_connections = 5};
-            return {.port = 19132, .max_users = 20, .max_incoming_connections = 5};
+            return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
+            return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
         }
     };
 
@@ -25,32 +29,21 @@ public:
         explicit InitFailedError(const std::string& message);
     };
 
-public:
     // Initializes the server to a usable state
     // Throws: InitFailedError
     explicit Server(const Config& config);
     ~Server();
-
-private:
-    // Disable copying
+    Server(Server&& other) noexcept;
+    Server& operator=(Server&& other) noexcept;
     Server(const Server&) = delete;
     Server& operator=(const Server&) = delete;
 
-public:
-    // Moves
-    Server(Server&& other) noexcept;
-    Server& operator=(Server&& other) noexcept;
-
-public:
     void run();
 
 private:
     void stop();
+    void receivePackets();
+    void onPacketReceived(const RakNet::Packet* packet);
 
-private:
-    void receive_packets();
-    void on_packet_received(const RakNet::Packet* packet);
-
-private:
-    RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
+    RakNet::RakPeerInterface* m_peer = RakNet::RakPeerInterface::GetInstance();
 };

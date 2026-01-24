@@ -13,17 +13,17 @@ Server::InitFailedError::InitFailedError(const std::string& message) : std::runt
 
 Server::Server(const Config& config)
 {
-    RakNet::SocketDescriptor socket_descriptor(config.port, nullptr);
-    RakNet::StartupResult startup_result = peer->Startup(config.max_users, &socket_descriptor, 1);
+    RakNet::SocketDescriptor socketDescriptor(config.port, nullptr);
+    const RakNet::StartupResult startupResult = m_peer->Startup(config.maxUsers, &socketDescriptor, 1);
 
     // All clear
-    if (startup_result == RakNet::RAKNET_STARTED)
+    if (startupResult == RakNet::RAKNET_STARTED)
     {
-        peer->SetMaximumIncomingConnections(config.max_incoming_connections);
+        m_peer->SetMaximumIncomingConnections(config.maxIncomingConnections);
         return;
     }
 
-    throw InitFailedError(std::string(magic_enum::enum_name(startup_result)));
+    throw InitFailedError(std::string(magic_enum::enum_name(startupResult)));
 }
 
 Server::~Server()
@@ -31,16 +31,16 @@ Server::~Server()
     stop();
 }
 
-Server::Server(Server&& other) noexcept : peer{other.peer}
+Server::Server(Server&& other) noexcept : m_peer{other.m_peer}
 {
-    other.peer = nullptr;
+    other.m_peer = nullptr;
 }
 
 Server& Server::operator=(Server&& other) noexcept
 {
     stop();
-    peer = other.peer;
-    other.peer = nullptr;
+    m_peer = other.m_peer;
+    other.m_peer = nullptr;
     return *this;
 }
 
@@ -48,28 +48,28 @@ void Server::run()
 {
     while (true)
     {
-        receive_packets();
+        receivePackets();
         RakSleep(15);
     }
 }
 
 void Server::stop()
 {
-    if (peer && peer->IsActive())
+    if (m_peer && m_peer->IsActive())
     {
-        peer->Shutdown(50);
+        m_peer->Shutdown(50);
     }
 }
 
-void Server::receive_packets()
+void Server::receivePackets()
 {
-    for (RakNet::Packet* packet{}; (packet = peer->Receive()) != nullptr; peer->DeallocatePacket(packet))
+    for (RakNet::Packet* packet{}; (packet = m_peer->Receive()) != nullptr; m_peer->DeallocatePacket(packet))
     {
-        on_packet_received(packet);
+        onPacketReceived(packet);
     }
 }
 
-void Server::on_packet_received(const RakNet::Packet* packet)
+void Server::onPacketReceived(const RakNet::Packet* packet)
 {
     switch (packet->data[0])
     {

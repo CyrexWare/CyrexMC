@@ -20,7 +20,7 @@ endif()
 FetchContent_Declare(RakNet
     SYSTEM 
     GIT_REPOSITORY https://github.com/CyrexWare/RakNet
-    GIT_TAG 719e29c00d132e17cdbc3256a4d9b18ae32276f2)
+    GIT_TAG 700207323fe306ec6154371b866360cbbf058afe)
 FetchContent_MakeAvailable(RakNet)
 
 FetchContent_Declare(MagicEnum
