@@ -1,32 +1,42 @@
 cmake_minimum_required(VERSION 3.15)
 
+include(FetchContent)
+
 project(CyrexMC VERSION 1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# define a macro that helps defining an option
+macro(CyrexMC_set_option var default type docstring)
+    if(NOT DEFINED ${var})
+        set(${var} ${default})
+    endif()
+    set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
+endmacro()
 
-# Add executable
-add_executable(CyrexMC
-    "cyrexmc/main.cpp"
- "cyrexmc/server.cpp" )
 
-# Include headers
-target_include_directories(CyrexMC PRIVATE cyrexmc)
-target_include_directories(CyrexMC PRIVATE raknet)
-
-# Magic-Enum
-if (EXISTS "${CMAKE_SOURCE_DIR}/magic_enum/CMakeLists.txt")
-    add_subdirectory(magic_enum)
-    target_include_directories(CyrexMC PRIVATE magic_enum/include)
+if(ENABLE_SANITIZERS)
+    string(APPEND CMAKE_CXX_FLAGS " -fno-omit-frame-pointer -fno-sanitize-recover=all -fsanitize=undefined")
 endif()
 
-# RakNet
-if (EXISTS "${CMAKE_SOURCE_DIR}/RakNet/RakNet/CMakeLists.txt")
-    add_subdirectory(RakNet/RakNet)
-    target_link_libraries(CyrexMC PRIVATE raknet)  # just RakNet
-else()
-    message(FATAL_ERROR "RakNet submodule not found. Did you run git submodule update --init?")
-endif()
+FetchContent_Declare(RakNet
+    SYSTEM 
+    GIT_REPOSITORY https://github.com/CyrexWare/RakNet
+    GIT_TAG 25369b76db042d8728d496b63bfdf832efdf9e56)
+FetchContent_MakeAvailable(RakNet)
 
+FetchContent_Declare(MagicEnum
+    SYSTEM 
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum
+    GIT_TAG v0.9.7)
+FetchContent_MakeAvailable(MagicEnum)
 
+file(GLOB_RECURSE SRC_FILES "${PROJECT_SOURCE_DIR}/src/*.cpp")
+
+add_executable(CyrexMC ${SRC_FILES})
+target_compile_features(CyrexMC PRIVATE cxx_std_23)
+target_include_directories(CyrexMC PRIVATE "${PROJECT_SOURCE_DIR}/src")
+target_link_libraries(CyrexMC PRIVATE raknet magic_enum::magic_enum)
+
+CyrexMC_set_option(CLANG_TIDY_EXECUTABLE clang-tidy STRING "Override clang-tidy executable, requires minimum version 14")
+add_custom_target(tidy
+    COMMAND ${CMAKE_COMMAND} -DCLANG_TIDY_EXECUTABLE=${CLANG_TIDY_EXECUTABLE} -DPROJECT_BINARY_DIR=${PROJECT_BINARY_DIR} -P ./cmake/Tidy.cmake
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} VERBATIM)
