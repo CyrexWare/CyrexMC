@@ -109,7 +109,7 @@ jobs:
       run: cmake --preset dev -DCMAKE_VERBOSE_MAKEFILE=ON ${{matrix.platform.flags}} ${{matrix.config.flags}} ${{matrix.type.flags}}
 
     - name: Build
-      run: cmake --build build --config ${{ matrix.type.name == 'Debug' && 'Debug' || 'Release' }} --target Game
+      run: cmake --build build --config ${{ matrix.type.name == 'Debug' && 'Debug' || 'Release' }} --target CyrexMC
 
   format:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
@@ -212,4 +212,4 @@ jobs:
       run: cmake --preset dev -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DSFML_BUILD_EXAMPLES=OFF -DENABLE_SANITIZERS=ON ${{matrix.platform.flags}}
 
     - name: Build
-      run: cmake --build build --target Game
+      run: cmake --build build --target CyrexMC
