@@ -2,12 +2,14 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "ninja-msvc",
-      "generator": "Ninja",
+      "name": "dev",
       "binaryDir": "build",
+      "installDir": "${sourceDir}/build/install",
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "clang-cl",
-        "CMAKE_C_COMPILER": "clang-cl"
+        "CMAKE_CXX_EXTENSIONS": "OFF",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "BUILD_SHARED_LIBS": "FALSE",
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     }
   ]
