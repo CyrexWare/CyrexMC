@@ -23,6 +23,14 @@ FetchContent_Declare(RakNet
     GIT_TAG 700207323fe306ec6154371b866360cbbf058afe)
 FetchContent_MakeAvailable(RakNet)
 
+
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+
 FetchContent_Declare(MagicEnum
     SYSTEM 
     GIT_REPOSITORY https://github.com/Neargye/magic_enum
