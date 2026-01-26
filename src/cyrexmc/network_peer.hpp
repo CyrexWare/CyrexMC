@@ -1,6 +1,7 @@
 #pragma once
-#include <RakNet/RakPeerInterface.h>
+#include <stdint>
 #include <string_view>
+#include <RakNet/RakPeerInterface.h>
 
 namespace cyrex
 {
