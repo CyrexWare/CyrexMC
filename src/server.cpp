@@ -11,8 +11,6 @@
 #include "RakNet/MessageIdentifiers.h"
 #include <RakNet/RakSleep.h>
 
-#include <zlib.h>
-
 #include "raknet-utils.hpp"
 #include "client.hpp"
 

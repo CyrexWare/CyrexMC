@@ -35,19 +35,18 @@ FetchContent_Declare(MagicEnum
 FetchContent_MakeAvailable(MagicEnum)
 
 FetchContent_Declare(
-  zlib
-  GIT_REPOSITORY "https://github.com/madler/zlib.git"
-  GIT_TAG "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf" # Use a specific tag/commit, e.g., v1.3.1
-  OVERRIDE_FIND_PACKAGE # Prevents conflicts if other dependencies use find_package(ZLIB)
+  libdeflate
+  GIT_REPOSITORY https://github.com/ebiggers/libdeflate
+  GIT_TAG v1.25
 )
-FetchContent_MakeAvailable(zlib)
+FetchContent_MakeAvailable(libdeflate)
 
 file(GLOB_RECURSE SRC_FILES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 
 add_executable(CyrexMC ${SRC_FILES})
 target_compile_features(CyrexMC PRIVATE cxx_std_23)
 target_include_directories(CyrexMC PRIVATE "${PROJECT_SOURCE_DIR}/src")
-target_link_libraries(CyrexMC PRIVATE raknet magic_enum::magic_enum zlib)
+target_link_libraries(CyrexMC PRIVATE raknet magic_enum::magic_enum libdeflate_static)
 target_compile_definitions(CyrexMC PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
 
 CyrexMC_set_option(CLANG_TIDY_EXECUTABLE clang-tidy STRING "Override clang-tidy executable, requires minimum version 14")
