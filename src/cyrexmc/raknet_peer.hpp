@@ -20,12 +20,11 @@ public:
     Packet* receive() override;
     std::uint32_t send(const char* data, const int length, const SendInfo sendInfo) override;
 
-private:
-    RakNet::RakPeerInterface* const m_peerInterface{};
-
-    // Inherited via INetworkPeer
     void deallocatePacket(Packet* packet) override;
     bool isActive() const override;
+
+private:
+    RakNet::RakPeerInterface* const m_peerInterface{};
 };
 
 } // namespace cyrex
