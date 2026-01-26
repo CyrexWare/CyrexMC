@@ -3,9 +3,12 @@
 #include <stdexcept>
 
 #include <cstdint>
+#include <unordered_map>
 
 // RakNet
 #include <RakNet/RakPeerInterface.h>
+
+#include "client.hpp"
 
 class Server
 {
@@ -45,4 +48,6 @@ private:
     void onPacketReceived(RakNet::Packet* packet);
 
     RakNet::RakPeerInterface* m_peer = RakNet::RakPeerInterface::GetInstance();
+
+    std::unordered_map<RakNet::RakNetGUID, Client> clients;
 };
