@@ -2,6 +2,8 @@
 #include <RakNet/RakPeerInterface.h>
 #include <string_view>
 
+#include <cstdint>
+
 namespace cyrex
 {
 

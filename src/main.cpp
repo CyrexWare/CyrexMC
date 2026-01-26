@@ -13,10 +13,12 @@ namespace
 void debugClient()
 {
     RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
+
     if (peer == nullptr)
     {
         return;
     }
+
     bool active = true;
     RakNet::SocketDescriptor socketDescriptor;
     peer->Startup(1, &socketDescriptor, 1);
@@ -50,7 +52,7 @@ void server()
 {
     try
     {
-        cyrex::RakNetPeer rakPeer (RakNet::RakPeerInterface::GetInstance());
+        cyrex::RakNetPeer rakPeer(RakNet::RakPeerInterface::GetInstance());
         cyrex::Server server(&rakPeer, cyrex::Server::Config::makeDefault());
         server.run();
     } catch (const cyrex::Server::InitFailedError& initFailedError)
