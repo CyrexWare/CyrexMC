@@ -23,14 +23,16 @@ jobs:
 
     env:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1"
 
     strategy:
       fail-fast: false
       matrix:
         platform:
           - { name: Windows VS2022 x64, os: windows-2022 }
-          - { name: Linux GCC,         os: ubuntu-latest }
-          - { name: Linux Clang,       os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ }
+          - { name: Linux GCC, os: ubuntu-latest }
+          - { name: Linux Clang, os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ }
+          # - { name: macOS, os: macos-latest } # BE GONE.
         config:
           - { name: Shared, flags: -DBUILD_SHARED_LIBS=TRUE }
           - { name: Static, flags: -DBUILD_SHARED_LIBS=FALSE }
@@ -39,13 +41,14 @@ jobs:
           - { name: Debug, flags: -DCMAKE_BUILD_TYPE=Debug }
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Set Visual Studio Architecture
-        if: contains(matrix.platform.name, 'Windows VS')
+        if: contains(matrix.platform.name, 'Windows VS') && !contains(matrix.platform.name, 'MSBuild')
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x64
+          arch: ${{ contains(matrix.platform.name, 'x86') && 'x86' || 'x64' }}
 
       - name: Get CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -53,17 +56,27 @@ jobs:
           cmakeVersion: ${{ runner.os == 'Windows' && '3.25' || '3.22' }}
           ninjaVersion: latest
 
-      - name: Install Linux Dependencies
+      - name: Install Linux Dependencies and Tools
         if: runner.os == 'Linux'
         run: |
           CLANG_VERSION=$(clang++ --version | sed -n 's/.*version \([0-9]\+\)\..*/\1/p')
+          echo "CLANG_VERSION=$CLANG_VERSION" >> $GITHUB_ENV
           sudo apt-get update
           sudo apt-get install -y \
             xorg-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev \
             libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev \
             libdrm-dev libgbm-dev xvfb fluxbox ccache gcovr \
-            ${{ matrix.platform.name == 'Linux Clang' && 'llvm-' || '' }}$CLANG_VERSION
-          sudo apt-get remove -y libasound2
+            ${{ matrix.platform.name == 'Linux Clang' && 'llvm-$CLANG_VERSION' || '' }}
+
+      - name: Remove ALSA Library
+        if: runner.os == 'Linux' && matrix.platform.name != 'Android'
+        run: sudo apt-get remove -y libasound2
+
+      - name: Install macOS Tools
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install gcovr ccache || true
 
       - name: Setup CCache
         uses: hendrikmuhs/ccache-action@v1.2.12
@@ -71,17 +84,43 @@ jobs:
           verbose: 2
           key: ${{ matrix.platform.name }}-${{ matrix.config.name }}-${{ matrix.type.name }}
 
+      - name: Install Gcovr for MinGW
+        if: matrix.type.name == 'Debug' && contains(matrix.platform.name, 'MinGW')
+        uses: threeal/pipx-install-action@v1.0.0
+        with:
+          packages: gcovr
+
+      - name: Cache MinGW
+        if: matrix.platform.name == 'Windows MinGW'
+        id: mingw-cache
+        uses: actions/cache@v4
+        with:
+          path: C:\Program Files\mingw64
+          key: winlibs-x86_64-posix-seh-gcc-12.2.0-llvm-16.0.0-mingw-w64msvcrt-10.0.0-r5
+
+      - name: Install MinGW
+        if: matrix.platform.name == 'Windows MinGW' && steps.mingw-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -Lo mingw64.zip https://github.com/brechtsanders/winlibs_mingw/releases/download/12.2.0-16.0.0-10.0.0-msvcrt-r5/winlibs-x86_64-posix-seh-gcc-12.2.0-llvm-16.0.0-mingw-w64msvcrt-10.0.0-r5.zip
+          unzip -qq -d "C:\Program Files" mingw64.zip
+
       - name: Configure CMake
-        run: cmake --preset dev -DCMAKE_VERBOSE_MAKEFILE=ON \
-             ${{ matrix.platform.flags }} \
-             ${{ matrix.config.flags }} \
-             ${{ matrix.type.flags }}
+        run: >
+          cmake --preset dev
+          -DCMAKE_VERBOSE_MAKEFILE=ON
+          ${{ matrix.platform.flags }}
+          ${{ matrix.config.flags }}
+          ${{ matrix.type.flags }}
 
       - name: Build
-        run: cmake --build build --config ${{ matrix.type.name == 'Debug' && 'Debug' || 'Release' }} --target CyrexMC
+        run: >
+          cmake --build build
+          --config ${{ matrix.type.name == 'Debug' && 'Debug' || 'Release' }}
+          --target CyrexMC
 
   format:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+
     name: Formatting
     runs-on: ubuntu-22.04
 
@@ -101,7 +140,8 @@ jobs:
       matrix:
         platform:
           - { name: Windows, os: windows-latest, flags: -GNinja }
-          - { name: Linux,   os: ubuntu-latest }
+          - { name: Linux, os: ubuntu-latest }
+          - { name: macOS, os: macos-latest }
 
     steps:
       - uses: actions/checkout@v4
@@ -122,8 +162,24 @@ jobs:
           libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev \
           libdrm-dev libgbm-dev
 
+      - name: Install macOS Dependencies
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install llvm || true
+          ln -s "$(brew --prefix llvm)/bin/clang-format" /usr/local/bin/clang-format
+          ln -s "$(brew --prefix llvm)/bin/clang-tidy" /usr/local/bin/clang-tidy
+          ln -s "$(brew --prefix llvm)/bin/clang-apply-replacements" /usr/local/bin/clang-apply-replacements
+          echo /usr/local/opt/llvm/bin >> $GITHUB_PATH
+          export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+
       - name: Configure
-        run: cmake --preset dev -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_UNITY_BUILD=ON ${{ matrix.platform.flags }}
+        run: >
+          cmake --preset dev
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_UNITY_BUILD=ON
+          ${{ matrix.platform.flags }}
 
       - name: Analyze Code
         run: cmake --build build --target tidy
@@ -138,8 +194,8 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - { name: Linux,               os: ubuntu-latest }
-          - { name: Linux DRM,           os: ubuntu-latest, flags: -DSFML_RUN_DISPLAY_TESTS=OFF -DSFML_USE_DRM=ON }
+          - { name: Linux, os: ubuntu-latest }
+          - { name: Linux DRM, os: ubuntu-latest, flags: -DSFML_RUN_DISPLAY_TESTS=OFF -DSFML_USE_DRM=ON }
           - { name: Linux GCC OpenGL ES, os: ubuntu-latest, flags: -DSFML_RUN_DISPLAY_TESTS=OFF -DSFML_OPENGL_ES=ON }
 
     steps:
@@ -160,11 +216,14 @@ jobs:
           sudo apt-get remove -y libasound2
 
       - name: Configure
-        run: cmake --preset dev -GNinja -DCMAKE_BUILD_TYPE=Debug \
-             -DCMAKE_CXX_COMPILER=clang++ \
-             -DSFML_BUILD_EXAMPLES=OFF \
-             -DENABLE_SANITIZERS=ON \
-             ${{ matrix.platform.flags }}
+        run: >
+          cmake --preset dev
+          -GNinja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=clang++
+          -DSFML_BUILD_EXAMPLES=OFF
+          -DENABLE_SANITIZERS=ON
+          ${{ matrix.platform.flags }}
 
       - name: Build
         run: cmake --build build --target CyrexMC
