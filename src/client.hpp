@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bit>
+
 #include "RakNet/BitStream.h"
 #include "raknet-utils.hpp"
 
@@ -84,6 +86,28 @@ struct Client
         std::uint32_t length = RakNetUtils::readVarInt32u(data);
         std::uint32_t id = RakNetUtils::readVarInt32u(data);
 
+        if (id == 0x01)
+        {
+            std::string view;
+            view.resize(200);
+            data.Read(view.data(), view.size());
+            data.SetReadOffset(data.GetReadOffset() - view.size() * 8);
 
+            std::uint32_t protocol;
+            data.Read(protocol);
+
+            std::uint32_t blockLength = RakNetUtils::readVarInt32u(data);
+
+
+            std::uint32_t strLength;
+            data.Read(strLength);
+            strLength = std::byteswap(strLength);
+
+            std::string str;
+            str.resize(strLength);
+            data.Read(str.data(), strLength);
+
+            std::println("JSON DATA\n{}", str);
+        }
     }
 };
