@@ -31,13 +31,18 @@ public:
     void deallocatePacket(Packet* packet) override
     {
     }
+
+    bool isActive() const override
+    {
+        return false;
+    }
 };
 
 // --- TEST SUITE 1 ---
 TEST(ExampleTest, IDK)
 {
     MockPeer peer;
-
     //Server obj
-    cyrex::Server server;
+    cyrex::Server server{&peer, cyrex::Server::Config::makeDefault()};
+    // ASSERT_TRUE(server->works)
 }
