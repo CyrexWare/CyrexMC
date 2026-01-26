@@ -32,7 +32,7 @@ public:
     {
         explicit InitFailedError(const std::string& message);
     };
-
+    
     // Initializes the server to a usable state
     // Throws: InitFailedError
     explicit Server(INetworkPeer* const peer, const Config& config);
