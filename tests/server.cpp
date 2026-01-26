@@ -15,11 +15,13 @@ class MockPeer : public cyrex::INetworkPeer
 public:
     [[nodiscard]] StartupResult startup(const StartupInfo startupInfo) override
     {
+        (void)startupInfo;
         return StartupResult::RAKNET_ALREADY_STARTED;
     }
 
     void shutdown(const ShutdownInfo shutdownInfo) override
     {
+        (void)shutdownInfo;
     }
 
     [[nodiscard]] Packet* receive() override

@@ -60,7 +60,7 @@ public:
 
     [[nodiscard]] virtual bool isActive() const = 0;
 
-    virtual ~INetworkPeer(){}
+    virtual ~INetworkPeer() = default;
 };
 
 } // namespace cyrex
