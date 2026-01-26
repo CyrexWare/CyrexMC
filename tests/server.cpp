@@ -13,7 +13,7 @@ struct cyrex::Server::Testing
 class MockPeer : public cyrex::INetworkPeer
 {
 public:
-    StartupResult startup(const StartupInfo startupInfo) override
+    [[nodiscard]] StartupResult startup(const StartupInfo startupInfo) override
     {
         return StartupResult::RAKNET_ALREADY_STARTED;
     }
@@ -22,25 +22,30 @@ public:
     {
     }
 
-    Packet* receive() override
+    [[nodiscard]] Packet* receive() override
     {
         return nullptr;
     }
 
-    std::uint32_t send(const char* data, const int length, const SendInfo sendInfo) override
+    [[nodiscard]] std::uint32_t send(const char* data, const std::uint32_t length, const SendInfo sendInfo) override
     {
+        (void)data;
+        (void)length;
+        (void)sendInfo;
         return 0;
     }
 
     void setMaximumIncomingConnections(const std::uint16_t maxIncomingConnections) override
     {
+        (void)maxIncomingConnections;
     }
 
     void deallocatePacket(Packet* packet) override
     {
+        (void)packet;
     }
 
-    bool isActive() const override
+    [[nodiscard]] bool isActive() const override
     {
         return false;
     }

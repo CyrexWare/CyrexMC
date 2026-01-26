@@ -43,7 +43,7 @@ public:
 
     // Initializes the server to a usable state
     // Throws: InitFailedError
-    explicit Server(INetworkPeer* const peer, const Config& config);
+    explicit Server(INetworkPeer* peer, const Config& config);
     ~Server();
     Server(Server&& other) noexcept;
     Server& operator=(Server&& other) noexcept;
@@ -55,11 +55,9 @@ public:
 private:
     void stop();
     void receivePackets();
-
     // Throws: NullPacketException if the packet is nullptr
-    void onPacketReceived(const RakNet::Packet* packet);
+    void onPacketReceived(RakNet::Packet* packet);
 
-private:
     INetworkPeer* m_peer;
 };
 

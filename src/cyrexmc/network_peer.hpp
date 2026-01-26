@@ -23,7 +23,7 @@ public:
         std::uint32_t numDescriptors{};
     };
 
-    virtual StartupResult startup(const StartupInfo startupInfo) = 0;
+    [[nodiscard]] virtual StartupResult startup(StartupInfo startupInfo) = 0;
 
     struct ShutdownInfo
     {
@@ -32,11 +32,11 @@ public:
         PacketPriority disconnectionNotificationPriority = LOW_PRIORITY;
     };
 
-    virtual void shutdown(const ShutdownInfo shutdownInfo) = 0;
+    virtual void shutdown(ShutdownInfo shutdownInfo) = 0;
 
-    virtual void setMaximumIncomingConnections(const std::uint16_t maxIncomingConnections) = 0;
+    virtual void setMaximumIncomingConnections(std::uint16_t maxIncomingConnections) = 0;
 
-    virtual Packet* receive() = 0;
+    [[nodiscard]] virtual Packet* receive() = 0;
 
     struct SendInfo
     {
@@ -54,11 +54,13 @@ public:
         uint32_t forceReceiptNumber{};
     };
 
-    virtual std::uint32_t send(const char* data, const int length, const SendInfo sendInfo) = 0;
+    [[nodiscard]] virtual std::uint32_t send(const char* data, std::uint32_t length, SendInfo sendInfo) = 0;
 
     virtual void deallocatePacket(Packet* packet) = 0;
 
-    virtual bool isActive() const = 0;
+    [[nodiscard]] virtual bool isActive() const = 0;
+
+    virtual ~INetworkPeer(){}
 };
 
 } // namespace cyrex

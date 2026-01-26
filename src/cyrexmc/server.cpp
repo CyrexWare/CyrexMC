@@ -83,7 +83,7 @@ void cyrex::Server::receivePackets()
     }
 }
 
-void cyrex::Server::onPacketReceived(const RakNet::Packet* packet)
+void cyrex::Server::onPacketReceived(RakNet::Packet* const packet)
 {
     if (packet == nullptr)
     {

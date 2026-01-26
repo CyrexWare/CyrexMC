@@ -35,7 +35,7 @@ cyrex::RakNetPeer::Packet* cyrex::RakNetPeer::receive()
     return m_peerInterface->Receive();
 }
 
-std::uint32_t cyrex::RakNetPeer::send(const char* data, const int length, const SendInfo sendInfo)
+std::uint32_t cyrex::RakNetPeer::send(const char* data, const std::uint32_t length, const SendInfo sendInfo)
 {
     return m_peerInterface->Send(data,
                                  length,
