@@ -37,15 +37,8 @@ public:
     };
 #pragma endregion
 
-#pragma region Testing
-    struct Testing
-    {
-        static void onNullPacketReceived(Server& server)
-        {
-            server.onPacketReceived(nullptr);
-        }
-    };
-#pragma region
+    // Implemented in tests/server.cpp
+    struct Testing;
 
     // Initializes the server to a usable state
     // Throws: InitFailedError

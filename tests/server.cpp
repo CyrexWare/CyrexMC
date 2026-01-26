@@ -1,6 +1,14 @@
 #include <gtest/gtest.h>
 #include <cyrexmc/server.hpp>
 
+struct cyrex::Server::Testing
+{
+    static void onNullPacketReceived(Server& server)
+    {
+        server.onPacketReceived(nullptr);
+    }
+};
+
 class MockPeer : public cyrex::INetworkPeer
 {
 public:
