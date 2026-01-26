@@ -1,5 +1,5 @@
 #pragma once
-#include <stdint>
+#include <cstdint>
 #include <string_view>
 #include <RakNet/RakPeerInterface.h>
 
