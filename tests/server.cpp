@@ -81,10 +81,6 @@ TEST(ServerTest, OnPacketReceivedThrowsNullPacketException)
     };
 
     auto peer = MockPeer{};
-
-    ASSERT_THROW(
-        {
-            cyrex::Server server(&peer, cfg);
-            cyrex::Server::Testing::onNullPacketReceived(server);
-        }, cyrex::Server::NullPacketException);
+    cyrex::Server server(&peer, cfg);
+    ASSERT_THROW(cyrex::Server::Testing::onNullPacketReceived(server), cyrex::Server::NullPacketException);
 }
