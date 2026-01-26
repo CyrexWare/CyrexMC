@@ -1,7 +1,6 @@
 #pragma once
-#include <cstdint>
-#include <string_view>
 #include <RakNet/RakPeerInterface.h>
+#include <string_view>
 
 namespace cyrex
 {
@@ -21,7 +20,7 @@ public:
         RakNet::SocketDescriptor* socketDescriptors{};
         std::uint32_t numDescriptors{};
     };
-    
+
     virtual StartupResult startup(const StartupInfo startupInfo) = 0;
 
     struct ShutdownInfo

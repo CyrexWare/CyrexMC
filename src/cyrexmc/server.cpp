@@ -27,11 +27,8 @@ cyrex::Server::Server(INetworkPeer* const peer, const Config& config)
     this->m_peer = peer;
 
     RakNet::SocketDescriptor socketDescriptor(config.port, nullptr);
-    const RakNet::StartupResult startupResult = m_peer->startup({
-        .maxConnections = config.maxUsers,
-        .socketDescriptors = &socketDescriptor,
-        .numDescriptors = 1
-    });
+    const RakNet::StartupResult startupResult = m_peer->startup(
+        {.maxConnections = config.maxUsers, .socketDescriptors = &socketDescriptor, .numDescriptors = 1});
 
     // All clear
     if (startupResult == RakNet::RAKNET_STARTED)

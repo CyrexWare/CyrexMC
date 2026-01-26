@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include <cyrexmc/server.hpp>
 
 struct cyrex::Server::Testing
@@ -67,7 +68,7 @@ TEST(ServerTest, ConstructorThrowsOnInvalidConfig)
 
     auto mockPeerA = MockPeer{};
     auto mockPeerB = MockPeer{};
-    
+
     ASSERT_THROW(cyrex::Server(&mockPeerA, badMaxUsers), cyrex::Server::InitFailedError);
     ASSERT_THROW(cyrex::Server(&mockPeerB, badIncomingConnections), cyrex::Server::InitFailedError);
 }
