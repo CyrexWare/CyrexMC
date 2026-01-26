@@ -20,7 +20,6 @@ public:
         static constexpr Config makeDefault()
         {
             return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
-            return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
         }
     };
 
@@ -43,7 +42,7 @@ public:
 private:
     void stop();
     void receivePackets();
-    void onPacketReceived(const RakNet::Packet* packet);
+    void onPacketReceived(RakNet::Packet* packet);
 
     RakNet::RakPeerInterface* m_peer = RakNet::RakPeerInterface::GetInstance();
 };
