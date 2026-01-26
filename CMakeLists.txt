@@ -62,7 +62,7 @@ file(GLOB_RECURSE TEST_SOURCES "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 
 add_executable(RunTests ${TEST_SOURCES})
 target_include_directories(RunTests PUBLIC "${PROJECT_SOURCE_DIR}/src/" "${PROJECT_SOURCE_DIR}/tests/" )
-target_link_libraries(RunTests PUBLIC GTest::gtest_main GTest::gmock_main CyrexMC_lib)
+target_link_libraries(RunTests PUBLIC  GTest::gtest_main  GTest::gmock_main CyrexMC_lib)
 
 # Auto discover TEST macros
 include(GoogleTest)

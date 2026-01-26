@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-
 #include <cyrexmc/server.hpp>
 
 class MockPeer : public cyrex::INetworkPeer
@@ -63,4 +62,21 @@ TEST(ServerTest, ConstructorThrowsOnInvalidConfig)
     
     ASSERT_THROW(cyrex::Server(&mockPeerA, badMaxUsers), cyrex::Server::InitFailedError);
     ASSERT_THROW(cyrex::Server(&mockPeerB, badIncomingConnections), cyrex::Server::InitFailedError);
+}
+
+TEST(ServerTest, OnPacketReceivedThrowsNullPacketException)
+{
+    const cyrex::Server::Config cfg{
+        .port = 1234,
+        .maxUsers = 10,
+        .maxIncomingConnections = 10,
+    };
+
+    auto peer = MockPeer{};
+
+    ASSERT_THROW(
+        {
+            cyrex::Server server(&peer, cfg);
+            cyrex::Server::Testing::onNullPacketReceived(server);
+        }, cyrex::Server::NullPacketException);
 }

@@ -7,9 +7,15 @@
 #include <RakNet/MessageIdentifiers.h>
 #include <RakNet/RakSleep.h>
 
+///  Exceptions
 cyrex::Server::InitFailedError::InitFailedError(const std::string& message) : std::runtime_error(message)
 {
 }
+
+cyrex::Server::NullPacketException::NullPacketException(const std::string& message) : std::runtime_error(message)
+{
+}
+// --
 
 cyrex::Server::Server(INetworkPeer* const peer, const Config& config)
 {
@@ -82,6 +88,11 @@ void cyrex::Server::receivePackets()
 
 void cyrex::Server::onPacketReceived(const RakNet::Packet* packet)
 {
+    if (packet == nullptr)
+    {
+        throw NullPacketException("null packet in onPacketReceived");
+    }
+
     switch (packet->data[0])
     {
         case ID_NEW_INCOMING_CONNECTION:

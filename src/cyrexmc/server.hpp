@@ -1,11 +1,8 @@
 #pragma once
-
 #include <stdexcept>
-
 #include <cstdint>
 
 // RakNet
-//#include <RakNet/RakPeerInterface.h>
 #include "network_peer.hpp"
 
 namespace cyrex
@@ -28,11 +25,28 @@ public:
         }
     };
 
+#pragma region Exceptions and Errors
     struct InitFailedError : std::runtime_error
     {
         explicit InitFailedError(const std::string& message);
     };
-    
+
+    struct NullPacketException : std::runtime_error
+    {
+        explicit NullPacketException(const std::string& message);
+    };
+#pragma endregion
+
+#pragma region Testing
+    struct Testing
+    {
+        static void onNullPacketReceived(Server& server)
+        {
+            server.onPacketReceived(nullptr);
+        }
+    };
+#pragma region
+
     // Initializes the server to a usable state
     // Throws: InitFailedError
     explicit Server(INetworkPeer* const peer, const Config& config);
@@ -47,6 +61,8 @@ public:
 private:
     void stop();
     void receivePackets();
+
+    // Throws: NullPacketException if the packet is nullptr
     void onPacketReceived(const RakNet::Packet* packet);
 
 private:
