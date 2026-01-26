@@ -5,7 +5,11 @@
 #include <cstdint>
 
 // RakNet
-#include <RakNet/RakPeerInterface.h>
+//#include <RakNet/RakPeerInterface.h>
+#include "network_peer.hpp"
+
+namespace cyrex
+{
 
 class Server
 {
@@ -31,7 +35,7 @@ public:
 
     // Initializes the server to a usable state
     // Throws: InitFailedError
-    explicit Server(const Config& config);
+    explicit Server(INetworkPeer* const peer, const Config& config);
     ~Server();
     Server(Server&& other) noexcept;
     Server& operator=(Server&& other) noexcept;
@@ -45,5 +49,8 @@ private:
     void receivePackets();
     void onPacketReceived(const RakNet::Packet* packet);
 
-    RakNet::RakPeerInterface* m_peer = RakNet::RakPeerInterface::GetInstance();
+private:
+    INetworkPeer* m_peer;
 };
+
+} // namespace cyrex

@@ -4,7 +4,8 @@
 #include <RakNet/MessageIdentifiers.h>
 #include <RakNet/RakPeerInterface.h>
 #include <RakNet/RakSleep.h>
-// Server
+// Cyrex
+#include "raknet_peer.hpp"
 #include "server.hpp"
 
 namespace
@@ -44,13 +45,15 @@ void debugClient()
     peer->Shutdown(50);
 }
 
+
 void server()
 {
     try
     {
-        Server server(Server::Config::makeDefault());
+        cyrex::RakNetPeer rakPeer (RakNet::RakPeerInterface::GetInstance());
+        cyrex::Server server(&rakPeer, cyrex::Server::Config::makeDefault());
         server.run();
-    } catch (const Server::InitFailedError& initFailedError)
+    } catch (const cyrex::Server::InitFailedError& initFailedError)
     {
         std::cerr << "Server Initialization Failed: " << initFailedError.what() << '\n';
     }
