@@ -19,9 +19,8 @@ public:
         std::uint16_t maxIncomingConnections{};
 
         // Default configuration for a typical minecraft bedrock server
-        static constexpr Config makeDefault()
+        static constexpr Config makeDefault() noexcept
         {
-            return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
             return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
         }
     };

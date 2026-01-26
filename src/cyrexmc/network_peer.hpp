@@ -13,7 +13,6 @@ class INetworkPeer
 {
 public:
     using StartupResult = RakNet::StartupResult;
-
     using Packet = RakNet::Packet;
 
     struct StartupInfo
