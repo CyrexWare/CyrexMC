@@ -108,6 +108,17 @@ struct Client
             data.Read(str.data(), strLength);
 
             std::println("JSON DATA\n{}", str);
+
+
+            std::uint32_t strLength2;
+            data.Read(strLength2);
+            strLength2 = std::byteswap(strLength2);
+
+            std::string str2;
+            str2.resize(strLength2);
+            data.Read(str2.data(), strLength2);
+
+            std::println("jswt DATA\n{}", str2);
         }
     }
 };
