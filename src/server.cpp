@@ -7,36 +7,48 @@
 #include <RakNet/MessageIdentifiers.h>
 #include <RakNet/RakSleep.h>
 
-Server::InitFailedError::InitFailedError(const std::string& message) : std::runtime_error(message)
+///  Exceptions
+cyrex::Server::InitFailedError::InitFailedError(const std::string& message) : std::runtime_error(message)
 {
 }
 
-Server::Server(const Config& config)
+cyrex::Server::NullPacketException::NullPacketException(const std::string& message) : std::runtime_error(message)
 {
-    RakNet::SocketDescriptor socketDescriptor(config.port, nullptr);
-    const RakNet::StartupResult startupResult = m_peer->Startup(config.maxUsers, &socketDescriptor, 1);
+}
+// --
+
+cyrex::Server::Server(INetworkPeer* const peer, const Config& config)
+{
+    if (peer == nullptr)
+    {
+        throw InitFailedError("peer is nullptr");
+    }
+
+    this->m_peer = peer;
+
+    const RakNet::StartupResult startupResult = m_peer->startup({.maxConnections = config.maxUsers, .port = config.port});
 
     // All clear
     if (startupResult == RakNet::RAKNET_STARTED)
     {
-        m_peer->SetMaximumIncomingConnections(config.maxIncomingConnections);
+        m_peer->setMaximumIncomingConnections(config.maxIncomingConnections);
         return;
     }
 
     throw InitFailedError(std::string(magic_enum::enum_name(startupResult)));
 }
 
-Server::~Server()
+cyrex::Server::~Server()
 {
     stop();
 }
 
-Server::Server(Server&& other) noexcept : m_peer{other.m_peer}
+cyrex::Server::Server(Server&& other) noexcept : m_peer{other.m_peer}
 {
     other.m_peer = nullptr;
 }
 
-Server& Server::operator=(Server&& other) noexcept
+cyrex::Server& cyrex::Server::operator=(Server&& other) noexcept
 {
     stop();
     m_peer = other.m_peer;
@@ -44,7 +56,7 @@ Server& Server::operator=(Server&& other) noexcept
     return *this;
 }
 
-void Server::run()
+void cyrex::Server::run()
 {
     while (true)
     {
@@ -53,24 +65,29 @@ void Server::run()
     }
 }
 
-void Server::stop()
+void cyrex::Server::stop()
 {
-    if (m_peer && m_peer->IsActive())
+    if (m_peer && m_peer->isActive())
     {
-        m_peer->Shutdown(50);
+        m_peer->shutdown({.blockDuration = 50});
     }
 }
 
-void Server::receivePackets()
+void cyrex::Server::receivePackets()
 {
-    for (RakNet::Packet* packet{}; (packet = m_peer->Receive()) != nullptr; m_peer->DeallocatePacket(packet))
+    for (RakNet::Packet* packet{}; (packet = m_peer->receive()) != nullptr; m_peer->deallocatePacket(packet))
     {
         onPacketReceived(packet);
     }
 }
 
-void Server::onPacketReceived(const RakNet::Packet* packet)
+void cyrex::Server::onPacketReceived(RakNet::Packet* const packet)
 {
+    if (packet == nullptr)
+    {
+        throw NullPacketException("null packet in onPacketReceived");
+    }
+
     switch (packet->data[0])
     {
         case ID_NEW_INCOMING_CONNECTION:

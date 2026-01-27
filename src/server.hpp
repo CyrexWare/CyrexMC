@@ -1,11 +1,13 @@
 #pragma once
-
 #include <stdexcept>
 
 #include <cstdint>
 
 // RakNet
-#include <RakNet/RakPeerInterface.h>
+#include "network_peer.hpp"
+
+namespace cyrex
+{
 
 class Server
 {
@@ -17,21 +19,30 @@ public:
         std::uint16_t maxIncomingConnections{};
 
         // Default configuration for a typical minecraft bedrock server
-        static constexpr Config makeDefault()
+        static constexpr Config makeDefault() noexcept
         {
-            return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
             return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
         }
     };
 
+#pragma region Exceptions and Errors
     struct InitFailedError : std::runtime_error
     {
         explicit InitFailedError(const std::string& message);
     };
 
+    struct NullPacketException : std::runtime_error
+    {
+        explicit NullPacketException(const std::string& message);
+    };
+#pragma endregion
+
+    // Implemented in tests/server.cpp
+    struct Testing;
+
     // Initializes the server to a usable state
     // Throws: InitFailedError
-    explicit Server(const Config& config);
+    explicit Server(INetworkPeer* peer, const Config& config);
     ~Server();
     Server(Server&& other) noexcept;
     Server& operator=(Server&& other) noexcept;
@@ -43,7 +54,10 @@ public:
 private:
     void stop();
     void receivePackets();
-    void onPacketReceived(const RakNet::Packet* packet);
+    // Throws: NullPacketException if the packet is nullptr
+    void onPacketReceived(RakNet::Packet* packet);
 
-    RakNet::RakPeerInterface* m_peer = RakNet::RakPeerInterface::GetInstance();
+    INetworkPeer* m_peer;
 };
+
+} // namespace cyrex
