@@ -8,7 +8,6 @@ if(HUNTER_ENABLED)
   include("cmake/HunterGate.cmake")
   huntergate(URL "https://github.com/cpp-pm/hunter/archive/v0.26.6.tar.gz" SHA1
              "e70c29f878f5d5f5cdf1b9ccd628fb872e8624a8")
-  message(STATUS "jwt-cpp: using hunter for dependency resolution")
 endif()
 
 project(CyrexMC VERSION 1.0)

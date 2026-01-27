@@ -10,8 +10,9 @@
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "BUILD_SHARED_LIBS": "FALSE",
         "CMAKE_BUILD_TYPE": "Debug",
-        "JWT_SSL_LIBRARY_OFF": "wolfSSL",
-        "HUNTER_ENABLED":  "TRUE"
+        "JWT_SSL_LIBRARY": "wolfSSL",
+        "HUNTER_ENABLED_OFF": "TRUE",
+        "WOLFSSL_OPENSSLEXTRA":  "TRUE"
       }
     }
   ]

@@ -4,6 +4,7 @@
 
 #include "RakNet/BitStream.h"
 #include "raknet-utils.hpp"
+#include <jwt-cpp/jwt.h>
 
 #include <libdeflate.h>
 
@@ -118,7 +119,11 @@ struct Client
             str2.resize(strLength2);
             data.Read(str2.data(), strLength2);
 
-            std::println("jswt DATA\n{}", str2);
+            std::println("JWT DATA\n{}", str2);
+            
+            auto decoded = jwt::decode(str2);
+
+            std::println("decoded JWT\n{}", decoded.get_header());
         }
     }
 };
