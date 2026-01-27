@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-cyrex::RakNetPeer::RakNetPeer(RakNet::RakPeerInterface* const peerInterface) : m_peerInterface(peerInterface)
+cyrex::RakNetPeer::RakNetPeer(RakNet::RakPeerInterface* peerInterface) : m_peerInterface(peerInterface)
 {
     if (m_peerInterface == nullptr)
     {
@@ -10,11 +10,10 @@ cyrex::RakNetPeer::RakNetPeer(RakNet::RakPeerInterface* const peerInterface) : m
     }
 }
 
-cyrex::RakNetPeer::StartupResult cyrex::RakNetPeer::startup(const StartupInfo startupInfo)
+cyrex::StartupResult cyrex::RakNetPeer::startup(StartupInfo startupInfo)
 {
-    const auto result = m_peerInterface->Startup(startupInfo.maxConnections,
-                                                 startupInfo.socketDescriptors,
-                                                 startupInfo.numDescriptors);
+    RakNet::SocketDescriptor socketDescriptor(startupInfo.port, nullptr);
+    const auto result = m_peerInterface->Startup(startupInfo.maxConnections, &socketDescriptor, 1);
     return result;
 }
 
@@ -25,17 +24,17 @@ void cyrex::RakNetPeer::shutdown(const ShutdownInfo shutdownInfo)
                               shutdownInfo.disconnectionNotificationPriority);
 }
 
-void cyrex::RakNetPeer::setMaximumIncomingConnections(const std::uint16_t maxIncomingConnections)
+void cyrex::RakNetPeer::setMaximumIncomingConnections(std::uint16_t maxIncomingConnections)
 {
     m_peerInterface->SetMaximumIncomingConnections(maxIncomingConnections);
 }
 
-cyrex::RakNetPeer::Packet* cyrex::RakNetPeer::receive()
+cyrex::Packet* cyrex::RakNetPeer::receive()
 {
     return m_peerInterface->Receive();
 }
 
-std::uint32_t cyrex::RakNetPeer::send(const char* data, const std::uint32_t length, const SendInfo sendInfo)
+std::uint32_t cyrex::RakNetPeer::send(const char* data, std::uint32_t length, SendInfo sendInfo)
 {
     return m_peerInterface->Send(data,
                                  length,

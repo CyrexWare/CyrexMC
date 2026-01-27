@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <cyrexmc/server.hpp>
+#include <server.hpp>
 
 struct cyrex::Server::Testing
 {
@@ -13,10 +13,10 @@ struct cyrex::Server::Testing
 class MockPeer : public cyrex::INetworkPeer
 {
 public:
-    [[nodiscard]] StartupResult startup(const StartupInfo startupInfo) override
+    [[nodiscard]] cyrex::StartupResult startup(const StartupInfo startupInfo) override
     {
         (void)startupInfo;
-        return StartupResult::RAKNET_ALREADY_STARTED;
+        return cyrex::StartupResult::RAKNET_ALREADY_STARTED;
     }
 
     void shutdown(const ShutdownInfo shutdownInfo) override
@@ -24,7 +24,7 @@ public:
         (void)shutdownInfo;
     }
 
-    [[nodiscard]] Packet* receive() override
+    [[nodiscard]] cyrex::Packet* receive() override
     {
         return nullptr;
     }
@@ -42,7 +42,7 @@ public:
         (void)maxIncomingConnections;
     }
 
-    void deallocatePacket(Packet* packet) override
+    void deallocatePacket(cyrex::Packet* packet) override
     {
         (void)packet;
     }

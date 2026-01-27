@@ -7,19 +7,18 @@
 namespace cyrex
 {
 
+using RakNet::Packet;
+using RakNet::StartupResult;
+
 // Basic I/O wrapper interface for networked connections
 // For making testing easier
 class INetworkPeer
 {
 public:
-    using StartupResult = RakNet::StartupResult;
-    using Packet = RakNet::Packet;
-
     struct StartupInfo
     {
         std::uint32_t maxConnections{};
-        RakNet::SocketDescriptor* socketDescriptors{};
-        std::uint32_t numDescriptors{};
+        std::uint16_t port{};
     };
 
     [[nodiscard]] virtual StartupResult startup(StartupInfo startupInfo) = 0;

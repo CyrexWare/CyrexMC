@@ -32,6 +32,7 @@ jobs:
         - { name: Windows VS2022 x64, os: windows-2022  }
         - { name: Linux GCC,      os: ubuntu-latest }
         - { name: Linux Clang,    os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ }
+        - { name: macOS,          os: macos-latest  }
         config:
         - { name: Shared, flags: -DBUILD_SHARED_LIBS=TRUE }
         - { name: Static, flags: -DBUILD_SHARED_LIBS=FALSE }
@@ -69,6 +70,12 @@ jobs:
     - name: Remove ALSA Library
       if: runner.os == 'Linux' && matrix.platform.name != 'Android'
       run: sudo apt-get remove -y libasound2
+      
+    - name: Install macOS Tools
+      if: runner.os == 'macOS'
+      run: |
+        brew update
+        brew install gcovr ccache || true
 
     # In addition to installing a known working version of CCache, this action also takes care of saving and restoring the cache for us
     # Additionally it outputs information at the end of each job that helps us to verify if the cache is working properly
@@ -135,6 +142,7 @@ jobs:
         platform:
         - { name: Windows,         os: windows-latest, flags: -GNinja }
         - { name: Linux,           os: ubuntu-latest }
+        - { name: macOS,           os: macos-latest }
 
     steps:
     - name: Checkout Code
@@ -154,6 +162,17 @@ jobs:
     - name: Install Linux Dependencies
       if: runner.os == 'Linux'
       run: sudo apt-get update && sudo apt-get install libfreetype-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libdrm-dev libgbm-dev
+
+    - name: Install macOS Dependencies
+      if: runner.os == 'macOS'
+      run: |
+        brew update
+        brew install llvm || true
+        ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
+        ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
+        ln -s "$(brew --prefix llvm)/bin/clang-apply-replacements" "/usr/local/bin/clang-apply-replacements"
+        echo /usr/local/opt/llvm/bin >> $GITHUB_PATH
+        export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 
     - name: Configure
       run: cmake --preset dev -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_UNITY_BUILD=ON ${{matrix.platform.flags}}
