@@ -26,7 +26,7 @@ std::uint64_t generateServerId()
     std::uniform_int_distribution<std::uint64_t> dist;
     return dist(gen);
 }
-}
+} // namespace
 
 cyrex::Server::Server(Config config) :
     m_config(std::move(config)),

@@ -36,4 +36,3 @@ protected:
     virtual void encodePayload(cyrex::network::io::BinaryWriter& out) const = 0;
 };
 } // namespace cyrex::network::mcbe
-  
