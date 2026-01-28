@@ -26,9 +26,9 @@ public:
         BinaryStream payload;
         encodePayload(payload);
 
-        out.writeU8(0xFE);
-        out.writeI8(static_cast<int8_t>(payload.length() + 1)); // + packetId
-        out.writeU8(static_cast<uint8_t>(networkId()));
+        out.writeU8(0xFE); //still wrong but yeah this is fine for testing
+        out.writeVarInt(payload.length() + 1); // + packetId
+        out.writeVarInt(networkId());
 
         out.writeBuffer(payload.data(), payload.length());
     }
