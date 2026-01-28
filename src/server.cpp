@@ -1,97 +1,156 @@
-#include "server.hpp"
+﻿#include "server.hpp"
 
+#include "network/raknet/raknet_handler.hpp"
+#include "util/textformat.hpp"
+
+#include <algorithm>
+#include <chrono>
 #include <iostream>
-#include <magic_enum/magic_enum.hpp>
+#include <random>
+#include <thread>
 
-// Raknet
-#include <RakNet/MessageIdentifiers.h>
-#include <RakNet/RakSleep.h>
+cyrex::Server* cyrex::Server::s_instance = nullptr;
 
-///  Exceptions
-cyrex::Server::InitFailedError::InitFailedError(const std::string& message) : std::runtime_error(message)
+cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::ServerProperties& p)
 {
+    return {p.port, p.portIpv6, p.maxPlayers, p.serverName, p.motd, p.defaultGameMode};
 }
 
-cyrex::Server::NullPacketException::NullPacketException(const std::string& message) : std::runtime_error(message)
+static std::uint64_t generateServerId()
 {
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<std::uint64_t> dist;
+    return dist(gen);
 }
-// --
 
-cyrex::Server::Server(INetworkPeer* const peer, const Config& config)
+cyrex::Server::Server(const Config& config) : m_config(config), m_serverUniqueId(generateServerId()), m_running(true)
 {
-    if (peer == nullptr)
-    {
-        throw InitFailedError("peer is nullptr");
-    }
+    if (s_instance)
+        throw std::runtime_error("Server already exists");
 
-    this->m_peer = peer;
+    s_instance = this;
 
-    const RakNet::StartupResult startupResult = m_peer->startup({.maxConnections = config.maxUsers, .port = config.port});
-
-    // All clear
-    if (startupResult == RakNet::RAKNET_STARTED)
-    {
-        m_peer->setMaximumIncomingConnections(config.maxIncomingConnections);
-        return;
-    }
-
-    throw InitFailedError(std::string(magic_enum::enum_name(startupResult)));
+    m_raknet = std::make_unique<cyrex::network::raknet::RaknetHandler>();
+    m_commands = std::make_unique<cyrex::command::CommandManager>(*this);
+    m_commands->registerDefaults();
 }
 
 cyrex::Server::~Server()
 {
-    stop();
+    // more better cleanup, and we need cleanup function for sessions, etc
+    m_running = false;
+    m_players.clear();
+    s_instance = nullptr;
 }
 
-cyrex::Server::Server(Server&& other) noexcept : m_peer{other.m_peer}
+cyrex::Server& cyrex::Server::getInstance()
 {
-    other.m_peer = nullptr;
+    if (!s_instance)
+        throw std::runtime_error("Server not initialized");
+
+    return *s_instance;
 }
 
-cyrex::Server& cyrex::Server::operator=(Server&& other) noexcept
+std::uint16_t cyrex::Server::getPort() const
 {
-    stop();
-    m_peer = other.m_peer;
-    other.m_peer = nullptr;
-    return *this;
+    return m_config.port;
 }
 
-void cyrex::Server::run()
+std::uint16_t cyrex::Server::getPortIpv6() const
 {
-    while (true)
-    {
-        receivePackets();
-        RakSleep(15);
-    }
+    return m_config.portIpv6;
+}
+
+std::uint32_t cyrex::Server::getMaxPlayers() const
+{
+    return m_config.maxPlayers;
+}
+
+std::uint64_t cyrex::Server::getServerUniqueId() const
+{
+    return m_serverUniqueId;
+}
+
+const std::string& cyrex::Server::getServerName() const
+{
+    return m_config.serverName;
+}
+
+const std::string& cyrex::Server::getMotd() const
+{
+    return m_config.motd;
+}
+
+cyrex::mcpe::protocol::types::GameMode cyrex::Server::getDefaultGameMode() const
+{
+    return m_config.defaultGameMode;
+}
+
+void cyrex::Server::setDefaultGameMode(cyrex::mcpe::protocol::types::GameMode mode)
+{
+    m_config.defaultGameMode = mode;
+}
+
+void cyrex::Server::setDefaultGameModeFromString(std::string_view mode)
+{
+    m_config.defaultGameMode = cyrex::mcpe::protocol::types::fromString(mode);
+}
+
+void cyrex::Server::addPlayer(const RakNet::RakNetGUID& guid)
+{
+    if (!hasPlayer(guid))
+        m_players.push_back(guid);
+}
+
+void cyrex::Server::removePlayer(const RakNet::RakNetGUID& guid)
+{
+    auto it = std::remove(m_players.begin(), m_players.end(), guid);
+    m_players.erase(it, m_players.end());
+}
+
+bool cyrex::Server::hasPlayer(const RakNet::RakNetGUID& guid) const
+{
+    return std::find(m_players.begin(), m_players.end(), guid) != m_players.end();
+}
+
+std::size_t cyrex::Server::getPlayerCount() const
+{
+    return m_players.size();
+}
+
+const std::vector<RakNet::RakNetGUID>& cyrex::Server::getAllPlayers() const
+{
+    return m_players;
 }
 
 void cyrex::Server::stop()
 {
-    if (m_peer && m_peer->isActive())
-    {
-        m_peer->shutdown({.blockDuration = 50});
-    }
+    cyrex::Server::~Server();
 }
 
-void cyrex::Server::receivePackets()
+void cyrex::Server::commandLoop()
 {
-    for (RakNet::Packet* packet{}; (packet = m_peer->receive()) != nullptr; m_peer->deallocatePacket(packet))
+    while (m_running)
     {
-        onPacketReceived(packet);
-    }
-}
-
-void cyrex::Server::onPacketReceived(RakNet::Packet* const packet)
-{
-    if (packet == nullptr)
-    {
-        throw NullPacketException("null packet in onPacketReceived");
-    }
-
-    switch (packet->data[0])
-    {
-        case ID_NEW_INCOMING_CONNECTION:
-            std::cerr << "A user is connecting...\n";
+        std::string line;
+        if (!std::getline(std::cin, line))
             break;
+
+        m_commands->executeConsole(line);
     }
+}
+
+void cyrex::Server::run()
+{
+    std::thread commandThread(&cyrex::Server::commandLoop, this);
+
+    while (m_running)
+    {
+        m_raknet->poll();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    if (commandThread.joinable())
+        commandThread.join();
 }

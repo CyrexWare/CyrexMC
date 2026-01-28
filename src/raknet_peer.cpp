@@ -1,5 +1,7 @@
 #include "raknet_peer.hpp"
 
+// Duplicate raknet peer, we will need to implement this in our other one
+
 #include <stdexcept>
 
 cyrex::RakNetPeer::RakNetPeer(RakNet::RakPeerInterface* peerInterface) : m_peerInterface(peerInterface)

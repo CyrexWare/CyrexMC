@@ -1,1 +1,1 @@
-# Cyrex Minecraft Server Software
+# Cyrex MCBE: Server Software

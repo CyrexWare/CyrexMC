@@ -1,10 +1,17 @@
 #pragma once
-#include <stdexcept>
+
+#include "command/command_manager.hpp"
+#include "network/mcbe/protocol/types/GameMode.hpp"
+#include "network/raknet/raknet_handler.hpp"
+#include "util/server_properties.hpp"
+
+#include <RakNet/RakNetTypes.h>
+#include <atomic>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <cstdint>
-
-// RakNet
-#include "network_peer.hpp"
 
 namespace cyrex
 {
@@ -14,50 +21,51 @@ class Server
 public:
     struct Config
     {
-        std::uint16_t port{};
-        std::uint32_t maxUsers{};
-        std::uint16_t maxIncomingConnections{};
+        std::uint16_t port;
+        std::uint16_t portIpv6;
+        std::uint32_t maxPlayers;
+        std::string serverName;
+        std::string motd;
+        cyrex::mcpe::protocol::types::GameMode defaultGameMode;
 
-        // Default configuration for a typical minecraft bedrock server
-        static constexpr Config makeDefault() noexcept
-        {
-            return {.port = 19132, .maxUsers = 20, .maxIncomingConnections = 5};
-        }
+        static Config fromProperties(const cyrex::util::ServerProperties& props);
     };
 
-#pragma region Exceptions and Errors
-    struct InitFailedError : std::runtime_error
-    {
-        explicit InitFailedError(const std::string& message);
-    };
-
-    struct NullPacketException : std::runtime_error
-    {
-        explicit NullPacketException(const std::string& message);
-    };
-#pragma endregion
-
-    // Implemented in tests/server.cpp
-    struct Testing;
-
-    // Initializes the server to a usable state
-    // Throws: InitFailedError
-    explicit Server(INetworkPeer* peer, const Config& config);
+    explicit Server(const Config& config);
     ~Server();
-    Server(Server&& other) noexcept;
-    Server& operator=(Server&& other) noexcept;
-    Server(const Server&) = delete;
-    Server& operator=(const Server&) = delete;
 
+    static Server& getInstance();
+
+    std::uint16_t getPort() const;
+    std::uint16_t getPortIpv6() const;
+    std::uint32_t getMaxPlayers() const;
+    std::uint64_t getServerUniqueId() const;
+    const std::string& getServerName() const;
+    const std::string& getMotd() const;
+
+    cyrex::mcpe::protocol::types::GameMode getDefaultGameMode() const;
+    void setDefaultGameMode(cyrex::mcpe::protocol::types::GameMode mode);
+    void setDefaultGameModeFromString(std::string_view mode);
+
+    void addPlayer(const RakNet::RakNetGUID& guid);
+    void removePlayer(const RakNet::RakNetGUID& guid);
+    bool hasPlayer(const RakNet::RakNetGUID& guid) const;
+    std::size_t getPlayerCount() const;
+    const std::vector<RakNet::RakNetGUID>& getAllPlayers() const;
+
+    void stop();
     void run();
 
 private:
-    void stop();
-    void receivePackets();
-    // Throws: NullPacketException if the packet is nullptr
-    void onPacketReceived(RakNet::Packet* packet);
+    void commandLoop();
 
-    INetworkPeer* m_peer;
+    static Server* s_instance;
+
+    Config m_config;
+    std::unique_ptr<cyrex::network::raknet::RaknetHandler> m_raknet;
+    std::vector<RakNet::RakNetGUID> m_players;
+    std::uint64_t m_serverUniqueId;
+    std::atomic<bool> m_running;
+    std::unique_ptr<cyrex::command::CommandManager> m_commands;
 };
-
 } // namespace cyrex
