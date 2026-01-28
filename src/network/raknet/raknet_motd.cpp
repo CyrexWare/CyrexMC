@@ -2,11 +2,9 @@
 
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/protocol/types/GameMode.hpp"
-#include "server.hpp"
 
-std::string cyrex::network::raknet::buildRaknetMotd()
+std::string cyrex::network::raknet::buildRaknetMotd(const cyrex::Server& server)
 {
-    const cyrex::Server& server = cyrex::Server::getInstance();
     auto gm = server.getDefaultGameMode();
 
     int gmNumeric = 1;

@@ -1,6 +1,7 @@
 #include "raknet_handler.hpp"
 
 #include "mcbe_packet_router.hpp"
+#include <memory>
 #include "network/session/network_session.hpp"
 #include "raknet_motd.hpp"
 #include "raknet_transport.hpp"
@@ -11,14 +12,13 @@
 #include <iostream>
 using namespace cyrex::util;
 
-cyrex::network::raknet::RaknetHandler::RaknetHandler()
+cyrex::network::raknet::RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
 {
-    const cyrex::Server& server = cyrex::Server::getInstance();
+    m_peer = std::make_unique<RaknetPeer>(m_server.getPort(), m_server.getMaxPlayers());
 
-    m_peer = std::make_unique<cyrex::network::raknet::RaknetPeer>(server.getPort(), server.getMaxPlayers());
     RakNet::RakPeerInterface* rakPeer = m_peer->get();
 
-    const std::string motd = cyrex::network::raknet::buildRaknetMotd();
+    const std::string motd = cyrex::network::raknet::buildRaknetMotd(m_server);
     std::string response;
 
     const auto len = static_cast<uint16_t>(motd.size());
@@ -28,10 +28,10 @@ cyrex::network::raknet::RaknetHandler::RaknetHandler()
 
     rakPeer->SetOfflinePingResponse(response.c_str(), response.size());
 
-    m_transportImpl = std::make_unique<cyrex::network::raknet::RaknetTransport>(rakPeer);
+    m_transportImpl = std::make_unique<RaknetTransport>(rakPeer);
 
     std::cout << renderConsole(bedrock(Color::RED) + "[RAKNET] ", true)
-              << renderConsole(bedrock(Color::DARK_GRAY) + "listening on ", false) << server.getPort() << std::endl;
+              << renderConsole(bedrock(Color::DARK_GRAY) + "listening on ", false) << m_server.getPort() << std::endl;
 }
 
 cyrex::network::raknet::RaknetHandler::~RaknetHandler() = default;

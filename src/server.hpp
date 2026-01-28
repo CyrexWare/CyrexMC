@@ -34,8 +34,6 @@ public:
     explicit Server(Config config);
     ~Server();
 
-    static Server& getInstance();
-
     [[nodiscard]] std::uint16_t getPort() const;
     [[nodiscard]] std::uint16_t getPortIpv6() const;
     [[nodiscard]] std::uint32_t getMaxPlayers() const;
@@ -58,8 +56,6 @@ public:
 
 private:
     void commandLoop();
-
-    static Server* sInstance;
 
     Config m_config;
     std::unique_ptr<cyrex::network::raknet::RaknetHandler> m_raknet;

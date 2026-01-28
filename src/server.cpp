@@ -10,8 +10,6 @@
 #include <thread>
 #include <utility>
 
-cyrex::Server* cyrex::Server::sInstance = nullptr;
-
 cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::ServerProperties& p)
 {
     return {p.port, p.portIpv6, p.maxPlayers, p.serverName, p.motd, p.defaultGameMode};
@@ -33,12 +31,7 @@ cyrex::Server::Server(Config config) :
     m_serverUniqueId(generateServerId()),
     m_running(true)
 {
-    if (sInstance)
-        throw std::runtime_error("Server already exists");
-
-    sInstance = this;
-
-    m_raknet = std::make_unique<cyrex::network::raknet::RaknetHandler>();
+    m_raknet = std::make_unique<cyrex::network::raknet::RaknetHandler>(*this);
     m_commands = std::make_unique<cyrex::command::CommandManager>(*this);
     m_commands->registerDefaults();
 }
@@ -48,15 +41,6 @@ cyrex::Server::~Server()
     // more better cleanup, and we need cleanup function for sessions, etc
     m_running = false;
     m_players.clear();
-    sInstance = nullptr;
-}
-
-cyrex::Server& cyrex::Server::getInstance()
-{
-    if (!sInstance)
-        throw std::runtime_error("Server not initialized");
-
-    return *sInstance;
 }
 
 std::uint16_t cyrex::Server::getPort() const
@@ -133,7 +117,8 @@ const std::vector<RakNet::RakNetGUID>& cyrex::Server::getAllPlayers() const
 
 void cyrex::Server::stop()
 {
-    cyrex::Server::~Server();
+    m_running = false;
+    m_players.clear();
 }
 
 void cyrex::Server::commandLoop()
