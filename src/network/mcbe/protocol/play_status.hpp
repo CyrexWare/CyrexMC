@@ -8,9 +8,6 @@
 
 #include <cstdint>
 
-using namespace cyrex::network::io;
-using namespace cyrex::network::session;
-
 namespace cyrex::network::mcbe::protocol
 {
 class PlayStatusPacket final : public cyrex::network::mcbe::Packet
@@ -46,18 +43,18 @@ public:
     }
 
 protected:
-    void decodePayload(BinaryReader& in) override
+    void decodePayload(cyrex::network::io::BinaryReader& in) override
     {
         status = in.readU32BE();
     }
 
-    void encodePayload(BinaryWriter& out) const override
+    void encodePayload(cyrex::network::io::BinaryWriter& out) const override
     {
         out.writeU32BE(status);
     }
 
 public:
-    bool handle(NetworkSession& /*session*/) override
+    bool handle(cyrex::network::session::NetworkSession& /*session*/) override
     {
         return true;
     }

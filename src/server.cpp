@@ -1,4 +1,4 @@
-﻿#include "server.hpp"
+#include "server.hpp"
 
 #include "network/raknet/raknet_handler.hpp"
 #include "util/textformat.hpp"

@@ -1,4 +1,4 @@
-﻿#include "mcbe_batch_decoder.hpp"
+#include "mcbe_batch_decoder.hpp"
 
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"

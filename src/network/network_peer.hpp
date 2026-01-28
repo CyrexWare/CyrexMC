@@ -61,4 +61,4 @@ public:
     virtual ~INetworkPeer() = default;
 };
 
-} // namespace cyrex
+} // namespace cyrex::network

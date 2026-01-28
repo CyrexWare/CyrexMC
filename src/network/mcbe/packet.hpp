@@ -6,24 +6,22 @@
 #include "network/io/binary_writer.hpp"
 #include "packetbase.hpp"
 
-using namespace cyrex::network::io;
-
 namespace cyrex::network::mcbe
 {
 
 class Packet : public PacketBase
 {
 public:
-    void decode(BinaryReader& in) final
+    void decode(cyrex::network::io::BinaryReader& in) final
     {
         decodePayload(in);
     }
 
-    void encode(BinaryWriter& out) const final
+    void encode(cyrex::network::io::BinaryWriter& out) const final
     {
         out.buffer.clear();
 
-        BinaryWriter payload;
+        cyrex::network::io::BinaryWriter payload;
         encodePayload(payload);
 
         out.writeI8(0xFE); //still wrong but yeah this is fine for testing
@@ -35,7 +33,7 @@ public:
 
 
 protected:
-    virtual void decodePayload(BinaryReader& in) = 0;
-    virtual void encodePayload(BinaryWriter& out) const = 0;
+    virtual void decodePayload(cyrex::network::io::BinaryReader& in) = 0;
+    virtual void encodePayload(cyrex::network::io::BinaryWriter& out) const = 0;
 };
 } // namespace cyrex::network::mcbe

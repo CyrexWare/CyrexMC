@@ -1,4 +1,4 @@
-﻿#include "network_session.hpp"
+#include "network_session.hpp"
 
 #include "network/mcbe/handler/session_begin_handler.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"

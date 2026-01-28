@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_direction.hpp"
@@ -46,12 +46,12 @@ public:
     }
 
 protected:
-    void decodePayload(BinaryReader&) override
+    void decodePayload(cyrex::network::io::BinaryReader&) override
     {
         // NOOP
     }
 
-    void encodePayload(BinaryWriter& out) const override
+    void encodePayload(cyrex::network::io::BinaryWriter& out) const override
     {
         out.writeI8(compressionThreshold);
         out.writeI8(compressionAlgorithm);
@@ -63,7 +63,7 @@ protected:
     }
 
 public:
-    bool handle(NetworkSession&) override
+    bool handle(cyrex::network::session::NetworkSession&) override
     {
         return true;
     }

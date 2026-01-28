@@ -15,10 +15,6 @@
 
 #include <cstdint>
 
-// is this valid?
-using namespace cyrex::network::io;
-using namespace cyrex::network::session;
-
 namespace cyrex::network::mcbe::protocol
 {
 
@@ -43,7 +39,7 @@ public:
     }
 
 protected:
-    void decodePayload(BinaryReader& in) override
+    void decodePayload(cyrex::network::io::BinaryReader& in) override
     {
         protocolVersion = in.readU32BE();
         std::cout << (cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::GREEN) + "[MCBE] ", true) +
@@ -56,13 +52,13 @@ protected:
                   << protocolVersion << std::endl;
     }
 
-    void encodePayload(BinaryWriter&) const override
+    void encodePayload(cyrex::network::io::BinaryWriter&) const override
     {
         // NOOP
     }
 
 public:
-    bool handle(NetworkSession& session) override
+    bool handle(cyrex::network::session::NetworkSession& session) override
     {
         session.handleRequestNetworkSettings(*this);
         return true;

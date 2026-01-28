@@ -22,4 +22,4 @@ private:
     RakNet::RakPeerInterface* const m_peerInterface{};
 };
 
-} // namespace cyrex
+} // namespace cyrex::network::raknet::other
