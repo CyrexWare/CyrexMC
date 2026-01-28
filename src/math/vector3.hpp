@@ -47,7 +47,7 @@ struct Vector3
 
     [[nodiscard]] Vector3 normalized() const
     {
-        float const len = length();
+        const float len = length();
         if (len == 0.f)
             return Vector3::zero();
         return {x / len, y / len, z / len};

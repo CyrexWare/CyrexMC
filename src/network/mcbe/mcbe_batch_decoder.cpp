@@ -14,7 +14,7 @@ bool cyrex::network::mcbe::McbeBatchDecoder::decode(const uint8_t* data, size_t 
 
     BinaryReader in(data, len);
 
-    uint8_t const compression = in.readU8();
+    const uint8_t compression = in.readU8();
 
     // Until NetworkSettingsPacket is exchanged,
     // MCBE packets are NOT compressed
@@ -23,7 +23,7 @@ bool cyrex::network::mcbe::McbeBatchDecoder::decode(const uint8_t* data, size_t 
 
     while (in.remaining() > 0)
     {
-        uint32_t const packetLen = in.readVarInt();
+        const uint32_t packetLen = in.readVarInt();
 
         if (packetLen == 0 || packetLen > in.remaining())
             return false;

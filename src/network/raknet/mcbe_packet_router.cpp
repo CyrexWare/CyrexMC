@@ -14,7 +14,7 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
         return;
 
     const uint8_t* data = p->data + 1;
-    size_t const len = p->length - 1;
+    const size_t len = p->length - 1;
 
     if (len == 0)
         return;
@@ -37,14 +37,14 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     }
     else
     {
-        uint8_t const compressionMethod = data[0];
+        const uint8_t compressionMethod = data[0];
 
         std::cout << renderConsole(bedrock(Color::GREEN) + "[MCBE][DEBUG]", true)
                   << renderConsole(bedrock(Color::DARK_GRAY) + " compression method = 0x", false) << std::hex
                   << (int)compressionMethod << std::dec << std::endl;
 
         const uint8_t* body = data + 1;
-        size_t const bodyLen = len - 1;
+        const size_t bodyLen = len - 1;
 
         if (compressionMethod == 0xFF)
         {

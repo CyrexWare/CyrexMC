@@ -25,7 +25,7 @@ ZlibCompressor::~ZlibCompressor()
 
 bool ZlibCompressor::compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output)
 {
-    bool const compressible = !m_minCompressionSize.has_value() || inputSize >= *m_minCompressionSize;
+    const bool compressible = !m_minCompressionSize.has_value() || inputSize >= *m_minCompressionSize;
 
     if (!compressible)
     {
@@ -33,10 +33,10 @@ bool ZlibCompressor::compress(const uint8_t* input, size_t inputSize, std::vecto
         return true;
     }
 
-    size_t const bound = libdeflate_deflate_compress_bound(m_compressor, inputSize);
+    const size_t bound = libdeflate_deflate_compress_bound(m_compressor, inputSize);
     output.resize(bound);
 
-    size_t const written = libdeflate_deflate_compress(m_compressor, input, inputSize, output.data(), bound);
+    const size_t written = libdeflate_deflate_compress(m_compressor, input, inputSize, output.data(), bound);
 
     if (written == 0)
         return false;

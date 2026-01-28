@@ -18,12 +18,12 @@ using namespace cyrex::network::io;
 namespace cyrex::network::session
 {
 
-void NetworkSession::onRaw(const RakNet::Packet&  /*packet*/, const uint8_t* data, size_t len)
+void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data, size_t len)
 {
     BinaryReader in(data, len);
 
-    uint32_t const packetLength = in.readVarUInt();
-    uint32_t const packetId = in.readVarUInt();
+    const uint32_t packetLength = in.readVarUInt();
+    const uint32_t packetId = in.readVarUInt();
 
     std::cout << renderConsole(bedrock(Color::GREEN) + "[MCBE][DEBUG]", true)
               << renderConsole(bedrock(Color::DARK_GRAY) + " packet length = ", false) << packetLength << std::endl;
@@ -112,12 +112,12 @@ void NetworkSession::send(cyrex::network::mcbe::PacketBase& packet)
         }
     }
 
-    std::string const msg = bedrock(Color::BLUE) + "[Cyrex] " + bedrock(Color::DARK_GRAY) +
-                      "send packet id=" + bedrock(Color::GOLD) + std::to_string(packet.networkId());
+    const std::string msg = bedrock(Color::BLUE) + "[Cyrex] " + bedrock(Color::DARK_GRAY) +
+                            "send packet id=" + bedrock(Color::GOLD) + std::to_string(packet.networkId());
 
     std::cout << renderConsole(msg, true) << std::endl;
 
-    std::string const dump = hexDump(out.data(), out.size());
+    const std::string dump = hexDump(out.data(), out.size());
 
     std::cout << renderConsole(bedrock(Color::BLUE) + "[Cyrex]", true)
               << renderConsole(bedrock(Color::DARK_GRAY) + " send payload: " + bedrock(Color::GRAY) + dump, false)

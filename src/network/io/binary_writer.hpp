@@ -122,7 +122,7 @@ public:
     {
         while (true)
         {
-            uint8_t const b = v & 0x7F;
+            const uint8_t b = v & 0x7F;
             v >>= 7;
             if (v)
                 writeU8(b | 0x80);
@@ -143,7 +143,7 @@ public:
     {
         while (true)
         {
-            uint8_t const b = v & 0x7F;
+            const uint8_t b = v & 0x7F;
             v >>= 7;
             if (v)
                 writeU8(b | 0x80);

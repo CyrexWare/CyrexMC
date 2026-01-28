@@ -31,7 +31,7 @@ public:
         m_guid(guid),
         m_address(address),
         m_transport(transport),
-        
+
         m_compressor(std::make_unique<cyrex::network::mcbe::compression::NoopCompressor>())
     {
     }

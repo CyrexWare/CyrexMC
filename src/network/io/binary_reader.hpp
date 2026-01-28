@@ -4,7 +4,6 @@
 #include "math/vector3.hpp"
 
 #include <math.h>
-
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -20,7 +19,7 @@ class BinaryReader
 public:
     BinaryReader() = default;
 
-    BinaryReader(const uint8_t* data, size_t len) : buffer(data, data + len) 
+    BinaryReader(const uint8_t* data, size_t len) : buffer(data, data + len)
     {
     }
 
@@ -51,7 +50,7 @@ public:
     uint16_t readU16LE()
     {
         ensureReadable(2);
-        uint16_t const v = buffer[offset] | (buffer[offset + 1] << 8);
+        const uint16_t v = buffer[offset] | (buffer[offset + 1] << 8);
         offset += 2;
         return v;
     }
@@ -59,7 +58,7 @@ public:
     uint16_t readU16BE()
     {
         ensureReadable(2);
-        uint16_t const v = (buffer[offset] << 8) | buffer[offset + 1];
+        const uint16_t v = (buffer[offset] << 8) | buffer[offset + 1];
         offset += 2;
         return v;
     }
@@ -87,7 +86,8 @@ public:
     uint32_t readU32LE()
     {
         ensureReadable(4);
-        uint32_t const v = buffer[offset] | (buffer[offset + 1] << 8) | (buffer[offset + 2] << 16) | (buffer[offset + 3] << 24);
+        const uint32_t v = buffer[offset] | (buffer[offset + 1] << 8) | (buffer[offset + 2] << 16) |
+                           (buffer[offset + 3] << 24);
         offset += 4;
         return v;
     }
@@ -95,7 +95,8 @@ public:
     uint32_t readU32BE()
     {
         ensureReadable(4);
-        uint32_t const v = (buffer[offset] << 24) | (buffer[offset + 1] << 16) | (buffer[offset + 2] << 8) | buffer[offset + 3];
+        const uint32_t v = (buffer[offset] << 24) | (buffer[offset + 1] << 16) | (buffer[offset + 2] << 8) |
+                           buffer[offset + 3];
         offset += 4;
         return v;
     }
@@ -148,7 +149,7 @@ public:
 
         for (int i = 0; i < 5; ++i)
         {
-            uint8_t const b = readU8();
+            const uint8_t b = readU8();
             value |= uint32_t(b & 0x7F) << shift;
             if ((b & 0x80) == 0)
                 return value;
@@ -170,7 +171,7 @@ public:
 
         for (int i = 0; i < 10; ++i)
         {
-            uint8_t const b = readU8();
+            const uint8_t b = readU8();
             value |= uint64_t(b & 0x7F) << shift;
             if ((b & 0x80) == 0)
                 return value;
@@ -187,7 +188,7 @@ public:
 
     std::string readString()
     {
-        uint32_t const len = readVarUInt();
+        const uint32_t len = readVarUInt();
         ensureReadable(len);
         std::string s(reinterpret_cast<char*>(&buffer[offset]), len);
         offset += len;

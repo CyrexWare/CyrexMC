@@ -41,7 +41,7 @@ protected:
                                                                                                      "(LoginPacket): ",
                                                  false))
                   << protocol << std::endl;
-        std::string const connectionRequest = in.readString();
+        const std::string connectionRequest = in.readString();
         tryDecodeRequestForConnection(connectionRequest);
     }
 
@@ -52,7 +52,7 @@ protected:
     }
 
 public:
-    bool handle(cyrex::network::session::NetworkSession&  /*session*/) override
+    bool handle(cyrex::network::session::NetworkSession& /*session*/) override
     {
         return false;
     }
@@ -62,10 +62,10 @@ private:
     {
         cyrex::network::io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
 
-        uint32_t const authLen = cr.readU32LE();
+        const uint32_t authLen = cr.readU32LE();
         authInfoJson = cr.readBytes(authLen);
 
-        uint32_t const clientLen = cr.readU32LE();
+        const uint32_t clientLen = cr.readU32LE();
         clientDataJwt = cr.readBytes(clientLen);
     }
 

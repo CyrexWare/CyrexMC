@@ -6,7 +6,7 @@
 
 std::string cyrex::network::raknet::buildRaknetMotd()
 {
-    cyrex::Server const& server = cyrex::Server::getInstance();
+    const cyrex::Server& server = cyrex::Server::getInstance();
     auto gm = server.getDefaultGameMode();
 
     int gmNumeric = 1;

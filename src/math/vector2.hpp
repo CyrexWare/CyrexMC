@@ -38,7 +38,7 @@ struct Vector2
 
     [[nodiscard]] Vector2 normalized() const
     {
-        float const len = length();
+        const float len = length();
         if (len == 0.f)
             return Vector2::zero();
         return {x / len, y / len};
@@ -88,6 +88,7 @@ struct Vector2
     {
         return {x * s, y * s};
     }
+
 
     Vector2 operator/(float s) const
     {

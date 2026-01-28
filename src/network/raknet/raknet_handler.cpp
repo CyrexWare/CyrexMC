@@ -13,15 +13,15 @@ using namespace cyrex::util;
 
 cyrex::network::raknet::RaknetHandler::RaknetHandler()
 {
-    cyrex::Server const& server = cyrex::Server::getInstance();
+    const cyrex::Server& server = cyrex::Server::getInstance();
 
     m_peer = std::make_unique<cyrex::network::raknet::RaknetPeer>(server.getPort(), server.getMaxPlayers());
     RakNet::RakPeerInterface* rakPeer = m_peer->get();
 
-    std::string const motd = cyrex::network::raknet::buildRaknetMotd();
+    const std::string motd = cyrex::network::raknet::buildRaknetMotd();
     std::string response;
 
-    auto const len = static_cast<uint16_t>(motd.size());
+    const auto len = static_cast<uint16_t>(motd.size());
     response.push_back((len >> 8) & 0xFF);
     response.push_back(len & 0xFF);
     response += motd;

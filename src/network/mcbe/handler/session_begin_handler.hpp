@@ -17,7 +17,7 @@ public:
     {
         // theres no way this is actually good, glalie review this, if this is lwk valid, idc yk
         auto& pk = static_cast<cyrex::network::mcbe::protocol::RequestNetworkSettingsPacket&>(packet);
-        uint32_t const version = pk.protocolVersion;
+        const uint32_t version = pk.protocolVersion;
 
         // no guarentee that a protocol is accepted at the moment
         // we mabye will support multiple versions or make it easy for plugins to.
