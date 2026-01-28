@@ -4,7 +4,8 @@
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "network/util/binary_stream.hpp"
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 #include "util/textformat.hpp"
 
 #include <iomanip>
@@ -12,14 +13,14 @@
 #include <sstream>
 #include <vector>
 using namespace cyrex::util;
-using namespace cyrex::network::util;
+using namespace cyrex::network::io;
 
 namespace cyrex::network::session
 {
 
-void NetworkSession::onRaw(RakNet::Packet, const uint8_t* data, size_t len)
+void NetworkSession::onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len)
 {
-    BinaryStream in(data, len);
+    BinaryReader in(data, len);
 
     uint32_t packetLength = in.readVarUInt();
     uint32_t packetId = in.readVarUInt();
@@ -31,16 +32,16 @@ void NetworkSession::onRaw(RakNet::Packet, const uint8_t* data, size_t len)
               << renderConsole(bedrock(Color::DARK_GRAY) + " packet id = 0x", false) << std::hex << packetId << std::dec
               << std::endl;
 
-    auto packet = cyrex::network::mcbe::PacketPool::instance().create(packetId);
-    if (!packet)
+    auto mcbePacket = cyrex::network::mcbe::PacketPool::instance().create(packetId);
+    if (!mcbePacket)
     {
         std::cout << renderConsole(bedrock(Color::RED) + "[MCBE][ERROR]", true)
                   << renderConsole(bedrock(Color::DARK_GRAY) + " unknown packet id", false) << std::endl;
         return;
     }
 
-    packet->decode(in);
-    packet->handle(*this);
+    mcbePacket->decode(in);
+    mcbePacket->handle(*this);
 }
 
 static std::string hexDump(const uint8_t* data, size_t len)
@@ -77,7 +78,7 @@ void NetworkSession::send(cyrex::network::mcbe::PacketBase& packet)
         return;
     }
 
-    cyrex::network::util::BinaryStream payload;
+    BinaryWriter payload;
     packet.encode(payload);
 
     std::vector<uint8_t> out;

@@ -4,7 +4,8 @@
 
 #include <stdexcept>
 
-cyrex::RakNetPeer::RakNetPeer(RakNet::RakPeerInterface* peerInterface) : m_peerInterface(peerInterface)
+cyrex::network::raknet::other::RakNetPeer::RakNetPeer(RakNet::RakPeerInterface* peerInterface) :
+    m_peerInterface(peerInterface)
 {
     if (m_peerInterface == nullptr)
     {
@@ -12,31 +13,31 @@ cyrex::RakNetPeer::RakNetPeer(RakNet::RakPeerInterface* peerInterface) : m_peerI
     }
 }
 
-cyrex::StartupResult cyrex::RakNetPeer::startup(StartupInfo startupInfo)
+cyrex::network::StartupResult cyrex::network::raknet::other::RakNetPeer::startup(StartupInfo startupInfo)
 {
     RakNet::SocketDescriptor socketDescriptor(startupInfo.port, nullptr);
     const auto result = m_peerInterface->Startup(startupInfo.maxConnections, &socketDescriptor, 1);
     return result;
 }
 
-void cyrex::RakNetPeer::shutdown(const ShutdownInfo shutdownInfo)
+void cyrex::network::raknet::other::RakNetPeer::shutdown(const ShutdownInfo shutdownInfo)
 {
     m_peerInterface->Shutdown(shutdownInfo.blockDuration,
                               shutdownInfo.orderingChannel,
                               shutdownInfo.disconnectionNotificationPriority);
 }
 
-void cyrex::RakNetPeer::setMaximumIncomingConnections(std::uint16_t maxIncomingConnections)
+void cyrex::network::raknet::other::RakNetPeer::setMaximumIncomingConnections(std::uint16_t maxIncomingConnections)
 {
     m_peerInterface->SetMaximumIncomingConnections(maxIncomingConnections);
 }
 
-cyrex::Packet* cyrex::RakNetPeer::receive()
+cyrex::network::Packet* cyrex::network::raknet::other::RakNetPeer::receive()
 {
     return m_peerInterface->Receive();
 }
 
-std::uint32_t cyrex::RakNetPeer::send(const char* data, std::uint32_t length, SendInfo sendInfo)
+std::uint32_t cyrex::network::raknet::other::RakNetPeer::send(const char* data, std::uint32_t length, SendInfo sendInfo)
 {
     return m_peerInterface->Send(data,
                                  length,
@@ -48,11 +49,11 @@ std::uint32_t cyrex::RakNetPeer::send(const char* data, std::uint32_t length, Se
                                  sendInfo.forceReceiptNumber);
 }
 
-void cyrex::RakNetPeer::deallocatePacket(Packet* packet)
+void cyrex::network::raknet::other::RakNetPeer::deallocatePacket(cyrex::network::Packet* packet)
 {
 }
 
-bool cyrex::RakNetPeer::isActive() const
+bool cyrex::network::raknet::other::RakNetPeer::isActive() const
 {
     return m_peerInterface->IsActive();
 }

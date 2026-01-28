@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace cyrex
+namespace cyrex::network
 {
 
 using RakNet::Packet;

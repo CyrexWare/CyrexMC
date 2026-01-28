@@ -7,6 +7,7 @@
 #include "mcbe_packet_router.hpp"
 #include "util/textformat.hpp"
 
+#include <RakNet/MessageIdentifiers.h>
 #include <iostream>
 using namespace cyrex::util;
 
@@ -48,17 +49,31 @@ void cyrex::network::raknet::RaknetHandler::poll()
     {
         handlePacket(p);
     }
+
+    connections.cleanup();
 }
 
 void cyrex::network::raknet::RaknetHandler::handlePacket(RakNet::Packet* p)
 {
-    const uint8_t id = p->data[0];
+    if (!p || !p->data || p->length == 0)
+        return;
 
-    // from switch to this, probably not too big of an impact, but eh
-    if (id == 0x13)
-        connections.onConnect(p->guid, p->systemAddress, this);
-    else if (id == 0x15)
-        connections.onDisconnect(p->guid);
-    else if (id == 0xFE)
-        cyrex::network::raknet::McbePacketRouter::route(p, connections);
+    switch (p->data[0])
+    {
+        case ID_NEW_INCOMING_CONNECTION:
+            connections.onConnect(p->guid, p->systemAddress, this);
+            break;
+
+        case ID_CONNECTION_LOST:
+        case ID_DISCONNECTION_NOTIFICATION:
+            connections.onDisconnect(p->guid);
+            break;
+
+        case 0xFE:
+            cyrex::network::raknet::McbePacketRouter::route(p, connections);
+            break;
+
+        default:
+            break;
+    }
 }

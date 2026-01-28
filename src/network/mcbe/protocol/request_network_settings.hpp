@@ -6,7 +6,8 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
 #include "network/session/network_session.hpp"
-#include "network/util/binary_stream.hpp"
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 #include "util/textformat.hpp"
 
 #include <RakNet/RakNetTypes.h>
@@ -15,7 +16,7 @@
 #include <cstdint>
 
 // is this valid?
-using namespace cyrex::network::util;
+using namespace cyrex::network::io;
 using namespace cyrex::network::session;
 
 namespace cyrex::network::mcbe::protocol
@@ -42,7 +43,7 @@ public:
     }
 
 protected:
-    void decodePayload(BinaryStream& in) override
+    void decodePayload(BinaryReader& in) override
     {
         protocolVersion = in.readU32BE();
         std::cout << (cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::GREEN) + "[MCBE] ", true) +
@@ -55,7 +56,7 @@ protected:
                   << protocolVersion << std::endl;
     }
 
-    void encodePayload(BinaryStream&) const override
+    void encodePayload(BinaryWriter&) const override
     {
         // NOOP
     }

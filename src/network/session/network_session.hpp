@@ -7,7 +7,8 @@
 #include "network/mcbe/packet_pool.hpp"
 #include "network/mcbe/packetbase.hpp"
 #include "network/mcbe/transport.hpp"
-#include "network/util/binary_stream.hpp"
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <memory>
@@ -37,8 +38,9 @@ public:
 
     bool compressionEnabled = false;
     Phase phase = Phase::HANDSHAKE;
+    bool markedForDisconnect = false;
 
-    void onRaw(RakNet::Packet packet, const uint8_t* data, size_t len);
+    void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
     void send(cyrex::network::mcbe::PacketBase& packet);
     bool disconnectUserForIncompatiableProtocol(uint32_t);
     bool handleRequestNetworkSettings(cyrex::network::mcbe::PacketBase& packet);

@@ -21,6 +21,7 @@ public:
     void onConnect(const RakNet::RakNetGUID& guid, RakNet::SystemAddress address, RaknetHandler* handler);
 
     void onDisconnect(const RakNet::RakNetGUID& guid);
+    void cleanup();
 
     cyrex::network::session::NetworkSession* get(const RakNet::RakNetGUID& guid);
 

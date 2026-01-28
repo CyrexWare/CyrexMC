@@ -1,6 +1,7 @@
 #pragma once
 
-#include "network/util/binary_stream.hpp"
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 #include "packet_direction.hpp"
 
 #include <cstdint>
@@ -22,8 +23,8 @@ public:
     virtual PacketDirection direction() const = 0;
     virtual bool allowBeforeLogin() const = 0;
 
-    virtual void decode(cyrex::network::util::BinaryStream& in) = 0;
-    virtual void encode(cyrex::network::util::BinaryStream& out) const = 0;
+    virtual void decode(cyrex::network::io::BinaryReader& in) = 0;
+    virtual void encode(cyrex::network::io::BinaryWriter& out) const = 0;
 
     virtual bool handle(cyrex::network::session::NetworkSession& session) = 0;
 };

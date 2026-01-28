@@ -1,12 +1,12 @@
 #pragma once
-#include "network_peer.hpp"
+#include "network/network_peer.hpp"
 
 #include <RakNet/RakPeerInterface.h>
 
-namespace cyrex
+namespace cyrex::network::raknet::other
 {
 
-class RakNetPeer : public INetworkPeer
+class RakNetPeer : public cyrex::network::INetworkPeer
 {
 public:
     explicit RakNetPeer(RakNet::RakPeerInterface* peerInterface);

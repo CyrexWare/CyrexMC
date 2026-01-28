@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-using namespace cyrex::network::util;
+using namespace cyrex::network::io;
 using namespace cyrex::network::session;
 
 namespace cyrex::network::mcbe::protocol
@@ -35,7 +35,7 @@ public:
     }
 
 protected:
-    void decodePayload(BinaryStream& in) override
+    void decodePayload(BinaryReader& in) override
     {
         protocol = in.readU32BE();
         std::cout << (cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::GREEN) + "[MCBE] ", true) +
@@ -48,7 +48,7 @@ protected:
         tryDecodeRequestForConnection(connectionRequest);
     }
 
-    void encodePayload(BinaryStream& out) const override
+    void encodePayload(BinaryWriter& out) const override
     {
         out.writeU32BE(protocol);
         out.writeString(tryEncodeRequestForConnection());
@@ -63,20 +63,18 @@ public:
 private:
     void tryDecodeRequestForConnection(const std::string& binary)
     {
-        BinaryStream cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
+        BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
 
         uint32_t authLen = cr.readU32LE();
-        authInfoJson.assign(reinterpret_cast<const char*>(cr.data() + cr.offset), authLen);
-        cr.offset += authLen;
+        authInfoJson = cr.readBytes(authLen);
 
         uint32_t clientLen = cr.readU32LE();
-        clientDataJwt.assign(reinterpret_cast<const char*>(cr.data() + cr.offset), clientLen);
-        cr.offset += clientLen;
+        clientDataJwt = cr.readBytes(clientLen);
     }
 
     std::string tryEncodeRequestForConnection() const
     {
-        BinaryStream cr;
+        BinaryWriter cr;
 
         cr.writeU32LE(static_cast<uint32_t>(authInfoJson.size()));
         cr.writeBuffer(reinterpret_cast<const uint8_t*>(authInfoJson.data()), authInfoJson.size());

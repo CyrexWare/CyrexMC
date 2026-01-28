@@ -1,8 +1,9 @@
 ﻿#include "mcbe_batch_decoder.hpp"
 
-#include "network/util/binary_stream.hpp"
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 
-using namespace cyrex::network::util;
+using namespace cyrex::network::io;
 
 //TODO: use this again, right now it has no official purpose, in test builds, i worked on, this had a purpose
 // However now no longer, this should be recoded, COMPLETELY, its faulty and dont uses session->compressor.
@@ -11,7 +12,7 @@ bool cyrex::network::mcbe::McbeBatchDecoder::decode(const uint8_t* data, size_t 
     if (len < 1)
         return false;
 
-    BinaryStream in(data, len);
+    BinaryReader in(data, len);
 
     uint8_t compression = in.readU8();
 

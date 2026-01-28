@@ -25,10 +25,26 @@ void cyrex::network::raknet::RaknetConnections::onConnect(const RakNet::RakNetGU
 
 void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
 {
-    sessions.erase(guid);
+    auto it = sessions.find(guid);
+    if (it == sessions.end())
+        return;
+
+    it->second->markedForDisconnect = true;
     std::cout << renderConsole(bedrock(Color::RED) + "[RAKNET] " + bedrock(Color::DARK_GRAY) + "Client disconnected", true)
-              << std::endl;
+             << std::endl;
 }
+
+void cyrex::network::raknet::RaknetConnections::cleanup()
+{
+    for (auto it = sessions.begin(); it != sessions.end();)
+    {
+        if (it->second->markedForDisconnect)
+            it = sessions.erase(it);
+        else
+            ++it;
+    }
+}
+
 
 cyrex::network::session::NetworkSession* cyrex::network::raknet::RaknetConnections::get(const RakNet::RakNetGUID& guid)
 {

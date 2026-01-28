@@ -3,11 +3,12 @@
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_direction.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "network/util/binary_stream.hpp"
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 
 #include <cstdint>
 
-using namespace cyrex::network::util;
+using namespace cyrex::network::io;
 using namespace cyrex::network::session;
 
 namespace cyrex::network::mcbe::protocol
@@ -45,12 +46,12 @@ public:
     }
 
 protected:
-    void decodePayload(BinaryStream& in) override
+    void decodePayload(BinaryReader& in) override
     {
         status = in.readU32BE();
     }
 
-    void encodePayload(BinaryStream& out) const override
+    void encodePayload(BinaryWriter& out) const override
     {
         out.writeU32BE(status);
     }
