@@ -30,17 +30,17 @@ public:
 
     int8_t trailingZero = 0;
 
-    [[nodiscard]] [[nodiscard]] uint32_t networkId() const override
+    [[nodiscard]] uint32_t networkId() const override
     {
         return ProtocolInfo::networkSettingsPacket;
     }
 
-    [[nodiscard]] [[nodiscard]] cyrex::network::mcbe::PacketDirection direction() const override
+    [[nodiscard]] cyrex::network::mcbe::PacketDirection direction() const override
     {
         return cyrex::network::mcbe::PacketDirection::Clientbound;
     }
 
-    [[nodiscard]] [[nodiscard]] bool allowBeforeLogin() const override
+    [[nodiscard]] bool allowBeforeLogin() const override
     {
         return true;
     }

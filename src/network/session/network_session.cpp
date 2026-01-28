@@ -15,6 +15,26 @@
 using namespace cyrex::util;
 using namespace cyrex::network::io;
 
+
+namespace
+{
+std::string hexDump(const uint8_t* data, size_t len)
+{
+    std::ostringstream oss;
+    oss << std::hex << std::uppercase << std::setfill('0');
+
+    for (size_t i = 0; i < len; ++i)
+    {
+        oss << std::setw(2) << static_cast<int>(data[i]);
+        if (i + 1 < len)
+            oss << ' ';
+    }
+
+    return oss.str();
+}
+} // namespace
+
+
 namespace cyrex::network::session
 {
 
@@ -42,21 +62,6 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
 
     mcbePacket->decode(in);
     mcbePacket->handle(*this);
-}
-
-static std::string hexDump(const uint8_t* data, size_t len)
-{
-    std::ostringstream oss;
-    oss << std::hex << std::uppercase << std::setfill('0');
-
-    for (size_t i = 0; i < len; ++i)
-    {
-        oss << std::setw(2) << static_cast<int>(data[i]);
-        if (i + 1 < len)
-            oss << ' ';
-    }
-
-    return oss.str();
 }
 
 // TODO: give better name

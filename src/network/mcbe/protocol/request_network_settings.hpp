@@ -23,17 +23,17 @@ class RequestNetworkSettingsPacket final : public cyrex::network::mcbe::Packet
 public:
     uint32_t protocolVersion = 0;
 
-    [[nodiscard]] [[nodiscard]] uint32_t networkId() const override
+    [[nodiscard]] uint32_t networkId() const override
     {
         return ProtocolInfo::requestNetworkSettingsPacket;
     }
 
-    [[nodiscard]] [[nodiscard]] cyrex::network::mcbe::PacketDirection direction() const override
+    [[nodiscard]] cyrex::network::mcbe::PacketDirection direction() const override
     {
         return cyrex::network::mcbe::PacketDirection::Serverbound;
     }
 
-    [[nodiscard]] [[nodiscard]] bool allowBeforeLogin() const override
+    [[nodiscard]] bool allowBeforeLogin() const override
     {
         return true;
     }

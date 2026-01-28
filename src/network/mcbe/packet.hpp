@@ -3,7 +3,6 @@
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "network/session/network_session.hpp"
 #include "packetbase.hpp"
 
 namespace cyrex::network::mcbe
@@ -12,12 +11,12 @@ namespace cyrex::network::mcbe
 class Packet : public PacketBase
 {
 public:
-    void decode(cyrex::network::io::BinaryReader& in) final
+    virtual void decode(cyrex::network::io::BinaryReader& in) final
     {
         decodePayload(in);
     }
 
-    void encode(cyrex::network::io::BinaryWriter& out) const final
+    virtual void encode(cyrex::network::io::BinaryWriter& out) const final
     {
         out.buffer.clear();
 
@@ -37,3 +36,4 @@ protected:
     virtual void encodePayload(cyrex::network::io::BinaryWriter& out) const = 0;
 };
 } // namespace cyrex::network::mcbe
+  

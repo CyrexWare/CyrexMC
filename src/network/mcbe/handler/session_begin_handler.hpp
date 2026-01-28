@@ -4,6 +4,7 @@
 #include "network/mcbe/protocol/request_network_settings.hpp"
 #include "network/session/network_session.hpp"
 
+#include <algorithm>
 #include <iostream>
 
 namespace cyrex::network::mcbe::handler
@@ -46,10 +47,9 @@ public:
     // no way im planning multiprotocol??
     constexpr bool isProtocolMabyeAccepted(std::uint32_t protocol)
     {
-        for (auto p : cyrex::network::mcbe::protocol::ProtocolInfo::acceptedProtocols)
-            if (p == protocol)
-                return true;
-        return false;
+        return std::any_of(cyrex::network::mcbe::protocol::ProtocolInfo::acceptedProtocols.begin(),
+                           cyrex::network::mcbe::protocol::ProtocolInfo::acceptedProtocols.end(),
+                           [protocol](auto p) { return p == protocol; });
     }
 };
 } // namespace cyrex::network::mcbe::handler

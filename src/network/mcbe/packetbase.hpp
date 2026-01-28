@@ -19,9 +19,9 @@ class PacketBase
 public:
     virtual ~PacketBase() = default;
 
-    [[nodiscard]] [[nodiscard]] virtual uint32_t networkId() const = 0;
-    [[nodiscard]] [[nodiscard]] virtual PacketDirection direction() const = 0;
-    [[nodiscard]] [[nodiscard]] virtual bool allowBeforeLogin() const = 0;
+    [[nodiscard]] virtual uint32_t networkId() const = 0;
+    [[nodiscard]] virtual PacketDirection direction() const = 0;
+    [[nodiscard]] virtual bool allowBeforeLogin() const = 0;
 
     virtual void decode(cyrex::network::io::BinaryReader& in) = 0;
     virtual void encode(cyrex::network::io::BinaryWriter& out) const = 0;

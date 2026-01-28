@@ -7,12 +7,15 @@
 namespace cyrex::util
 {
 
-static ServerProperties defaults()
+namespace
+{
+
+ServerProperties defaults()
 {
     return {19134, 19135, 100, "CyrexMC", "Cyrex MCBE Software", mcpe::protocol::types::GameMode::SURVIVAL};
 }
 
-static void writeDefaults(const std::string& path, const ServerProperties& cfg)
+void writeDefaults(const std::string& path, const ServerProperties& cfg)
 {
     std::ofstream out(path, std::ios::trunc);
     if (!out.is_open())
@@ -25,6 +28,8 @@ static void writeDefaults(const std::string& path, const ServerProperties& cfg)
     out << "motd=" << cfg.motd << "\n";
     out << "gamemode=" << mcpe::protocol::types::toString(cfg.defaultGameMode) << "\n";
 }
+
+} // anonymous namespace
 
 ServerProperties ServerProperties::load(const std::string& path)
 {

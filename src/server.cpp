@@ -17,12 +17,15 @@ cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::S
     return {p.port, p.portIpv6, p.maxPlayers, p.serverName, p.motd, p.defaultGameMode};
 }
 
-static std::uint64_t generateServerId()
+namespace
+{
+std::uint64_t generateServerId()
 {
     std::random_device rd;
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<std::uint64_t> dist;
     return dist(gen);
+}
 }
 
 cyrex::Server::Server(Config config) :

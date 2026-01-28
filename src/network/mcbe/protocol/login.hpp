@@ -79,7 +79,7 @@ private:
         cr.writeU32LE(static_cast<uint32_t>(clientDataJwt.size()));
         cr.writeBuffer(reinterpret_cast<const uint8_t*>(clientDataJwt.data()), clientDataJwt.size());
 
-        return std::string(reinterpret_cast<const char*>(cr.data()), cr.length());
+        return {reinterpret_cast<const char*>(cr.data()), cr.length()};
     }
 };
 } // namespace cyrex::network::mcbe::protocol
