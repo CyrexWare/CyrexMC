@@ -9,8 +9,9 @@ if(NOT EXISTS ${CLANG_TIDY_EXECUTABLE})
     endif()
 endif()
 
+
 # Check executable version
-execute_process(COMMAND ${CLANG_TIDY_EXECUTABLE} --version OUTPUT_VARIABLE CLANG_TIDY_VERSION)
+execute_process(COMMAND ${Python_EXECUTABLE} ${RUN_CLANG_TIDY} -clang-tidy-binary ${CLANG_TIDY_EXECUTABLE} -fix -quiet -p ${PROJECT_BINARY_DIR} "^((?!_deps).)*$" RESULTS_VARIABLE EXIT_CODE)
 string(REGEX MATCH "version ([0-9]+)" CLANG_TIDY_VERSION ${CLANG_TIDY_VERSION})
 unset(CLANG_TIDY_VERSION)
 if(CMAKE_MATCH_1 GREATER_EQUAL 14)

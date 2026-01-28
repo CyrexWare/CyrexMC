@@ -2,6 +2,10 @@
 
 project(CyrexMC VERSION 1.0 LANGUAGES CXX)
 
+if (MSVC)
+    add_compile_options(/FS)
+endif()
+
 include(FetchContent)
 enable_testing()
 
