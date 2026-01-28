@@ -1,7 +1,6 @@
 #include "raknet_handler.hpp"
 
 #include "mcbe_packet_router.hpp"
-#include <memory>
 #include "network/session/network_session.hpp"
 #include "raknet_motd.hpp"
 #include "raknet_transport.hpp"
@@ -10,6 +9,7 @@
 
 #include <RakNet/MessageIdentifiers.h>
 #include <iostream>
+#include <memory>
 using namespace cyrex::util;
 
 cyrex::network::raknet::RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)

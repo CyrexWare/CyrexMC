@@ -1,6 +1,7 @@
 #pragma once
-#include <string>
 #include "server.hpp"
+
+#include <string>
 
 namespace cyrex::network::raknet
 {
