@@ -12,6 +12,6 @@ public:
     RakNet::RakPeerInterface* get();
 
 private:
-    RakNet::RakPeerInterface* m_peer;
+    RakNet::RakPeerInterface* peer;
 };
 } // namespace cyrex::network::raknet

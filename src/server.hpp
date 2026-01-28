@@ -31,7 +31,7 @@ public:
         static Config fromProperties(const cyrex::util::ServerProperties& props);
     };
 
-    explicit Server(Config  config);
+    explicit Server(Config config);
     ~Server();
 
     static Server& getInstance();

@@ -24,7 +24,7 @@ public:
         cyrex::network::io::BinaryWriter payload;
         encodePayload(payload);
 
-        out.writeI8(0xFE); //ency - still wrong but yeah this is fine for testing
+        out.writeI8(0xFE);                     //ency - still wrong but yeah this is fine for testing
         out.writeVarInt(payload.length() + 1); // + packetId
         out.writeVarInt(networkId());
 

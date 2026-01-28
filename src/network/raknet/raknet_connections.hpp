@@ -26,6 +26,6 @@ public:
     cyrex::network::session::NetworkSession* get(const RakNet::RakNetGUID& guid);
 
 private:
-    std::unordered_map<RakNet::RakNetGUID, std::unique_ptr<cyrex::network::session::NetworkSession>> m_sessions;
+    std::unordered_map<RakNet::RakNetGUID, std::unique_ptr<cyrex::network::session::NetworkSession>> sessions;
 };
 } // namespace cyrex::network::raknet
