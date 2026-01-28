@@ -14,7 +14,7 @@ class CommandRegistry
 {
 public:
     void registerCommand(std::unique_ptr<CommandBase> command);
-    CommandBase* find(const std::string& name) const;
+    [[nodiscard]] CommandBase* find(const std::string& name) const;
 
 private:
     std::unordered_map<std::string, CommandBase*> m_lookup;

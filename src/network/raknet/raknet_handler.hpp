@@ -23,11 +23,11 @@ public:
 private:
     void handlePacket(RakNet::Packet* p);
 
-private:
-    std::unique_ptr<RaknetPeer> peer;
-    RaknetConnections connections;
 
-    std::unique_ptr<cyrex::network::mcbe::Transport> transportImpl;
+    std::unique_ptr<RaknetPeer> m_peer;
+    RaknetConnections m_connections;
+
+    std::unique_ptr<cyrex::network::mcbe::Transport> m_transportImpl;
 };
 
 } // namespace cyrex::network::raknet

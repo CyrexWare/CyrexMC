@@ -31,7 +31,7 @@ public:
         static Config fromProperties(const cyrex::util::ServerProperties& props);
     };
 
-    explicit Server(const Config& config);
+    explicit Server(Config  config);
     ~Server();
 
     static Server& getInstance();
@@ -59,7 +59,7 @@ public:
 private:
     void commandLoop();
 
-    static Server* s_instance;
+    static Server* sInstance;
 
     Config m_config;
     std::unique_ptr<cyrex::network::raknet::RaknetHandler> m_raknet;

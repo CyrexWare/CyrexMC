@@ -10,7 +10,7 @@
 namespace cyrex::util
 {
 // should make sure this is proper
-constexpr char CODE = '\xA7';
+constexpr char code = '\xA7';
 
 enum class Color : char
 {
@@ -55,12 +55,12 @@ enum class Style : char
 
 inline std::string bedrock(Color c)
 {
-    return std::string{CODE, static_cast<char>(c)};
+    return std::string{code, static_cast<char>(c)};
 }
 
 inline std::string bedrock(Style s)
 {
-    return std::string{CODE, static_cast<char>(s)};
+    return std::string{code, static_cast<char>(s)};
 }
 
 inline std::string color(Color c, std::string_view text)
@@ -78,7 +78,7 @@ inline std::string strip(std::string_view text)
     std::string out;
     for (size_t i = 0; i < text.size(); ++i)
     {
-        if (text[i] == CODE && i + 1 < text.size())
+        if (text[i] == code && i + 1 < text.size())
         {
             ++i;
             continue;
@@ -143,7 +143,7 @@ inline std::string renderConsole(std::string_view text, bool includeTime)
 
     for (size_t i = 0; i < text.size(); ++i)
     {
-        if (text[i] == CODE && i + 1 < text.size())
+        if (text[i] == code && i + 1 < text.size())
         {
             auto it = ansi.find(text[i + 1]);
             if (it != ansi.end())
