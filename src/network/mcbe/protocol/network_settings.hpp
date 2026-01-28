@@ -16,8 +16,8 @@ namespace cyrex::network::mcbe::protocol
 class NetworkSettingsPacket final : public cyrex::network::mcbe::Packet
 {
 public:
-    static constexpr uint16_t COMPRESS_NOTHING = 0;
-    static constexpr uint16_t COMPRESS_EVERYTHING = 1;
+    static constexpr uint16_t compressNothing = 0;
+    static constexpr uint16_t compressEverything = 1;
 
     int8_t compressionThreshold = 1;
     int8_t compressionAlgorithm = 0;
@@ -30,17 +30,17 @@ public:
 
     int8_t trailingZero = 0;
 
-    uint32_t networkId() const override
+    [[nodiscard]] [[nodiscard]] uint32_t networkId() const override
     {
-        return ProtocolInfo::NETWORK_SETTINGS_PACKET;
+        return ProtocolInfo::networkSettingsPacket;
     }
 
-    cyrex::network::mcbe::PacketDirection direction() const override
+    [[nodiscard]] [[nodiscard]] cyrex::network::mcbe::PacketDirection direction() const override
     {
         return cyrex::network::mcbe::PacketDirection::Clientbound;
     }
 
-    bool allowBeforeLogin() const override
+    [[nodiscard]] [[nodiscard]] bool allowBeforeLogin() const override
     {
         return true;
     }

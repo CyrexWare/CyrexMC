@@ -19,9 +19,9 @@
 namespace
 {
 
-static std::filesystem::path lockFile = "server.lock";
+std::filesystem::path lockFile = "server.lock";
 
-static uint64_t getPid()
+uint64_t getPid()
 {
 #if defined(_WIN32)
     return static_cast<uint64_t>(GetCurrentProcessId());
@@ -30,14 +30,14 @@ static uint64_t getPid()
 #endif
 }
 
-static bool isProcessAlive(uint64_t pid)
+bool isProcessAlive(uint64_t pid)
 {
 #if defined(_WIN32)
     HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, static_cast<DWORD>(pid));
     if (!h)
         return false;
     DWORD code = 0;
-    bool alive = GetExitCodeProcess(h, &code) && code == STILL_ACTIVE;
+    bool const alive = GetExitCodeProcess(h, &code) && code == STILL_ACTIVE;
     CloseHandle(h);
     return alive;
 #else
@@ -45,18 +45,18 @@ static bool isProcessAlive(uint64_t pid)
 #endif
 }
 
-static void removeLock()
+void removeLock()
 {
     std::error_code ec;
     std::filesystem::remove(lockFile, ec);
 }
 
-static void onExit()
+void onExit()
 {
     removeLock();
 }
 
-static void onSignal(int)
+void onSignal(int)
 {
     removeLock();
     std::_Exit(0);

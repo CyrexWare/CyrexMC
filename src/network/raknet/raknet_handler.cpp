@@ -13,22 +13,22 @@ using namespace cyrex::util;
 
 cyrex::network::raknet::RaknetHandler::RaknetHandler()
 {
-    cyrex::Server& server = cyrex::Server::getInstance();
+    cyrex::Server const& server = cyrex::Server::getInstance();
 
-    peer = std::make_unique<cyrex::network::raknet::RaknetPeer>(server.getPort(), server.getMaxPlayers());
-    RakNet::RakPeerInterface* rakPeer = peer->get();
+    m_peer = std::make_unique<cyrex::network::raknet::RaknetPeer>(server.getPort(), server.getMaxPlayers());
+    RakNet::RakPeerInterface* rakPeer = m_peer->get();
 
-    std::string motd = cyrex::network::raknet::buildRaknetMotd();
+    std::string const motd = cyrex::network::raknet::buildRaknetMotd();
     std::string response;
 
-    uint16_t len = static_cast<uint16_t>(motd.size());
+    auto const len = static_cast<uint16_t>(motd.size());
     response.push_back((len >> 8) & 0xFF);
     response.push_back(len & 0xFF);
     response += motd;
 
     rakPeer->SetOfflinePingResponse(response.c_str(), response.size());
 
-    transportImpl = std::make_unique<cyrex::network::raknet::RaknetTransport>(rakPeer);
+    m_transportImpl = std::make_unique<cyrex::network::raknet::RaknetTransport>(rakPeer);
 
     std::cout << renderConsole(bedrock(Color::RED) + "[RAKNET] ", true)
               << renderConsole(bedrock(Color::DARK_GRAY) + "listening on ", false) << server.getPort() << std::endl;
@@ -38,19 +38,19 @@ cyrex::network::raknet::RaknetHandler::~RaknetHandler() = default;
 
 cyrex::network::mcbe::Transport* cyrex::network::raknet::RaknetHandler::transport()
 {
-    return transportImpl.get();
+    return m_transportImpl.get();
 }
 
 void cyrex::network::raknet::RaknetHandler::poll()
 {
-    RakNet::RakPeerInterface* rakPeer = peer->get();
+    RakNet::RakPeerInterface* rakPeer = m_peer->get();
 
     for (RakNet::Packet* p = rakPeer->Receive(); p; rakPeer->DeallocatePacket(p), p = rakPeer->Receive())
     {
         handlePacket(p);
     }
 
-    connections.cleanup();
+    m_connections.cleanup();
 }
 
 void cyrex::network::raknet::RaknetHandler::handlePacket(RakNet::Packet* p)
@@ -61,16 +61,16 @@ void cyrex::network::raknet::RaknetHandler::handlePacket(RakNet::Packet* p)
     switch (p->data[0])
     {
         case ID_NEW_INCOMING_CONNECTION:
-            connections.onConnect(p->guid, p->systemAddress, this);
+            m_connections.onConnect(p->guid, p->systemAddress, this);
             break;
 
         case ID_CONNECTION_LOST:
         case ID_DISCONNECTION_NOTIFICATION:
-            connections.onDisconnect(p->guid);
+            m_connections.onDisconnect(p->guid);
             break;
 
         case 0xFE:
-            cyrex::network::raknet::McbePacketRouter::route(p, connections);
+            cyrex::network::raknet::McbePacketRouter::route(p, m_connections);
             break;
 
         default:

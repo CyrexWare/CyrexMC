@@ -20,12 +20,12 @@ public:
         return true;
     }
 
-    cyrex::mcpe::protocol::types::CompressionAlgorithm networkId() const noexcept override
+    [[nodiscard]] cyrex::mcpe::protocol::types::CompressionAlgorithm networkId() const noexcept override
     {
         return cyrex::mcpe::protocol::types::CompressionAlgorithm::NONE;
     }
 
-    std::optional<size_t> compressionThreshold() const noexcept override
+    [[nodiscard]] std::optional<size_t> compressionThreshold() const noexcept override
     {
         return std::nullopt;
     }

@@ -88,14 +88,14 @@ public:
 
     void writeFloatLE(float v)
     {
-        uint32_t bits;
+        uint32_t bits = 0;
         std::memcpy(&bits, &v, sizeof(bits));
         writeU32LE(bits);
     }
 
     void writeDoubleLE(double v)
     {
-        uint64_t bits;
+        uint64_t bits = 0;
         std::memcpy(&bits, &v, sizeof(bits));
         writeU64LE(bits);
     }
@@ -122,7 +122,7 @@ public:
     {
         while (true)
         {
-            uint8_t b = v & 0x7F;
+            uint8_t const b = v & 0x7F;
             v >>= 7;
             if (v)
                 writeU8(b | 0x80);
@@ -143,7 +143,7 @@ public:
     {
         while (true)
         {
-            uint8_t b = v & 0x7F;
+            uint8_t const b = v & 0x7F;
             v >>= 7;
             if (v)
                 writeU8(b | 0x80);
@@ -166,12 +166,12 @@ public:
         buffer.insert(buffer.end(), s.begin(), s.end());
     }
 
-    const uint8_t* data() const
+    [[nodiscard]] const uint8_t* data() const
     {
         return buffer.data();
     }
 
-    size_t length() const
+    [[nodiscard]] size_t length() const
     {
         return buffer.size();
     }

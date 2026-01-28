@@ -55,7 +55,7 @@ void cyrex::command::CommandManager::executeConsole(const std::string& line)
         return;
     }
 
-    PermissionLevel sourceLevel = PermissionLevel::CONSOLE;
+    PermissionLevel const sourceLevel = PermissionLevel::CONSOLE;
 
     if (!hasPermission(sourceLevel, cmd->permission()))
     {

@@ -17,7 +17,7 @@ public:
 
     struct Entry
     {
-        Factory factory{};
+        Factory factory;
         PacketDirection direction{PacketDirection::Bidirectional};
     };
 
@@ -30,21 +30,21 @@ public:
 
     void bind(uint32_t id, Factory f, PacketDirection dir)
     {
-        entries[id] = {std::move(f), dir};
+        m_entries[id] = {std::move(f), dir};
     }
 
-    std::unique_ptr<PacketBase> create(uint32_t id) const
+    [[nodiscard]] std::unique_ptr<PacketBase> create(uint32_t id) const
     {
-        auto it = entries.find(id);
-        if (it == entries.end())
+        auto it = m_entries.find(id);
+        if (it == m_entries.end())
             return nullptr;
         return it->second.factory();
     }
 
-    PacketDirection direction(uint32_t id) const
+    [[nodiscard]] PacketDirection direction(uint32_t id) const
     {
-        auto it = entries.find(id);
-        if (it == entries.end())
+        auto it = m_entries.find(id);
+        if (it == m_entries.end())
             return PacketDirection::Bidirectional;
         return it->second.direction;
     }
@@ -52,6 +52,6 @@ public:
     void registerAll();
 
 private:
-    std::unordered_map<uint32_t, Entry> entries;
+    std::unordered_map<uint32_t, Entry> m_entries;
 };
 } // namespace cyrex::network::mcbe

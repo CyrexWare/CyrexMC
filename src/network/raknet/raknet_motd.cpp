@@ -6,7 +6,7 @@
 
 std::string cyrex::network::raknet::buildRaknetMotd()
 {
-    cyrex::Server& server = cyrex::Server::getInstance();
+    cyrex::Server const& server = cyrex::Server::getInstance();
     auto gm = server.getDefaultGameMode();
 
     int gmNumeric = 1;
@@ -19,9 +19,9 @@ std::string cyrex::network::raknet::buildRaknetMotd()
     motd += "MCPE;";
     motd += server.getMotd();
     motd += ";";
-    motd += std::to_string(cyrex::network::mcbe::protocol::ProtocolInfo::CURRENT_PROTOCOL);
+    motd += std::to_string(cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol);
     motd += ";";
-    motd += cyrex::network::mcbe::protocol::ProtocolInfo::MINECRAFT_VERSION_NETWORK;
+    motd += cyrex::network::mcbe::protocol::ProtocolInfo::minecraftVersionNetwork;
     motd += ";";
     motd += std::to_string(server.getPlayerCount());
     motd += ";";

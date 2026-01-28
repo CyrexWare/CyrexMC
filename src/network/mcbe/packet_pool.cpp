@@ -9,19 +9,19 @@
 void cyrex::network::mcbe::PacketPool::registerAll()
 {
     bind(
-        cyrex::network::mcbe::protocol::ProtocolInfo::REQUEST_NETWORK_SETTINGS_PACKET,
+        cyrex::network::mcbe::protocol::ProtocolInfo::requestNetworkSettingsPacket,
         [] { return std::make_unique<cyrex::network::mcbe::protocol::RequestNetworkSettingsPacket>(); },
         PacketDirection::Serverbound);
     bind(
-        cyrex::network::mcbe::protocol::ProtocolInfo::NETWORK_SETTINGS_PACKET,
+        cyrex::network::mcbe::protocol::ProtocolInfo::networkSettingsPacket,
         [] { return std::make_unique<cyrex::network::mcbe::protocol::NetworkSettingsPacket>(); },
         PacketDirection::Clientbound);
     bind(
-        cyrex::network::mcbe::protocol::ProtocolInfo::LOGIN_PACKET,
+        cyrex::network::mcbe::protocol::ProtocolInfo::loginPacket,
         [] { return std::make_unique<cyrex::network::mcbe::protocol::LoginPacket>(); },
         PacketDirection::Serverbound);
     bind(
-        cyrex::network::mcbe::protocol::ProtocolInfo::PLAY_STATUS_PACKET,
+        cyrex::network::mcbe::protocol::ProtocolInfo::playStatusPacket,
         [] { return std::make_unique<cyrex::network::mcbe::protocol::PlayStatusPacket>(); },
         PacketDirection::Clientbound);
 }

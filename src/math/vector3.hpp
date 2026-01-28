@@ -14,7 +14,7 @@ struct Vector3
     constexpr Vector3() : x(0), y(0), z(0)
     {
     }
-    constexpr Vector3(float x_, float y_, float z_) : x(x_), y(y_), z(z_)
+    constexpr Vector3(float x, float y, float z) : x(x), y(y), z(z)
     {
     }
 
@@ -35,60 +35,60 @@ struct Vector3
         return {0.f, -1.f, 0.f};
     }
 
-    float length() const
+    [[nodiscard]] float length() const
     {
         return std::sqrt(x * x + y * y + z * z);
     }
 
-    float lengthSquared() const
+    [[nodiscard]] float lengthSquared() const
     {
         return x * x + y * y + z * z;
     }
 
-    Vector3 normalized() const
+    [[nodiscard]] Vector3 normalized() const
     {
-        float len = length();
+        float const len = length();
         if (len == 0.f)
             return Vector3::zero();
         return {x / len, y / len, z / len};
     }
 
-    float dot(const Vector3& o) const
+    [[nodiscard]] float dot(const Vector3& o) const
     {
         return x * o.x + y * o.y + z * o.z;
     }
 
-    Vector3 cross(const Vector3& o) const
+    [[nodiscard]] Vector3 cross(const Vector3& o) const
     {
         return {y * o.z - z * o.y, z * o.x - x * o.z, x * o.y - y * o.x};
     }
 
-    float distance(const Vector3& o) const
+    [[nodiscard]] float distance(const Vector3& o) const
     {
         return (*this - o).length();
     }
 
-    float distanceSquared(const Vector3& o) const
+    [[nodiscard]] float distanceSquared(const Vector3& o) const
     {
         return (*this - o).lengthSquared();
     }
 
-    Vector3 floor() const
+    [[nodiscard]] Vector3 floor() const
     {
         return {std::floor(x), std::floor(y), std::floor(z)};
     }
 
-    Vector3 ceil() const
+    [[nodiscard]] Vector3 ceil() const
     {
         return {std::ceil(x), std::ceil(y), std::ceil(z)};
     }
 
-    Vector3 abs() const
+    [[nodiscard]] Vector3 abs() const
     {
         return {std::fabs(x), std::fabs(y), std::fabs(z)};
     }
 
-    Vector3 lerp(const Vector3& to, float t) const
+    [[nodiscard]] Vector3 lerp(const Vector3& to, float t) const
     {
         return {x + (to.x - x) * t, y + (to.y - y) * t, z + (to.z - z) * t};
     }

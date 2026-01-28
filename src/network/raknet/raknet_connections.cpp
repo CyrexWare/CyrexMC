@@ -18,7 +18,7 @@ void cyrex::network::raknet::RaknetConnections::onConnect(const RakNet::RakNetGU
     session->setCompressor(
         std::make_unique<cyrex::network::mcbe::compression::ZlibCompressor>(6, std::optional<size_t>{0}, 2 * 1024 * 1024));
 
-    sessions.emplace(guid, std::move(session));
+    m_sessions.emplace(guid, std::move(session));
 
     std::cout << renderConsole(bedrock(Color::RED) + "[RAKNET] " + bedrock(Color::DARK_GRAY) + "New incoming connection", true)
               << std::endl;
@@ -26,8 +26,8 @@ void cyrex::network::raknet::RaknetConnections::onConnect(const RakNet::RakNetGU
 
 void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
 {
-    auto it = sessions.find(guid);
-    if (it == sessions.end())
+    auto it = m_sessions.find(guid);
+    if (it == m_sessions.end())
         return;
 
     it->second->markedForDisconnect = true;
@@ -37,10 +37,10 @@ void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNe
 
 void cyrex::network::raknet::RaknetConnections::cleanup()
 {
-    for (auto it = sessions.begin(); it != sessions.end();)
+    for (auto it = m_sessions.begin(); it != m_sessions.end();)
     {
         if (it->second->markedForDisconnect)
-            it = sessions.erase(it);
+            it = m_sessions.erase(it);
         else
             ++it;
     }
@@ -49,8 +49,8 @@ void cyrex::network::raknet::RaknetConnections::cleanup()
 
 cyrex::network::session::NetworkSession* cyrex::network::raknet::RaknetConnections::get(const RakNet::RakNetGUID& guid)
 {
-    auto it = sessions.find(guid);
-    if (it == sessions.end())
+    auto it = m_sessions.find(guid);
+    if (it == m_sessions.end())
         return nullptr;
 
     return it->second.get();

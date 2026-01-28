@@ -31,7 +31,7 @@ public:
         m_guid(guid),
         m_address(address),
         m_transport(transport),
-        m_protocolId(0),
+        
         m_compressor(std::make_unique<cyrex::network::mcbe::compression::NoopCompressor>())
     {
     }
@@ -47,7 +47,7 @@ public:
 
     void setCompressor(std::unique_ptr<cyrex::network::mcbe::compression::Compressor> compressor);
 
-    cyrex::network::mcbe::compression::Compressor& compressor() const
+    [[nodiscard]] [[nodiscard]] cyrex::network::mcbe::compression::Compressor& compressor() const
     {
         return *m_compressor;
     }
@@ -57,17 +57,17 @@ public:
         m_protocolId = protocolId;
     }
 
-    std::uint32_t protocolId() const
+    [[nodiscard]] [[nodiscard]] std::uint32_t protocolId() const
     {
         return m_protocolId;
     }
 
-    RakNet::RakNetGUID guid() const
+    [[nodiscard]] [[nodiscard]] RakNet::RakNetGUID guid() const
     {
         return m_guid;
     }
 
-    RakNet::SystemAddress address() const
+    [[nodiscard]] [[nodiscard]] RakNet::SystemAddress address() const
     {
         return m_address;
     }
@@ -77,7 +77,7 @@ private:
     RakNet::SystemAddress m_address;
     cyrex::network::mcbe::Transport* m_transport;
 
-    std::uint32_t m_protocolId;
+    std::uint32_t m_protocolId{0}{0};
     std::unique_ptr<cyrex::network::mcbe::compression::Compressor> m_compressor;
 };
 } // namespace cyrex::network::session
