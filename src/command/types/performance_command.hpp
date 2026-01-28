@@ -12,4 +12,4 @@ public:
     Permission permission() const override;
     void execute(CommandContext& ctx) override;
 };
-} // namespace cyrex::command
+} // namespace cyrex::command::types
