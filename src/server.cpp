@@ -25,7 +25,10 @@ static std::uint64_t generateServerId()
     return dist(gen);
 }
 
-cyrex::Server::Server(Config  config) : m_config(std::move(config)), m_serverUniqueId(generateServerId()), m_running(true)
+cyrex::Server::Server(Config config) :
+    m_config(std::move(config)),
+    m_serverUniqueId(generateServerId()),
+    m_running(true)
 {
     if (sInstance)
         throw std::runtime_error("Server already exists");
