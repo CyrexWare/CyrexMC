@@ -11,12 +11,12 @@ namespace cyrex::network::mcbe
 class Packet : public PacketBase
 {
 public:
-    virtual void decode(cyrex::network::io::BinaryReader& in) final
+    void decode(cyrex::network::io::BinaryReader& in) final
     {
         decodePayload(in);
     }
 
-    virtual void encode(cyrex::network::io::BinaryWriter& out) const final
+    void encode(cyrex::network::io::BinaryWriter& out) const final
     {
         out.buffer.clear();
 

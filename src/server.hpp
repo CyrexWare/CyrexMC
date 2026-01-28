@@ -36,22 +36,22 @@ public:
 
     static Server& getInstance();
 
-    std::uint16_t getPort() const;
-    std::uint16_t getPortIpv6() const;
-    std::uint32_t getMaxPlayers() const;
-    std::uint64_t getServerUniqueId() const;
-    const std::string& getServerName() const;
-    const std::string& getMotd() const;
+    [[nodiscard]] std::uint16_t getPort() const;
+    [[nodiscard]] std::uint16_t getPortIpv6() const;
+    [[nodiscard]] std::uint32_t getMaxPlayers() const;
+    [[nodiscard]] std::uint64_t getServerUniqueId() const;
+    [[nodiscard]] const std::string& getServerName() const;
+    [[nodiscard]] const std::string& getMotd() const;
 
-    cyrex::mcpe::protocol::types::GameMode getDefaultGameMode() const;
+    [[nodiscard]] cyrex::mcpe::protocol::types::GameMode getDefaultGameMode() const;
     void setDefaultGameMode(cyrex::mcpe::protocol::types::GameMode mode);
     void setDefaultGameModeFromString(std::string_view mode);
 
     void addPlayer(const RakNet::RakNetGUID& guid);
     void removePlayer(const RakNet::RakNetGUID& guid);
-    bool hasPlayer(const RakNet::RakNetGUID& guid) const;
-    std::size_t getPlayerCount() const;
-    const std::vector<RakNet::RakNetGUID>& getAllPlayers() const;
+    [[nodiscard]] bool hasPlayer(const RakNet::RakNetGUID& guid) const;
+    [[nodiscard]] std::size_t getPlayerCount() const;
+    [[nodiscard]] const std::vector<RakNet::RakNetGUID>& getAllPlayers() const;
 
     void stop();
     void run();
