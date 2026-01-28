@@ -1,8 +1,9 @@
 #include "mcbe_packet_router.hpp"
 
-#include <iostream>
-#include "util/textformat.hpp"
 #include "network/session/network_session.hpp"
+#include "util/textformat.hpp"
+
+#include <iostream>
 using namespace cyrex::network::session;
 using namespace cyrex::util;
 

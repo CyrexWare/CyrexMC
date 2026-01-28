@@ -1,9 +1,9 @@
 #pragma once
 
-#include "network/mcbe/protocol/protocol_info.hpp"
-#include "network/session/network_session.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
+#include "network/mcbe/protocol/protocol_info.hpp"
+#include "network/session/network_session.hpp"
 #include "packetbase.hpp"
 
 namespace cyrex::network::mcbe
@@ -24,7 +24,7 @@ public:
         cyrex::network::io::BinaryWriter payload;
         encodePayload(payload);
 
-        out.writeI8(0xFE); //still wrong but yeah this is fine for testing
+        out.writeI8(0xFE); //ency - still wrong but yeah this is fine for testing
         out.writeVarInt(payload.length() + 1); // + packetId
         out.writeVarInt(networkId());
 

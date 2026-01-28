@@ -1,7 +1,7 @@
 #include "stop_command.hpp"
 
-#include "command/permission.hpp"
 #include "command/command_context.hpp"
+#include "command/permission.hpp"
 #include "server.hpp"
 
 std::string cyrex::command::types::StopCommand::name() const

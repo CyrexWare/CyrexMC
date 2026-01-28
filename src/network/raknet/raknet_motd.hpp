@@ -3,5 +3,5 @@
 
 namespace cyrex::network::raknet
 {
-    std::string buildRaknetMotd();
+std::string buildRaknetMotd();
 }

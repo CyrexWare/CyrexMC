@@ -1,11 +1,11 @@
 #include "network_session.hpp"
 
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 #include "network/mcbe/handler/session_begin_handler.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
 #include "util/textformat.hpp"
 
 #include <iomanip>

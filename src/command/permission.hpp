@@ -2,7 +2,8 @@
 
 #include <string>
 
-namespace cyrex::command {
+namespace cyrex::command
+{
 
 enum class PermissionLevel
 {

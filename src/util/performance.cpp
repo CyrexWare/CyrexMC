@@ -35,5 +35,6 @@ std::string getReport()
     out << bedrock(Color::DARK_GRAY) << "==========================" << bedrock(Style::RESET);
 
     return out.str();
+    return out.str();
 }
 } // namespace cyrex::util

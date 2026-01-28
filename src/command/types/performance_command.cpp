@@ -1,7 +1,6 @@
 #include "performance_command.hpp"
 
 #include "command/permission.hpp"
-
 #include "util/performance.hpp"
 #include "util/textformat.hpp"
 

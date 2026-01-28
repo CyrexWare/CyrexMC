@@ -1,5 +1,7 @@
 #pragma once
 
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 #include "network/mcbe/compression/compressor.hpp"
 #include "network/mcbe/compression/noop_compressor.hpp"
 #include "network/mcbe/compression/zlib_compressor.hpp"
@@ -7,8 +9,6 @@
 #include "network/mcbe/packet_pool.hpp"
 #include "network/mcbe/packetbase.hpp"
 #include "network/mcbe/transport.hpp"
-#include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <memory>

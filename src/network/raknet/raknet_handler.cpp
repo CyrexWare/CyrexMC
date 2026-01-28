@@ -1,10 +1,10 @@
 #include "raknet_handler.hpp"
 
+#include "mcbe_packet_router.hpp"
 #include "network/session/network_session.hpp"
 #include "raknet_motd.hpp"
 #include "raknet_transport.hpp"
 #include "server.hpp"
-#include "mcbe_packet_router.hpp"
 #include "util/textformat.hpp"
 
 #include <RakNet/MessageIdentifiers.h>

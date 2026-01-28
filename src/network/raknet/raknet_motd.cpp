@@ -1,7 +1,7 @@
 #include "raknet_motd.hpp"
 
-#include "network/mcbe/protocol/types/GameMode.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
+#include "network/mcbe/protocol/types/GameMode.hpp"
 #include "server.hpp"
 
 std::string cyrex::network::raknet::buildRaknetMotd()

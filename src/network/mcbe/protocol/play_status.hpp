@@ -1,10 +1,10 @@
 #pragma once
 
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_direction.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
 
 #include <cstdint>
 
