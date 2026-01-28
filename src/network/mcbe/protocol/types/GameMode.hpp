@@ -1,6 +1,6 @@
 #pragma once
 #include <string_view>
-
+#include <cctype>
 #include <cstdint>
 
 namespace cyrex::mcpe::protocol::types
@@ -42,15 +42,11 @@ constexpr bool iequals(std::string_view a, std::string_view b) noexcept
 {
     if (a.size() != b.size())
         return false;
+
     for (size_t i = 0; i < a.size(); ++i)
     {
-        auto ca = a[i];
-        auto cb = b[i];
-        if (ca >= 'A' && ca <= 'Z')
-            ca += 32;
-        if (cb >= 'A' && cb <= 'Z')
-            cb += 32;
-        if (ca != cb)
+        // the fact toupper exists is just amazing
+        if (std::toupper(static_cast<unsigned char>(a[i])) != std::toupper(static_cast<unsigned char>(b[i])))
             return false;
     }
     return true;
