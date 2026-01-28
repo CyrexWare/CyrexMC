@@ -77,7 +77,7 @@ private:
     RakNet::SystemAddress m_address;
     cyrex::network::mcbe::Transport* m_transport;
 
-    std::uint32_t m_protocolId{0}{0};
+    std::uint32_t m_protocolId{0};
     std::unique_ptr<cyrex::network::mcbe::compression::Compressor> m_compressor;
 };
 } // namespace cyrex::network::session
