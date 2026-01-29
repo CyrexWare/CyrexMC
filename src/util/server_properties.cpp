@@ -12,7 +12,7 @@ namespace
 
 ServerProperties defaults()
 {
-    return {19134, 19135, 100, "CyrexMC", "Cyrex MCBE Software", mcpe::protocol::types::GameMode::SURVIVAL};
+    return {19132, 19135, 100, "CyrexMC", "Cyrex MCBE Software", mcpe::protocol::types::GameMode::SURVIVAL};
 }
 
 void writeDefaults(const std::string& path, const ServerProperties& cfg)
