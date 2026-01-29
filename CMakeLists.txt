@@ -2,14 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 
 include(FetchContent)
 
-# HUNTER_ENABLED is always set if this package is included in a project using hunter (HunterGate sets it) In this case
-# we will use hunter as well to stay consistent. If not the use can supply it on configure to force using hunter.
-if(HUNTER_ENABLED)
-  include("cmake/HunterGate.cmake")
-  huntergate(URL "https://github.com/cpp-pm/hunter/archive/v0.26.6.tar.gz" SHA1
-             "e70c29f878f5d5f5cdf1b9ccd628fb872e8624a8")
-endif()
-
 project(CyrexMC VERSION 1.0)
 
 # define a macro that helps defining an option
@@ -24,11 +16,6 @@ endmacro()
 if(ENABLE_SANITIZERS)
     string(APPEND CMAKE_CXX_FLAGS " -fno-omit-frame-pointer -fno-sanitize-recover=all -fsanitize=undefined")
 endif()
-
-# Set variables to control zlib's build options and avoid conflicts
-set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
-set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(ZLIB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(RakNet
     SYSTEM 
@@ -49,19 +36,20 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(libdeflate)
 
-SET(HUNTER_ENABLED TRUE)
-
+SET(WOLFSSL_OPENSSLEXTRA TRUE)
 FetchContent_Declare(
   wolfssl
   GIT_REPOSITORY https://github.com/wolfSSL/wolfssl
   GIT_TAG v5.8.4-stable
+  OVERRIDE_FIND_PACKAGE
 )
 FetchContent_MakeAvailable(wolfssl)
 
+SET(JWT_SSL_LIBRARY "wolfSSL")
 FetchContent_Declare(
   jwt-cpp
-  GIT_REPOSITORY https://github.com/Thalhammer/jwt-cpp
-  GIT_TAG v0.7.1
+  GIT_REPOSITORY https://github.com/CyrexWare/jwt-cpp
+  GIT_TAG eaebed9c588993d8dc9c791f38ac43c7220c2103
 )
 FetchContent_MakeAvailable(jwt-cpp)
 
