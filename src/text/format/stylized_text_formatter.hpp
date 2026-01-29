@@ -86,5 +86,4 @@ struct std::formatter<cyrex::TextStyle>
             cyrex::textStyleToString(textStyle)
         );
     }
-
 };
