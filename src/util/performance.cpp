@@ -8,7 +8,7 @@
 
 namespace cyrex::util
 {
-std::string getReport()
+std::string makeReport()
 {
     static auto startTime = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();

@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace cyrex::log
+namespace cyrex::logx
 {
 inline void sendConsoleMessage(MessageType type, std::string_view message)
 {
