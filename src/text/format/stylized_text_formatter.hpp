@@ -74,7 +74,7 @@ template<>
 struct std::formatter<cyrex::TextStyle>
 {
     constexpr static auto parse(std::format_parse_context& context) {
-        return ctx.begin();
+        return context.begin();
     }
 
     // Format the value
