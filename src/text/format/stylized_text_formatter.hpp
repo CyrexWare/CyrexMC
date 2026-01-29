@@ -73,15 +73,15 @@ namespace cyrex
 template<>
 struct std::formatter<cyrex::TextStyle>
 {
-    constexpr static auto parse(std::format_parse_context& ctx) {
+    constexpr static auto parse(std::format_parse_context& context) {
         return ctx.begin();
     }
 
     // Format the value
     template <typename FormatContext>
-    auto format(const cyrex::TextStyle textStyle, FormatContext& ctx) const {
+    auto format(const cyrex::TextStyle textStyle, FormatContext& context) const {
         return std::format_to(
-            ctx.out(),
+            context.out(),
             "{}",
             cyrex::textStyleToString(textStyle)
         );
