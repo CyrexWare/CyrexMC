@@ -11,7 +11,9 @@
 #include "network/mcbe/transport.hpp"
 
 #include <RakNet/RakNetTypes.h>
+#include <functional>
 #include <memory>
+#include <queue>
 
 #include <cstdint>
 
@@ -41,13 +43,15 @@ public:
     bool markedForDisconnect = false;
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
-    void send(cyrex::network::mcbe::PacketBase& packet);
+    void send(cyrex::network::mcbe::PacketBase& packet, bool immediately = false);
+    void flush();
     bool disconnectUserForIncompatiableProtocol(uint32_t);
     bool handleRequestNetworkSettings(cyrex::network::mcbe::PacketBase& packet);
+    void tick();
 
     void setCompressor(std::unique_ptr<cyrex::network::mcbe::compression::Compressor> compressor);
 
-    [[nodiscard]] [[nodiscard]] cyrex::network::mcbe::compression::Compressor& compressor() const
+    [[nodiscard]] cyrex::network::mcbe::compression::Compressor& compressor() const
     {
         return *m_compressor;
     }
@@ -57,22 +61,25 @@ public:
         m_protocolId = protocolId;
     }
 
-    [[nodiscard]] [[nodiscard]] std::uint32_t protocolId() const
+    [[nodiscard]] std::uint32_t protocolId() const
     {
         return m_protocolId;
     }
 
-    [[nodiscard]] [[nodiscard]] RakNet::RakNetGUID guid() const
+    [[nodiscard]] RakNet::RakNetGUID guid() const
     {
         return m_guid;
     }
 
-    [[nodiscard]] [[nodiscard]] RakNet::SystemAddress address() const
+    [[nodiscard]] RakNet::SystemAddress address() const
     {
         return m_address;
     }
 
 private:
+    void sendInternal(cyrex::network::mcbe::PacketBase& packet);
+    std::queue<std::function<void()>> m_sendQueue;
+
     RakNet::RakNetGUID m_guid;
     RakNet::SystemAddress m_address;
     cyrex::network::mcbe::Transport* m_transport;

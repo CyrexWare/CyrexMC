@@ -1,5 +1,7 @@
 #pragma once
 
+#include "log/console_logger.hpp"
+#include "log/message_type.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packet.hpp"
@@ -8,7 +10,8 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
 #include "network/session/network_session.hpp"
-#include "util/textformat.hpp"
+#include "text/format/builder.hpp"
+#include "text/format/color.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <iostream>
@@ -42,14 +45,12 @@ protected:
     void decodePayload(cyrex::network::io::BinaryReader& in) override
     {
         protocolVersion = in.readU32BE();
-        std::cout << (cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::GREEN) + "[MCBE] ", true) +
-                      cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::EMERALD) +
-                                                     "Received "
-                                                     "Protocol Version "
-                                                     "(RequestNetworkSe"
-                                                     "ttings): ",
-                                                 false))
-                  << protocolVersion << std::endl;
+        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
+                                       cyrex::text::format::Builder()
+                                           .color(text::format::Color::DARK_GRAY)
+                                           .text("[MCBE] Received Protocol Version (RequestNetworkSettingsPacket): " +
+                                                 protocolVersion)
+                                           .build());
     }
 
     void encodePayload(cyrex::network::io::BinaryWriter&) const override

@@ -3,8 +3,11 @@
 #include "command/types/performance_command.hpp"
 #include "command/types/stop_command.hpp"
 #include "command_context.hpp"
+#include "log/console_logger.hpp"
+#include "log/message_type.hpp"
 #include "server.hpp"
-#include "util/textformat.hpp"
+#include "text/format/builder.hpp"
+#include "text/format/color.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -46,12 +49,12 @@ void cyrex::command::CommandManager::executeConsole(const std::string& line)
     auto* cmd = m_registry.find(name);
     if (!cmd)
     {
-        std::cout << cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::RED) +
-                                                    cyrex::util::bedrock(cyrex::util::Style::BOLD) +
-                                                    "[Cyrex] The command you have entered does not exist." +
-                                                    cyrex::util::bedrock(cyrex::util::Style::RESET),
-                                                false)
-                  << std::endl;
+        // TODO: check if its console or player
+        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_INFO,
+                                       cyrex::text::format::Builder()
+                                           .color(text::format::Color::RED)
+                                           .text("The command you have entered does not exist.")
+                                           .build());
         return;
     }
 
@@ -59,12 +62,12 @@ void cyrex::command::CommandManager::executeConsole(const std::string& line)
 
     if (!hasPermission(sourceLevel, cmd->permission()))
     {
-        std::cout << cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::GOLD) +
-                                                    cyrex::util::bedrock(cyrex::util::Style::BOLD) +
-                                                    "[Cyrex] You do not have permission to use this command." +
-                                                    cyrex::util::bedrock(cyrex::util::Style::RESET),
-                                                false)
-                  << std::endl;
+        // TODO: check if its console or player
+        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_INFO,
+                                       cyrex::text::format::Builder()
+                                           .color(text::format::Color::RED)
+                                           .text("The command you have entered does not exist.")
+                                           .build());
         return;
     }
 

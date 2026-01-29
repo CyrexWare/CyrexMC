@@ -1,8 +1,11 @@
 #include "performance_command.hpp"
 
 #include "command/permission.hpp"
+#include "log/console_logger.hpp"
+#include "log/message_type.hpp"
+#include "text/format/builder.hpp"
+#include "text/format/color.hpp"
 #include "util/performance.hpp"
-#include "util/textformat.hpp"
 
 #include <iostream>
 
@@ -23,5 +26,9 @@ cyrex::command::Permission cyrex::command::types::PerformanceCommand::permission
 
 void cyrex::command::types::PerformanceCommand::execute(CommandContext&)
 {
-    std::cout << cyrex::util::renderConsole(cyrex::util::getReport(), false) << std::endl;
+    cyrex::log::sendConsoleMessage(cyrex::log::MessageType::INFO,
+                                   cyrex::text::format::Builder()
+                                       .color(text::format::Color::AQUA)
+                                       .text(cyrex::util::getReport())
+                                       .build());
 }

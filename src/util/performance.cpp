@@ -1,6 +1,6 @@
 #include "performance.hpp"
 
-#include "util/textformat.hpp"
+#include "text/format/builder.hpp"
 
 #include <chrono>
 #include <sstream>
@@ -20,21 +20,37 @@ std::string getReport()
     uptimeSeconds %= 60;
     uptimeMinutes %= 60;
 
-    std::ostringstream out;
+    cyrex::text::format::Builder b;
 
-    out << bedrock(Color::AQUA) << bedrock(Style::BOLD) << "=== Server Performance ===" << bedrock(Style::RESET) << "\n";
+    b.color(cyrex::text::format::Color::AQUA)
+        .style(cyrex::text::format::Style::BOLD)
+        .text("=== Server Performance ===")
+        .reset()
+        .text("\n");
 
-    out << bedrock(Color::YELLOW) << "Uptime: " << bedrock(Color::WHITE) << uptimeHours << "h " << uptimeMinutes << "m "
-        << uptimeSeconds << "s\n";
+    b.color(cyrex::text::format::Color::YELLOW)
+        .text("Uptime: ")
+        .color(cyrex::text::format::Color::WHITE)
+        .text(std::to_string(uptimeHours))
+        .text("h ")
+        .text(std::to_string(uptimeMinutes))
+        .text("m ")
+        .text(std::to_string(uptimeSeconds))
+        .text("s\n");
 
-    out << bedrock(Color::YELLOW) << "CPU Threads: " << bedrock(Color::WHITE) << std::thread::hardware_concurrency()
-        << "\n";
+    b.color(cyrex::text::format::Color::YELLOW)
+        .text("CPU Threads: ")
+        .color(cyrex::text::format::Color::WHITE)
+        .text(std::to_string(std::thread::hardware_concurrency()))
+        .text("\n");
 
-    out << bedrock(Color::YELLOW) << "Clock: " << bedrock(Color::GRAY) << "steady_clock\n";
+    b.color(cyrex::text::format::Color::YELLOW)
+        .text("Clock: ")
+        .color(cyrex::text::format::Color::GRAY)
+        .text("steady_clock\n");
 
-    out << bedrock(Color::DARK_GRAY) << "==========================" << bedrock(Style::RESET);
+    b.color(cyrex::text::format::Color::DARK_GRAY).text("==========================").reset();
 
-    return out.str();
-    return out.str();
+    return b.build();
 }
 } // namespace cyrex::util

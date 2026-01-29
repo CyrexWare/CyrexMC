@@ -1,9 +1,12 @@
 #pragma once
 
+#include "log/console_logger.hpp"
+#include "log/message_type.hpp"
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_direction.hpp"
 #include "network/session/network_session.hpp"
-#include "util/textformat.hpp"
+#include "text/format/builder.hpp"
+#include "text/format/color.hpp"
 
 #include <iostream>
 
@@ -35,12 +38,11 @@ protected:
     void decodePayload(cyrex::network::io::BinaryReader& in) override
     {
         protocol = in.readU32BE();
-        std::cout << (cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::GREEN) + "[MCBE] ", true) +
-                      cyrex::util::renderConsole(cyrex::util::bedrock(cyrex::util::Color::EMERALD) + "Received "
-                                                                                                     "Protocol Version "
-                                                                                                     "(LoginPacket): ",
-                                                 false))
-                  << protocol << std::endl;
+        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
+                                       cyrex::text::format::Builder()
+                                           .color(text::format::Color::DARK_GRAY)
+                                           .text("[MCBE] Received Protocol Version (LoginPacket): " + protocol)
+                                           .build());
         const std::string connectionRequest = in.readString();
         tryDecodeRequestForConnection(connectionRequest);
     }

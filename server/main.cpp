@@ -1,7 +1,10 @@
+#include "log/console_logger.hpp"
+#include "log/message_type.hpp"
 #include "network/mcbe/packet_pool.hpp"
 #include "server.hpp"
+#include "text/format/builder.hpp"
+#include "text/format/color.hpp"
 #include "util/server_properties.hpp"
-#include "util/textformat.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -37,7 +40,7 @@ bool isProcessAlive(uint64_t pid)
     if (!h)
         return false;
     DWORD code = 0;
-    bool const alive = GetExitCodeProcess(h, &code) && code == STILL_ACTIVE;
+    const bool alive = GetExitCodeProcess(h, &code) && code == STILL_ACTIVE;
     CloseHandle(h);
     return alive;
 #else
@@ -75,11 +78,18 @@ int main()
 
         if (pid != 0 && isProcessAlive(pid))
         {
-            std::string msg;
-            msg += bedrock(Color::RED) + "Another instance of the server is already running.\n";
-            msg += bedrock(Color::GRAY) + "Press ENTER to safely close this instance.";
+            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::E_RROR,
+                                           cyrex::text::format::Builder()
+                                               .color(cyrex::text::format::Color::RED)
+                                               .text("Another instance of the server is already running.\n")
+                                               .build());
 
-            std::cout << renderConsole(msg, true) << std::endl;
+            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::E_RROR,
+                                           cyrex::text::format::Builder()
+                                               .color(cyrex::text::format::Color::RED)
+                                               .text("Press ENTER to safely close this instance.")
+                                               .build());
+
             std::cin.get();
             return 1;
         }

@@ -1,11 +1,14 @@
 #include "raknet_handler.hpp"
 
+#include "log/console_logger.hpp"
+#include "log/message_type.hpp"
 #include "mcbe_packet_router.hpp"
 #include "network/session/network_session.hpp"
 #include "raknet_motd.hpp"
 #include "raknet_transport.hpp"
 #include "server.hpp"
-#include "util/textformat.hpp"
+#include "text/format/builder.hpp"
+#include "text/format/color.hpp"
 
 #include <RakNet/MessageIdentifiers.h>
 #include <iostream>
@@ -29,9 +32,11 @@ cyrex::network::raknet::RaknetHandler::RaknetHandler(cyrex::Server& server) : m_
     rakPeer->SetOfflinePingResponse(response.c_str(), response.size());
 
     m_transportImpl = std::make_unique<RaknetTransport>(rakPeer);
-
-    std::cout << renderConsole(bedrock(Color::RED) + "[RAKNET] ", true)
-              << renderConsole(bedrock(Color::DARK_GRAY) + "listening on ", false) << m_server.getPort() << std::endl;
+    cyrex::log::sendConsoleMessage(cyrex::log::MessageType::RAKNET_LOG,
+                                   cyrex::text::format::Builder()
+                                       .color(text::format::Color::DARK_GRAY)
+                                       .text("listening on " + m_server.getPort())
+                                       .build());
 }
 
 cyrex::network::raknet::RaknetHandler::~RaknetHandler() = default;
@@ -50,6 +55,7 @@ void cyrex::network::raknet::RaknetHandler::poll()
         handlePacket(p);
     }
 
+    m_connections.tick();
     m_connections.cleanup();
 }
 

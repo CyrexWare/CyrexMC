@@ -23,6 +23,8 @@ public:
     void onDisconnect(const RakNet::RakNetGUID& guid);
     void cleanup();
 
+    void tick();
+
     cyrex::network::session::NetworkSession* get(const RakNet::RakNetGUID& guid);
 
 private:

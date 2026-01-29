@@ -1,20 +1,20 @@
 #include "network_session.hpp"
 
+#include "log/console_logger.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/handler/session_begin_handler.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "util/textformat.hpp"
+#include "text/format/builder.hpp"
 
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <vector>
-using namespace cyrex::util;
-using namespace cyrex::network::io;
 
+using namespace cyrex::network::io;
 
 namespace
 {
@@ -34,9 +34,14 @@ std::string hexDump(const uint8_t* data, size_t len)
 }
 } // namespace
 
-
 namespace cyrex::network::session
 {
+
+// eh, we could just call flush directly, but we might expand this function
+void NetworkSession::tick()
+{
+    flush();
+}
 
 void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data, size_t len)
 {
@@ -45,18 +50,27 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
     const uint32_t packetLength = in.readVarUInt();
     const uint32_t packetId = in.readVarUInt();
 
-    std::cout << renderConsole(bedrock(Color::GREEN) + "[MCBE][DEBUG]", true)
-              << renderConsole(bedrock(Color::DARK_GRAY) + " packet length = ", false) << packetLength << std::endl;
+    log::sendConsoleMessage(log::MessageType::MCBE_DEBUG,
+                            text::format::Builder()
+                                .color(text::format::Color::DARK_GRAY)
+                                .text("packet length = ")
+                                .color(text::format::Color::GOLD)
+                                .text(std::to_string(packetLength))
+                                .build());
 
-    std::cout << renderConsole(bedrock(Color::GREEN) + "[MCBE][DEBUG]", true)
-              << renderConsole(bedrock(Color::DARK_GRAY) + " packet id = 0x", false) << std::hex << packetId << std::dec
-              << std::endl;
+    log::sendConsoleMessage(log::MessageType::MCBE_DEBUG,
+                            text::format::Builder()
+                                .color(text::format::Color::DARK_GRAY)
+                                .text("packet id = 0x")
+                                .color(text::format::Color::GOLD)
+                                .text(std::to_string(packetId))
+                                .build());
 
     auto mcbePacket = cyrex::network::mcbe::PacketPool::instance().create(packetId);
     if (!mcbePacket)
     {
-        std::cout << renderConsole(bedrock(Color::RED) + "[MCBE][ERROR]", true)
-                  << renderConsole(bedrock(Color::DARK_GRAY) + " unknown packet id", false) << std::endl;
+        log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
+                                text::format::Builder().color(text::format::Color::DARK_GRAY).text("unknown packet id").build());
         return;
     }
 
@@ -64,18 +78,39 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
     mcbePacket->handle(*this);
 }
 
-// TODO: give better name
 bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVersion)
 {
     cyrex::network::mcbe::protocol::PlayStatusPacket packet{};
     packet.status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
                         ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
                         : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
+
     send(packet);
     return true;
 }
 
-void NetworkSession::send(cyrex::network::mcbe::PacketBase& packet)
+void NetworkSession::send(cyrex::network::mcbe::PacketBase& packet, bool immediately)
+{
+    if (immediately)
+    {
+        sendInternal(packet);
+        return;
+    }
+
+    m_sendQueue.emplace([this, &packet]() { sendInternal(packet); });
+}
+
+void NetworkSession::flush()
+{
+    while (!m_sendQueue.empty())
+    {
+        auto& fn = m_sendQueue.front();
+        fn();
+        m_sendQueue.pop();
+    }
+}
+
+void NetworkSession::sendInternal(cyrex::network::mcbe::PacketBase& packet)
 {
     if (cyrex::network::mcbe::PacketPool::instance().direction(packet.networkId()) ==
         cyrex::network::mcbe::PacketDirection::Serverbound)
@@ -102,8 +137,11 @@ void NetworkSession::send(cyrex::network::mcbe::PacketBase& packet)
 
             if (!compressor().compress(payload.data(), payload.length(), compressed))
             {
-                std::cout << renderConsole(bedrock(Color::RED) + "[Cyrex][ERROR]", true)
-                          << renderConsole(bedrock(Color::DARK_GRAY) + " compression failed", false) << std::endl;
+                log::sendConsoleMessage(log::MessageType::E_RROR,
+                                        text::format::Builder()
+                                            .color(text::format::Color::DARK_GRAY)
+                                            .text("compression failed")
+                                            .build());
                 return;
             }
 
@@ -117,16 +155,23 @@ void NetworkSession::send(cyrex::network::mcbe::PacketBase& packet)
         }
     }
 
-    const std::string msg = bedrock(Color::BLUE) + "[Cyrex] " + bedrock(Color::DARK_GRAY) +
-                            "send packet id=" + bedrock(Color::GOLD) + std::to_string(packet.networkId());
-
-    std::cout << renderConsole(msg, true) << std::endl;
+    log::sendConsoleMessage(log::MessageType::DEBUG,
+                            text::format::Builder()
+                                .color(text::format::Color::DARK_GRAY)
+                                .text("send packet id=")
+                                .color(text::format::Color::GOLD)
+                                .text(std::to_string(packet.networkId()))
+                                .build());
 
     const std::string dump = hexDump(out.data(), out.size());
 
-    std::cout << renderConsole(bedrock(Color::BLUE) + "[Cyrex]", true)
-              << renderConsole(bedrock(Color::DARK_GRAY) + " send payload: " + bedrock(Color::GRAY) + dump, false)
-              << std::endl;
+    log::sendConsoleMessage(log::MessageType::DEBUG,
+                            text::format::Builder()
+                                .color(text::format::Color::DARK_GRAY)
+                                .text("send payload: ")
+                                .color(text::format::Color::GRAY)
+                                .text(dump)
+                                .build());
 
     m_transport->send(m_guid, out.data(), out.size());
 }
@@ -142,4 +187,5 @@ bool NetworkSession::handleRequestNetworkSettings(cyrex::network::mcbe::PacketBa
     handler.handle(*this, packet);
     return true;
 }
+
 } // namespace cyrex::network::session

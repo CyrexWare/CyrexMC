@@ -39,7 +39,7 @@ public:
         pak.clientThrottleThreshold = 0;
         pak.clientThrottleScalar = 0.0f;
         pak.trailingZero = 0;
-        session.send(pak);
+        session.send(pak, true);
         // mark compression as ready to go lol!
         session.compressionEnabled = true;
     }
