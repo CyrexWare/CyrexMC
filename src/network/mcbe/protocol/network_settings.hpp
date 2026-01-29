@@ -16,6 +16,8 @@ namespace cyrex::network::mcbe::protocol
 class NetworkSettingsPacket final : public cyrex::network::mcbe::Packet
 {
 public:
+    using Packet::Packet;
+
     static constexpr uint16_t compressNothing = 0;
     static constexpr uint16_t compressEverything = 1;
 
@@ -30,28 +32,14 @@ public:
 
     int8_t trailingZero = 0;
 
-    [[nodiscard]] uint32_t networkId() const override
-    {
-        return ProtocolInfo::networkSettingsPacket;
-    }
-
-    [[nodiscard]] cyrex::network::mcbe::PacketDirection direction() const override
-    {
-        return cyrex::network::mcbe::PacketDirection::Clientbound;
-    }
-
-    [[nodiscard]] bool allowBeforeLogin() const override
-    {
-        return true;
-    }
-
 protected:
-    void decodePayload(cyrex::network::io::BinaryReader&) override
+    bool decodePayload(cyrex::network::io::BinaryReader&) override
     {
         // NOOP
+        return false;
     }
 
-    void encodePayload(cyrex::network::io::BinaryWriter& out) const override
+    bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
     {
         out.writeI8(compressionThreshold);
         out.writeI8(compressionAlgorithm);
@@ -60,12 +48,22 @@ protected:
         out.writeI8(clientThrottleThreshold);
         out.writeFloatLE(clientThrottleScalar);
         out.writeI8(trailingZero);
+        return true;
     }
 
 public:
     bool handle(cyrex::network::session::NetworkSession&) override
     {
         return true;
+    }
+};
+
+class NetworkSettingsPacketDef final : public cyrex::network::mcbe::PacketDefImpl<NetworkSettingsPacket>
+{
+public:
+    NetworkSettingsPacketDef() :
+        PacketDefImpl{ProtocolInfo::networkSettingsPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true}
+    {
     }
 };
 } // namespace cyrex::network::mcbe::protocol

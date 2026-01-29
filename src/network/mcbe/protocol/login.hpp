@@ -14,46 +14,29 @@ namespace cyrex::network::mcbe::protocol
 {
 class LoginPacket final : public cyrex::network::mcbe::Packet
 {
+    friend class LoginPacketDef;
+
 public:
+    using Packet::Packet;
+
     uint32_t protocol = 0;
     std::string authInfoJson;
     std::string clientDataJwt;
 
-    [[nodiscard]] uint32_t networkId() const override
-    {
-        return ProtocolInfo::loginPacket;
-    }
-
-    [[nodiscard]] cyrex::network::mcbe::PacketDirection direction() const override
-    {
-        return cyrex::network::mcbe::PacketDirection::Serverbound;
-    }
-
-    [[nodiscard]] bool allowBeforeLogin() const override
-    {
-        return false;
-    }
-
-protected:
-    void decodePayload(cyrex::network::io::BinaryReader& in) override
-    {
-        protocol = in.readU32BE();
-        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
-                                       cyrex::text::format::Builder()
-                                           .color(text::format::Color::DARK_GRAY)
-                                           .text("[MCBE] Received Protocol Version (LoginPacket): " + protocol)
-                                           .build());
-        const std::string connectionRequest = in.readString();
-        tryDecodeRequestForConnection(connectionRequest);
-    }
-
-    void encodePayload(cyrex::network::io::BinaryWriter& out) const override
+    bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
     {
         out.writeU32BE(protocol);
         out.writeString(tryEncodeRequestForConnection());
+        return true;
     }
 
-public:
+    bool decodePayload(cyrex::network::io::BinaryReader& in) override
+    {
+        //out.writeU32BE(protocol);
+        //out.writeString(tryEncodeRequestForConnection());
+        return true;
+    }
+
     bool handle(cyrex::network::session::NetworkSession& /*session*/) override
     {
         return false;
@@ -82,6 +65,14 @@ private:
         cr.writeBuffer(reinterpret_cast<const uint8_t*>(clientDataJwt.data()), clientDataJwt.size());
 
         return {reinterpret_cast<const char*>(cr.data()), cr.length()};
+    }
+};
+
+class LoginPacketDef final : public cyrex::network::mcbe::PacketDefImpl<LoginPacket>
+{
+public:
+    LoginPacketDef() : PacketDefImpl{ProtocolInfo::loginPacket, cyrex::network::mcbe::PacketDirection::Serverbound, false}
+    {
     }
 };
 } // namespace cyrex::network::mcbe::protocol

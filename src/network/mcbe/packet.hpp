@@ -3,36 +3,43 @@
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "packetbase.hpp"
+
+namespace cyrex::network::session
+{
+    class NetworkSession;
+}
 
 namespace cyrex::network::mcbe
 {
 
-class Packet : public PacketBase
+class PacketDef;
+
+class Packet
 {
 public:
-    void decode(cyrex::network::io::BinaryReader& in) final
+    Packet(const PacketDef& def) : def{def}
     {
-        decodePayload(in);
+
     }
 
-    void encode(cyrex::network::io::BinaryWriter& out) const final
+    const PacketDef& getDef() const
     {
-        out.buffer.clear();
-
-        cyrex::network::io::BinaryWriter payload;
-        encodePayload(payload);
-
-        out.writeI8(0xFE);                     //ency - still wrong but yeah this is fine for testing
-        out.writeVarInt(payload.length() + 1); // + packetId
-        out.writeVarInt(networkId());
-
-        out.writeBuffer(payload.data(), payload.length());
+        return def;
     }
 
+    bool decode(cyrex::network::io::BinaryReader& in)
+    {
+        return decodePayload(in);
+    }
 
-protected:
-    virtual void decodePayload(cyrex::network::io::BinaryReader& in) = 0;
-    virtual void encodePayload(cyrex::network::io::BinaryWriter& out) const = 0;
+    bool encode(cyrex::network::io::BinaryWriter& out) const;
+
+    virtual bool decodePayload(cyrex::network::io::BinaryReader& in) = 0;
+    virtual bool encodePayload(cyrex::network::io::BinaryWriter& out) const = 0;
+
+    virtual bool handle(cyrex::network::session::NetworkSession& session) = 0;
+
+private:
+    const PacketDef& def;
 };
 } // namespace cyrex::network::mcbe

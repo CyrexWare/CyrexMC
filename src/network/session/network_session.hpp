@@ -6,8 +6,8 @@
 #include "network/mcbe/compression/noop_compressor.hpp"
 #include "network/mcbe/compression/zlib_compressor.hpp"
 #include "network/mcbe/packet.hpp"
-#include "network/mcbe/packet_pool.hpp"
-#include "network/mcbe/packetbase.hpp"
+#include "network/mcbe/packet_factory.hpp"
+#include "network/mcbe/packet_def.hpp"
 #include "network/mcbe/transport.hpp"
 
 #include <RakNet/RakNetTypes.h>
@@ -36,6 +36,7 @@ public:
 
         m_compressor(std::make_unique<cyrex::network::mcbe::compression::NoopCompressor>())
     {
+        packetFactory.registerAll();
     }
 
     bool compressionEnabled = false;
@@ -43,10 +44,10 @@ public:
     bool markedForDisconnect = false;
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
-    void send(cyrex::network::mcbe::PacketBase& packet, bool immediately = false);
+    void send(cyrex::network::mcbe::Packet& packet, bool immediately = false);
     void flush();
     bool disconnectUserForIncompatiableProtocol(uint32_t);
-    bool handleRequestNetworkSettings(cyrex::network::mcbe::PacketBase& packet);
+    bool handleRequestNetworkSettings(uint32_t version);
     void tick();
 
     void setCompressor(std::unique_ptr<cyrex::network::mcbe::compression::Compressor> compressor);
@@ -77,7 +78,7 @@ public:
     }
 
 private:
-    void sendInternal(cyrex::network::mcbe::PacketBase& packet);
+    void sendInternal(cyrex::network::mcbe::Packet& packet);
     std::queue<std::function<void()>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
@@ -86,5 +87,7 @@ private:
 
     std::uint32_t m_protocolId{0};
     std::unique_ptr<cyrex::network::mcbe::compression::Compressor> m_compressor;
+
+    cyrex::network::mcbe::PacketFactory packetFactory;
 };
 } // namespace cyrex::network::session
