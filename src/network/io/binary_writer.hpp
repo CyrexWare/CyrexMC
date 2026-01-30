@@ -3,6 +3,7 @@
 #include "math/vector2.hpp"
 #include "math/vector3.hpp"
 
+#include <bit>
 #include <string>
 #include <vector>
 
@@ -133,7 +134,8 @@ public:
     static size_t getVarUIntSize(uint32_t v)
     {
         size_t len = 0;
-        do {
+        do
+        {
             len++;
             v >>= 7;
         } while (v != 0);
@@ -169,7 +171,8 @@ public:
     static size_t getVarULongSize(uint64_t v)
     {
         size_t len = 0;
-        do {
+        do
+        {
             len++;
             v >>= 7;
         } while (v != 0);

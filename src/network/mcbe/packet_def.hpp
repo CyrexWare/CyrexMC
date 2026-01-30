@@ -43,7 +43,7 @@ public:
             return {};
         }
 
-        if(!packet->decode(in))
+        if (!packet->decode(in))
         {
             return {};
         }
@@ -56,7 +56,6 @@ template <typename T>
 class PacketDefImpl : public PacketDef
 {
 public:
-    
     using PacketType = T;
 
     using PacketDef::PacketDef;

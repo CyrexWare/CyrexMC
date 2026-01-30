@@ -62,7 +62,7 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
                                 .color(text::format::Color::DARK_GRAY)
                                 .text("packet id = 0x")
                                 .color(text::format::Color::GOLD)
-                                .text(std::to_string(packetId))
+                                .text(std::format("{:02X}", static_cast<uint32_t>(packetId)))
                                 .build());
 
     const auto* packetDef = packetFactory.find(packetId);
@@ -77,14 +77,20 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
     if (!packet)
     {
         log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
-                                text::format::Builder().color(text::format::Color::DARK_GRAY).text("error decoding").build());
+                                text::format::Builder()
+                                    .color(text::format::Color::DARK_GRAY)
+                                    .text("error decoding packet")
+                                    .build());
         return;
     }
 
     if (!packet->handle(*this))
     {
         log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
-                                text::format::Builder().color(text::format::Color::DARK_GRAY).text("error handling").build());
+                                text::format::Builder()
+                                    .color(text::format::Color::DARK_GRAY)
+                                    .text("error handling packet")
+                                    .build());
         return;
     }
 }
@@ -93,8 +99,8 @@ bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVer
 {
     auto packet = packetFactory.create<cyrex::network::mcbe::protocol::PlayStatusPacketDef>();
     packet->status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
-                        ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
-                        : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
+                         ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
+                         : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
 
     send(*packet);
     return true;
@@ -168,17 +174,18 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
     log::sendConsoleMessage(log::MessageType::DEBUG,
                             text::format::Builder()
                                 .color(text::format::Color::DARK_GRAY)
-                                .text("send packet id=")
+                                .text("send packet id = 0x")
                                 .color(text::format::Color::GOLD)
-                                .text(std::to_string(packet.getDef().networkId))
+                                .text(std::format("{:02X}", static_cast<uint32_t>(packet.getDef().networkId)))
                                 .build());
+
 
     const std::string dump = hexDump(out.data(), out.size());
 
     log::sendConsoleMessage(log::MessageType::DEBUG,
                             text::format::Builder()
                                 .color(text::format::Color::DARK_GRAY)
-                                .text("send payload: ")
+                                .text("send payload = ")
                                 .color(text::format::Color::GRAY)
                                 .text(dump)
                                 .build());
@@ -197,7 +204,7 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
     // we mabye will support multiple versions or make it easy for plugins to.
     if (!cyrex::network::mcbe::protocol::isProtocolMabyeAccepted(version))
     {
-        disconnectUserForIncompatiableProtocol(version);
+        //disconnectUserForIncompatiableProtocol(version);
         return false;
     }
 

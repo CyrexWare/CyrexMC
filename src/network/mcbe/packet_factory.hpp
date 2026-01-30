@@ -66,13 +66,13 @@ public:
         return def->create();
     }
 
-    template<typename T>
+    template <typename T>
     auto create() const
     {
         T t;
         return dynamic_pointer_cast_unique<typename T::PacketType>(get(t.networkId).create());
     }
-    
+
 
     void registerAll();
 

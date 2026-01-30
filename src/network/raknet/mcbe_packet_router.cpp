@@ -81,7 +81,7 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
             cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
                                            cyrex::text::format::Builder()
                                                .color(text::format::Color::DARK_GRAY)
-                                               .text("decompressed size = " + payload.size())
+                                               .text("decompressed size = " + std::to_string(payload.size()))
                                                .build());
         }
         else

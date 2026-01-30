@@ -39,7 +39,7 @@ public:
 
     bool handle(cyrex::network::session::NetworkSession& /*session*/) override
     {
-        return false;
+        return true;
     }
 
 private:
@@ -71,7 +71,8 @@ private:
 class LoginPacketDef final : public cyrex::network::mcbe::PacketDefImpl<LoginPacket>
 {
 public:
-    LoginPacketDef() : PacketDefImpl{ProtocolInfo::loginPacket, cyrex::network::mcbe::PacketDirection::Serverbound, false}
+    LoginPacketDef() :
+        PacketDefImpl{ProtocolInfo::loginPacket, cyrex::network::mcbe::PacketDirection::Serverbound, false}
     {
     }
 };

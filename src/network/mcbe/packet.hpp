@@ -6,7 +6,7 @@
 
 namespace cyrex::network::session
 {
-    class NetworkSession;
+class NetworkSession;
 }
 
 namespace cyrex::network::mcbe
@@ -19,7 +19,6 @@ class Packet
 public:
     Packet(const PacketDef& def) : def{def}
     {
-
     }
 
     const PacketDef& getDef() const

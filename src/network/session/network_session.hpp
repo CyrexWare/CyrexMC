@@ -6,8 +6,8 @@
 #include "network/mcbe/compression/noop_compressor.hpp"
 #include "network/mcbe/compression/zlib_compressor.hpp"
 #include "network/mcbe/packet.hpp"
-#include "network/mcbe/packet_factory.hpp"
 #include "network/mcbe/packet_def.hpp"
+#include "network/mcbe/packet_factory.hpp"
 #include "network/mcbe/transport.hpp"
 
 #include <RakNet/RakNetTypes.h>

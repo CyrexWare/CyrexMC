@@ -35,8 +35,8 @@ protected:
         cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
                                        cyrex::text::format::Builder()
                                            .color(text::format::Color::DARK_GRAY)
-                                           .text("[MCBE] Received Protocol Version (RequestNetworkSettingsPacket): " +
-                                                 protocolVersion)
+                                           .text("Received Protocol Version (RequestNetworkSettingsPacket): " +
+                                                 std::to_string(protocolVersion))
                                            .build());
         return true;
     }
