@@ -9,8 +9,10 @@
 #include <unordered_map>
 
 template <typename Derived, typename Base>
-    requires std::is_convertible_v<Derived*, Base*> && std::is_polymorphic_v<Base>
-std::unique_ptr<Derived> dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr)
+    requires std::is_convertible_v<Derived*, Base*> && 
+             std::is_polymorphic_v<Base>
+std::unique_ptr<Derived> 
+dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr)
 {
     auto* derivedPtr = dynamic_cast<Derived*>(ptr.get());
 
@@ -67,16 +69,17 @@ public:
     }
 
     template <typename T>
-    [[nodiscard]] [[nodiscard]] auto create() const
+    [[nodiscard]]
+    auto create() const
     {
         T t;
         return dynamicPointerCastUnique<typename T::PacketType>(get(t.networkId).create());
     }
-
 
     void registerAll();
 
 private:
     std::unordered_map<uint32_t, std::unique_ptr<PacketDef>> m_entries;
 };
+
 } // namespace cyrex::network::mcbe
