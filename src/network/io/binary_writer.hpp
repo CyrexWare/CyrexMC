@@ -88,16 +88,12 @@ public:
 
     void writeFloatLE(float v)
     {
-        uint32_t bits = 0;
-        std::memcpy(&bits, &v, sizeof(bits));
-        writeU32LE(bits);
+        writeU32LE(std::bit_cast<uint32_t>(v));
     }
 
     void writeDoubleLE(double v)
     {
-        uint64_t bits = 0;
-        std::memcpy(&bits, &v, sizeof(bits));
-        writeU64LE(bits);
+        writeU64LE(std::bit_cast<uint64_t>(v));
     }
 
     void writeVector2(const cyrex::math::Vector2& v)
@@ -134,9 +130,24 @@ public:
         }
     }
 
-    void writeVarInt(int32_t v)
+    static size_t getVarUIntSize(uint32_t v)
     {
-        writeVarUInt(static_cast<uint32_t>(v));
+        size_t len = 0;
+        do {
+            len++;
+            v >>= 7;
+        } while (v != 0);
+        return len;
+    }
+
+    void writeVarInt(const int32_t v)
+    {
+        writeVarUInt(static_cast<uint32_t>(v << 1 ^ (v < 0 ? ~0 : 0)));
+    }
+
+    static size_t getVarIntSize(int32_t v)
+    {
+        return getVarUIntSize(static_cast<uint32_t>(v << 1 ^ (v < 0 ? ~0 : 0)));
     }
 
     void writeVarULong(uint64_t v)
@@ -155,9 +166,24 @@ public:
         }
     }
 
-    void writeVarLong(int64_t v)
+    static size_t getVarULongSize(uint64_t v)
     {
-        writeVarULong(static_cast<uint64_t>(v));
+        size_t len = 0;
+        do {
+            len++;
+            v >>= 7;
+        } while (v != 0);
+        return len;
+    }
+
+    void writeVarLong(const int64_t v)
+    {
+        writeVarULong(static_cast<uint64_t>(v << 1 ^ (v < 0 ? ~0 : 0)));
+    }
+
+    static size_t getVarLongSize(int64_t v)
+    {
+        return getVarULongSize(static_cast<uint64_t>(v << 1 ^ (v < 0 ? ~0 : 0)));
     }
 
     void writeString(const std::string& s)
