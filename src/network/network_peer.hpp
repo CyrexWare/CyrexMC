@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace cyrex
+namespace cyrex::network
 {
 
 using RakNet::Packet;
@@ -61,4 +61,4 @@ public:
     virtual ~INetworkPeer() = default;
 };
 
-} // namespace cyrex
+} // namespace cyrex::network

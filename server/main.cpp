@@ -1,79 +1,119 @@
-// STD
-#include <iostream>
-// RakNet
-#include <RakNet/MessageIdentifiers.h>
-#include <RakNet/RakPeerInterface.h>
-#include <RakNet/RakSleep.h>
-// Cyrex
-#include "raknet_peer.hpp"
+#include "log/console_logger.hpp"
+#include "log/message_type.hpp"
+#include "network/mcbe/packet_factory.hpp"
 #include "server.hpp"
+#include "text/format/builder.hpp"
+#include "text/format/color.hpp"
+#include "util/server_properties.hpp"
+
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+
+#include <csignal>
+
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <signal.h>
+#include <unistd.h>
+#endif
 
 namespace
 {
-void debugClient()
+
+std::filesystem::path lockFile = "server.lock";
+
+uint64_t getPid()
 {
-    RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
-
-    if (peer == nullptr)
-    {
-        return;
-    }
-
-    bool active = true;
-    RakNet::SocketDescriptor socketDescriptor;
-    peer->Startup(1, &socketDescriptor, 1);
-    peer->Connect("127.0.0.1", 19132, nullptr, 0);
-
-    while (active)
-    {
-        for (RakNet::Packet* packet{}; (packet = peer->Receive()) != nullptr; peer->DeallocatePacket(packet))
-        {
-            switch (packet->data[0])
-            {
-                case ID_CONNECTION_REQUEST_ACCEPTED:
-                    std::cerr << "client connected to server\n";
-                    break;
-                case ID_CONNECTION_ATTEMPT_FAILED:
-                    std::cerr << "failed to connect to the server\n";
-                    active = false;
-                    break;
-            }
-            if (!active)
-                break;
-        }
-        RakSleep(10);
-    }
-
-    peer->Shutdown(50);
+#if defined(_WIN32)
+    return static_cast<uint64_t>(GetCurrentProcessId());
+#else
+    return static_cast<uint64_t>(getpid());
+#endif
 }
 
-
-void server()
+bool isProcessAlive(uint64_t pid)
 {
-    try
-    {
-        cyrex::RakNetPeer rakPeer(RakNet::RakPeerInterface::GetInstance());
-        cyrex::Server server(&rakPeer, cyrex::Server::Config::makeDefault());
-        server.run();
-    } catch (const cyrex::Server::InitFailedError& initFailedError)
-    {
-        std::cerr << "Server Initialization Failed: " << initFailedError.what() << '\n';
-    }
+#if defined(_WIN32)
+    HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, static_cast<DWORD>(pid));
+    if (!h)
+        return false;
+    DWORD code = 0;
+    const bool alive = GetExitCodeProcess(h, &code) && code == STILL_ACTIVE;
+    CloseHandle(h);
+    return alive;
+#else
+    return kill(static_cast<pid_t>(pid), 0) == 0;
+#endif
+}
+
+void removeLock()
+{
+    std::error_code ec;
+    std::filesystem::remove(lockFile, ec);
+}
+
+void onExit()
+{
+    removeLock();
+}
+
+void onSignal(int)
+{
+    removeLock();
+    std::_Exit(0);
 }
 } // namespace
 
 int main()
 {
-    puts("[c]lient / [s]erver");
-    const std::int32_t ch = getchar();
-    if (ch == 'c')
+    using namespace cyrex::util;
+
+    if (std::filesystem::exists(lockFile))
     {
-        debugClient();
-    }
-    else if (ch == 's')
-    {
-        server();
+        uint64_t pid = 0;
+        std::ifstream in(lockFile);
+        in >> pid;
+
+        if (pid != 0 && isProcessAlive(pid))
+        {
+            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::E_RROR,
+                                           cyrex::text::format::Builder()
+                                               .color(cyrex::text::format::Color::RED)
+                                               .text("Another instance of the server is already running.\n")
+                                               .build());
+
+            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::E_RROR,
+                                           cyrex::text::format::Builder()
+                                               .color(cyrex::text::format::Color::RED)
+                                               .text("Press ENTER to safely close this instance.")
+                                               .build());
+
+            std::cin.get();
+            return 1;
+        }
+
+        removeLock();
     }
 
+    {
+        std::ofstream out(lockFile, std::ios::trunc);
+        out << getPid();
+    }
+
+    std::atexit(onExit);
+    std::signal(SIGINT, onSignal);
+    std::signal(SIGTERM, onSignal);
+
+#if !defined(_WIN32)
+    std::signal(SIGHUP, onSignal);
+#endif
+
+    auto props = cyrex::util::ServerProperties::load("server.properties");
+    cyrex::Server server(cyrex::Server::Config::fromProperties(props));
+    server.run();
+
+    removeLock();
     return 0;
 }

@@ -9,9 +9,14 @@ if(NOT EXISTS ${CLANG_TIDY_EXECUTABLE})
     endif()
 endif()
 
+
 # Check executable version
-execute_process(COMMAND ${CLANG_TIDY_EXECUTABLE} --version OUTPUT_VARIABLE CLANG_TIDY_VERSION)
-string(REGEX MATCH "version ([0-9]+)" CLANG_TIDY_VERSION ${CLANG_TIDY_VERSION})
+execute_process(
+    COMMAND ${CLANG_TIDY_EXECUTABLE} --version
+    OUTPUT_VARIABLE CLANG_TIDY_VERSION_OUTPUT
+    ERROR_VARIABLE CLANG_TIDY_VERSION_OUTPUT
+)
+string(REGEX MATCH "version ([0-9]+)" _ "${CLANG_TIDY_VERSION_OUTPUT}")
 unset(CLANG_TIDY_VERSION)
 if(CMAKE_MATCH_1 GREATER_EQUAL 14)
     message(STATUS "Using clang-tidy version ${CMAKE_MATCH_1}")
@@ -30,3 +35,5 @@ execute_process(COMMAND ${Python_EXECUTABLE} ${RUN_CLANG_TIDY} -clang-tidy-binar
 if(NOT EXIT_CODE STREQUAL 0)
     message(FATAL_ERROR "Analysis failed")
 endif()
+
+
