@@ -10,7 +10,7 @@ bool cyrex::network::mcbe::Packet::encode(cyrex::network::io::BinaryWriter& out)
     }
 
     out.writeU8(0xFE);
-    out.writeVarUInt(payload.length() + 1);
+    out.writeVarUInt(payload.length() + io::BinaryWriter::getVarUIntSize(def.networkId));
     out.writeVarUInt(def.networkId);
     out.writeBuffer(payload.data(), payload.length());
 
