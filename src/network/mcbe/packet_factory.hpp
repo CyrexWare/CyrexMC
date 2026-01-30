@@ -16,7 +16,7 @@ std::unique_ptr<Derived> dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr) n
 
     if (auto derived = dynamic_cast<Derived*>(ptr.get()))
     {
-        ptr.reset();
+        ptr.release();
         return std::unique_ptr<Derived>(derived);
     }
 
