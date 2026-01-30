@@ -65,7 +65,7 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
                                 .text(std::format("{:02X}", static_cast<uint32_t>(packetId)))
                                 .build());
 
-    const auto* packetDef = packetFactory.find(packetId);
+    const auto* packetDef = m_packetFactory.find(packetId);
     if (!packetDef)
     {
         log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
@@ -97,7 +97,7 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
 
 bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVersion)
 {
-    auto packet = packetFactory.create<cyrex::network::mcbe::protocol::PlayStatusPacketDef>();
+    auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::PlayStatusPacketDef>();
     packet->status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
                          ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
                          : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
@@ -211,7 +211,7 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
     setProtocolId(version);
 
     // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
-    auto packet = packetFactory.create<cyrex::network::mcbe::protocol::NetworkSettingsPacketDef>();
+    auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::NetworkSettingsPacketDef>();
     packet->compressionThreshold = cyrex::network::mcbe::protocol::NetworkSettingsPacket::compressEverything;
     packet->compressionAlgorithm = 1;
     packet->padding = 00;

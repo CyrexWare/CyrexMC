@@ -36,7 +36,7 @@ public:
 
         m_compressor(std::make_unique<cyrex::network::mcbe::compression::NoopCompressor>())
     {
-        packetFactory.registerAll();
+        m_packetFactory.registerAll();
     }
 
     bool compressionEnabled = false;
@@ -88,6 +88,6 @@ private:
     std::uint32_t m_protocolId{0};
     std::unique_ptr<cyrex::network::mcbe::compression::Compressor> m_compressor;
 
-    cyrex::network::mcbe::PacketFactory packetFactory;
+    cyrex::network::mcbe::PacketFactory m_packetFactory;
 };
 } // namespace cyrex::network::session

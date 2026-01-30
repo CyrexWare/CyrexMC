@@ -11,45 +11,45 @@ class Builder
 public:
     Builder& color(Color c)
     {
-        data += code(c);
+        m_data += code(c);
         return *this;
     }
 
     Builder& style(Style s)
     {
-        data += code(s);
+        m_data += code(s);
         return *this;
     }
 
     Builder& text(std::string_view t)
     {
-        data += t;
+        m_data += t;
         return *this;
     }
 
     Builder& reset()
     {
-        data += code(Style::RESET);
+        m_data += code(Style::RESET);
         return *this;
     }
 
     Builder& space()
     {
-        data += ' ';
+        m_data += ' ';
         return *this;
     }
 
-    std::string build() const
+    [[nodiscard]] std::string build() const
     {
-        return data;
+        return m_data;
     }
 
     operator std::string() const
     {
-        return data;
+        return m_data;
     }
 
 private:
-    std::string data;
+    std::string m_data;
 };
 } // namespace cyrex::text::format

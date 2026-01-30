@@ -11,11 +11,7 @@ endif()
 
 
 # Check executable version
-execute_process(
-    COMMAND ${CLANG_TIDY_EXECUTABLE} --version
-    OUTPUT_VARIABLE CLANG_TIDY_VERSION_OUTPUT
-    ERROR_VARIABLE CLANG_TIDY_VERSION_OUTPUT
-)
+execute_process(COMMAND ${Python_EXECUTABLE} ${RUN_CLANG_TIDY} -clang-tidy-binary ${CLANG_TIDY_EXECUTABLE} -fix -quiet -p ${PROJECT_BINARY_DIR} "^((?!_deps).)*$" RESULTS_VARIABLE EXIT_CODE)
 string(REGEX MATCH "version ([0-9]+)" _ "${CLANG_TIDY_VERSION_OUTPUT}")
 unset(CLANG_TIDY_VERSION)
 if(CMAKE_MATCH_1 GREATER_EQUAL 14)
@@ -31,7 +27,7 @@ set(RUN_CLANG_TIDY "${CMAKE_CURRENT_SOURCE_DIR}/run-clang-tidy")
 message(STATUS "run-clang-tidy path: ${RUN_CLANG_TIDY}")
 
 # Run
-execute_process(COMMAND ${Python_EXECUTABLE} ${RUN_CLANG_TIDY} -clang-tidy-binary ${CLANG_TIDY_EXECUTABLE} -quiet -p ${PROJECT_BINARY_DIR} "^((?!_deps).)*$" RESULTS_VARIABLE EXIT_CODE)
+execute_process(COMMAND ${Python_EXECUTABLE} ${RUN_CLANG_TIDY} -clang-tidy-binary ${CLANG_TIDY_EXECUTABLE} -fix -quiet -p ${PROJECT_BINARY_DIR} "^((?!_deps).)*$" RESULTS_VARIABLE EXIT_CODE)
 if(NOT EXIT_CODE STREQUAL 0)
     message(FATAL_ERROR "Analysis failed")
 endif()

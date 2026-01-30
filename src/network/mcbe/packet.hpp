@@ -17,13 +17,14 @@ class PacketDef;
 class Packet
 {
 public:
-    Packet(const PacketDef& def) : def{def}
+    virtual ~Packet() = default;
+    Packet(const PacketDef& def) : m_def{def}
     {
     }
 
-    const PacketDef& getDef() const
+    [[nodiscard]] [[nodiscard]] [[nodiscard]] const PacketDef& getDef() const
     {
-        return def;
+        return m_def;
     }
 
     bool decode(cyrex::network::io::BinaryReader& in)
@@ -39,6 +40,6 @@ public:
     virtual bool handle(cyrex::network::session::NetworkSession& session) = 0;
 
 private:
-    const PacketDef& def;
+    const PacketDef& m_def;
 };
 } // namespace cyrex::network::mcbe
