@@ -9,10 +9,8 @@
 #include <unordered_map>
 
 template <typename Derived, typename Base>
-    requires std::is_convertible_v<Derived*, Base*> && 
-             std::is_polymorphic_v<Base>
-std::unique_ptr<Derived> 
-dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr)
+    requires std::is_convertible_v<Derived*, Base*> && std::is_polymorphic_v<Base>
+std::unique_ptr<Derived> dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr)
 {
     auto* derivedPtr = dynamic_cast<Derived*>(ptr.get());
 
