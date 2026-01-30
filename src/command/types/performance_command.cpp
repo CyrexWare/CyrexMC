@@ -29,6 +29,6 @@ void cyrex::command::types::PerformanceCommand::execute(CommandContext&)
     cyrex::log::sendConsoleMessage(cyrex::log::MessageType::INFO,
                                    cyrex::text::format::Builder()
                                        .color(text::format::Color::AQUA)
-                                       .text(cyrex::util::getReport())
+                                       .text(cyrex::util::makeReport())
                                        .build());
 }

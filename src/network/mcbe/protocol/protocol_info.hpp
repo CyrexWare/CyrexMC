@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 
 #include <cstdint>
@@ -29,4 +30,12 @@ struct ProtocolInfo
     static constexpr std::uint8_t requestNetworkSettingsPacket = 0xc1;
 };
 
+
+// no way im planning multiprotocol??
+constexpr bool isProtocolMabyeAccepted(std::uint32_t protocol)
+{
+    return std::any_of(ProtocolInfo::acceptedProtocols.begin(),
+                       ProtocolInfo::acceptedProtocols.end(),
+                       [protocol](auto p) { return p == protocol; });
+}
 } // namespace cyrex::network::mcbe::protocol

@@ -18,19 +18,15 @@ inline std::string formatMessage(MessageType type, std::string_view message, boo
 
     if (includeTime)
     {
-        out += color(Color::DARK_GRAY, "[");
-        out += cyrex::util::currentTime();
-        out += color(Color::DARK_GRAY, "] ");
+        out += text::format::color(text::format::Color::DARK_GRAY, "[" + cyrex::util::currentTime() + "]");
     }
 
     out += color(meta.color, meta.tag);
-
     if (!message.empty())
     {
         out += " ";
         out += std::string(message);
     }
-
     return out;
 }
 } // namespace cyrex::log

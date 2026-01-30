@@ -51,14 +51,9 @@ FetchContent_Declare(libdeflate
 FetchContent_MakeAvailable(libdeflate)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
-    "${PROJECT_SOURCE_DIR}/src/*.cpp"
-    "${PROJECT_SOURCE_DIR}/src/*/*.cpp"
-    "${PROJECT_SOURCE_DIR}/src/*/*/*.cpp"
-    "${PROJECT_SOURCE_DIR}/server/*.cpp"
-    "${PROJECT_SOURCE_DIR}/server/*/*.cpp"
+    "${PROJECT_SOURCE_DIR}/src/**.cpp"
+    "${PROJECT_SOURCE_DIR}/src/**.hpp"
 )
-
-list(FILTER ENGINE_SOURCES EXCLUDE REGEX ".*/server/main\\.cpp$")
 
 add_executable(CyrexMC
     server/main.cpp

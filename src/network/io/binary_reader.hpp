@@ -3,6 +3,7 @@
 #include "math/vector2.hpp"
 #include "math/vector3.hpp"
 
+#include <bit>
 #include <math.h>
 #include <stdexcept>
 #include <string>
@@ -106,7 +107,7 @@ public:
         ensureReadable(8);
         uint64_t v = 0;
         for (int i = 0; i < 8; ++i)
-            v |= uint64_t(buffer[offset + i]) << (i * 8);
+            v |= static_cast<uint64_t>(buffer[offset + i]) << (i * 8);
         offset += 8;
         return v;
     }
@@ -128,18 +129,12 @@ public:
 
     float readFloatLE()
     {
-        uint32_t bits = readU32LE();
-        float f = NAN;
-        std::memcpy(&f, &bits, sizeof(f));
-        return f;
+        return std::bit_cast<float>(readU32LE());
     }
 
     double readDoubleLE()
     {
-        uint64_t bits = readU64LE();
-        double d = NAN;
-        std::memcpy(&d, &bits, sizeof(d));
-        return d;
+        return std::bit_cast<double>(readU64LE());
     }
 
     uint32_t readVarUInt()
@@ -150,7 +145,7 @@ public:
         for (int i = 0; i < 5; ++i)
         {
             const uint8_t b = readU8();
-            value |= uint32_t(b & 0x7F) << shift;
+            value |= static_cast<uint32_t>(b & 0x7F) << shift;
             if ((b & 0x80) == 0)
                 return value;
             shift += 7;
@@ -161,7 +156,8 @@ public:
 
     int32_t readVarInt()
     {
-        return static_cast<int32_t>(readVarUInt());
+        const uint32_t v = readVarUInt();
+        return static_cast<int32_t>(v >> 1 ^ -1 * (v & 1));
     }
 
     uint64_t readVarULong()
@@ -172,7 +168,7 @@ public:
         for (int i = 0; i < 10; ++i)
         {
             const uint8_t b = readU8();
-            value |= uint64_t(b & 0x7F) << shift;
+            value |= static_cast<uint64_t>(b & 0x7F) << shift;
             if ((b & 0x80) == 0)
                 return value;
             shift += 7;
@@ -183,7 +179,8 @@ public:
 
     int64_t readVarLong()
     {
-        return static_cast<int64_t>(readVarULong());
+        const uint64_t v = readVarULong();
+        return static_cast<int64_t>(v >> 1 ^ -1 * (v & 1));
     }
 
     std::string readString()

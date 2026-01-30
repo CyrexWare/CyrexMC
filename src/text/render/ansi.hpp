@@ -34,7 +34,7 @@ inline std::string ansi(std::string_view text)
 
     for (size_t i = 0; i < text.size(); ++i)
     {
-        if (text[i] == Code && i + 1 < text.size())
+        if (text[i] == text::format::colorcode && i + 1 < text.size())
         {
             if (auto it = map.find(text[i + 1]); it != map.end())
                 out += it->second;

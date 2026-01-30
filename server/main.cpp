@@ -1,6 +1,6 @@
 #include "log/console_logger.hpp"
 #include "log/message_type.hpp"
-#include "network/mcbe/packet_pool.hpp"
+#include "network/mcbe/packet_factory.hpp"
 #include "server.hpp"
 #include "text/format/builder.hpp"
 #include "text/format/color.hpp"
@@ -112,7 +112,6 @@ int main()
 
     auto props = cyrex::util::ServerProperties::load("server.properties");
     cyrex::Server server(cyrex::Server::Config::fromProperties(props));
-    cyrex::network::mcbe::PacketPool::instance().registerAll();
     server.run();
 
     removeLock();

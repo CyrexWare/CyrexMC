@@ -4,5 +4,5 @@
 
 namespace cyrex::util
 {
-std::string getReport();
+std::string makeReport();
 }

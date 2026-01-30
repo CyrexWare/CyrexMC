@@ -3,6 +3,7 @@
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packet.hpp"
+#include "network/mcbe/packet_def.hpp"
 #include "network/mcbe/packet_direction.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
 
@@ -13,6 +14,8 @@ namespace cyrex::network::mcbe::protocol
 class PlayStatusPacket final : public cyrex::network::mcbe::Packet
 {
 public:
+    using Packet::Packet;
+
     // Mabye make this separately?
     static constexpr uint32_t loginSuccess = 0;
     static constexpr uint32_t loginFailedClient = 1;
@@ -27,36 +30,32 @@ public:
 
     uint32_t status = 0;
 
-    [[nodiscard]] uint32_t networkId() const override
-    {
-        return ProtocolInfo::playStatusPacket;
-    }
-
-    [[nodiscard]] cyrex::network::mcbe::PacketDirection direction() const override
-    {
-        return cyrex::network::mcbe::PacketDirection::Clientbound;
-    }
-
-    [[nodiscard]] bool allowBeforeLogin() const override
-    {
-        return true;
-    }
-
 protected:
-    void decodePayload(cyrex::network::io::BinaryReader& in) override
+    bool decodePayload(cyrex::network::io::BinaryReader& in) override
     {
         status = in.readU32BE();
+        return false;
     }
 
-    void encodePayload(cyrex::network::io::BinaryWriter& out) const override
+    bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
     {
         out.writeU32BE(status);
+        return false;
     }
 
 public:
     bool handle(cyrex::network::session::NetworkSession& /*session*/) override
     {
         return true;
+    }
+};
+
+class PlayStatusPacketDef final : public cyrex::network::mcbe::PacketDefImpl<PlayStatusPacket>
+{
+public:
+    PlayStatusPacketDef() :
+        PacketDefImpl{ProtocolInfo::playStatusPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true}
+    {
     }
 };
 } // namespace cyrex::network::mcbe::protocol

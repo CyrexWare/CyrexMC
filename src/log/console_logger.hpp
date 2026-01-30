@@ -1,4 +1,5 @@
 #pragma once
+
 #include "message_format.hpp"
 #include "text/render/ansi.hpp"
 

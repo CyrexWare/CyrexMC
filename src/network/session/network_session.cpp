@@ -3,7 +3,6 @@
 #include "log/console_logger.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
-#include "network/mcbe/handler/session_begin_handler.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
@@ -63,33 +62,51 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
                                 .color(text::format::Color::DARK_GRAY)
                                 .text("packet id = 0x")
                                 .color(text::format::Color::GOLD)
-                                .text(std::to_string(packetId))
+                                .text(std::format("{:02X}", static_cast<uint32_t>(packetId)))
                                 .build());
 
-    auto mcbePacket = cyrex::network::mcbe::PacketPool::instance().create(packetId);
-    if (!mcbePacket)
+    const auto* packetDef = m_packetFactory.find(packetId);
+    if (!packetDef)
     {
         log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
                                 text::format::Builder().color(text::format::Color::DARK_GRAY).text("unknown packet id").build());
         return;
     }
 
-    mcbePacket->decode(in);
-    mcbePacket->handle(*this);
+    auto packet = packetDef->decode(in);
+    if (!packet)
+    {
+        log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
+                                text::format::Builder()
+                                    .color(text::format::Color::DARK_GRAY)
+                                    .text("error decoding packet")
+                                    .build());
+        return;
+    }
+
+    if (!packet->handle(*this))
+    {
+        log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
+                                text::format::Builder()
+                                    .color(text::format::Color::DARK_GRAY)
+                                    .text("error handling packet")
+                                    .build());
+        return;
+    }
 }
 
 bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVersion)
 {
-    cyrex::network::mcbe::protocol::PlayStatusPacket packet{};
-    packet.status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
-                        ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
-                        : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
+    auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::PlayStatusPacketDef>();
+    packet->status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
+                         ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
+                         : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
 
-    send(packet);
+    send(*packet);
     return true;
 }
 
-void NetworkSession::send(cyrex::network::mcbe::PacketBase& packet, bool immediately)
+void NetworkSession::send(cyrex::network::mcbe::Packet& packet, bool immediately)
 {
     if (immediately)
     {
@@ -110,10 +127,9 @@ void NetworkSession::flush()
     }
 }
 
-void NetworkSession::sendInternal(cyrex::network::mcbe::PacketBase& packet)
+void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
 {
-    if (cyrex::network::mcbe::PacketPool::instance().direction(packet.networkId()) ==
-        cyrex::network::mcbe::PacketDirection::Serverbound)
+    if (packet.getDef().direction == cyrex::network::mcbe::PacketDirection::Serverbound)
     {
         return;
     }
@@ -158,17 +174,18 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::PacketBase& packet)
     log::sendConsoleMessage(log::MessageType::DEBUG,
                             text::format::Builder()
                                 .color(text::format::Color::DARK_GRAY)
-                                .text("send packet id=")
+                                .text("send packet id = 0x")
                                 .color(text::format::Color::GOLD)
-                                .text(std::to_string(packet.networkId()))
+                                .text(std::format("{:02X}", static_cast<uint32_t>(packet.getDef().networkId)))
                                 .build());
+
 
     const std::string dump = hexDump(out.data(), out.size());
 
     log::sendConsoleMessage(log::MessageType::DEBUG,
                             text::format::Builder()
                                 .color(text::format::Color::DARK_GRAY)
-                                .text("send payload: ")
+                                .text("send payload = ")
                                 .color(text::format::Color::GRAY)
                                 .text(dump)
                                 .build());
@@ -181,10 +198,31 @@ void NetworkSession::setCompressor(std::unique_ptr<cyrex::network::mcbe::compres
     m_compressor = std::move(comp);
 }
 
-bool NetworkSession::handleRequestNetworkSettings(cyrex::network::mcbe::PacketBase& packet)
+bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
 {
-    cyrex::network::mcbe::handler::SessionBeginHandler handler{};
-    handler.handle(*this, packet);
+    // no guarentee that a protocol is accepted at the moment
+    // we mabye will support multiple versions or make it easy for plugins to.
+    if (!cyrex::network::mcbe::protocol::isProtocolMabyeAccepted(version))
+    {
+        //disconnectUserForIncompatiableProtocol(version);
+        return false;
+    }
+
+    setProtocolId(version);
+
+    // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
+    auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::NetworkSettingsPacketDef>();
+    packet->compressionThreshold = cyrex::network::mcbe::protocol::NetworkSettingsPacket::compressEverything;
+    packet->compressionAlgorithm = 1;
+    packet->padding = 00;
+    packet->enableClientThrottling = false;
+    packet->clientThrottleThreshold = 0;
+    packet->clientThrottleScalar = 0.0f;
+    packet->trailingZero = 0;
+    send(*packet, true);
+    // mark compression as ready to go lol!
+    compressionEnabled = true;
+
     return true;
 }
 
