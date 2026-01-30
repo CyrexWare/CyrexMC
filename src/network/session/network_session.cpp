@@ -1,12 +1,11 @@
 #include "network_session.hpp"
 
-#include "log/console_logger.hpp"
+#include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "text/format/builder.hpp"
 
 #include <iomanip>
 #include <iostream>
@@ -49,48 +48,26 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
     const uint32_t packetLength = in.readVarUInt();
     const uint32_t packetId = in.readVarUInt();
 
-    log::sendConsoleMessage(log::MessageType::MCBE_DEBUG,
-                            text::format::Builder()
-                                .color(text::format::Color::DARK_GRAY)
-                                .text("packet length = ")
-                                .color(text::format::Color::GOLD)
-                                .text(std::to_string(packetLength))
-                                .build());
-
-    log::sendConsoleMessage(log::MessageType::MCBE_DEBUG,
-                            text::format::Builder()
-                                .color(text::format::Color::DARK_GRAY)
-                                .text("packet id = 0x")
-                                .color(text::format::Color::GOLD)
-                                .text(std::format("{:02X}", static_cast<uint32_t>(packetId)))
-                                .build());
+    cyrex::logging::info(LOG_MCBE, "packet length = {}", packetLength);
+    cyrex::logging::info(LOG_MCBE, "packet id = {}0x{:02X}", cyrex::logging::Color::GOLD, packetId);
 
     const auto* packetDef = m_packetFactory.find(packetId);
     if (!packetDef)
     {
-        log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
-                                text::format::Builder().color(text::format::Color::DARK_GRAY).text("unknown packet id").build());
+        cyrex::logging::error(LOG_MCBE, "unknown packet id");
         return;
     }
 
     auto packet = packetDef->decode(in);
     if (!packet)
     {
-        log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
-                                text::format::Builder()
-                                    .color(text::format::Color::DARK_GRAY)
-                                    .text("error decoding packet")
-                                    .build());
+        cyrex::logging::error(LOG_MCBE, "error decoding packet");
         return;
     }
 
     if (!packet->handle(*this))
     {
-        log::sendConsoleMessage(log::MessageType::MCBE_ERROR,
-                                text::format::Builder()
-                                    .color(text::format::Color::DARK_GRAY)
-                                    .text("error handling packet")
-                                    .build());
+        cyrex::logging::error(LOG_MCBE, "error handling packet");
         return;
     }
 }

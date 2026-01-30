@@ -1,15 +1,11 @@
 #include "raknet_handler.hpp"
 
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "mcbe_packet_router.hpp"
 #include "network/session/network_session.hpp"
 #include "raknet_motd.hpp"
 #include "raknet_transport.hpp"
 #include "server.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
-
 #include <RakNet/MessageIdentifiers.h>
 #include <iostream>
 #include <memory>
@@ -32,11 +28,8 @@ cyrex::network::raknet::RaknetHandler::RaknetHandler(cyrex::Server& server) : m_
     rakPeer->SetOfflinePingResponse(response.c_str(), response.size());
 
     m_transportImpl = std::make_unique<RaknetTransport>(rakPeer);
-    cyrex::log::sendConsoleMessage(cyrex::log::MessageType::RAKNET_LOG,
-                                   cyrex::text::format::Builder()
-                                       .color(text::format::Color::DARK_GRAY)
-                                       .text("listening on " + std::to_string(server.getPort()))
-                                       .build());
+
+    cyrex::logging::log(LOG_RAKNET, "listening on {}", server.getPort());
 }
 
 cyrex::network::raknet::RaknetHandler::~RaknetHandler() = default;

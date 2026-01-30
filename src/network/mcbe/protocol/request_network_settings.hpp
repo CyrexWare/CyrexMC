@@ -1,7 +1,6 @@
 #pragma once
 
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packet.hpp"
@@ -10,8 +9,6 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
 #include "network/session/network_session.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <iostream>

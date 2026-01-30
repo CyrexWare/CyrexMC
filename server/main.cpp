@@ -1,9 +1,6 @@
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "network/mcbe/packet_factory.hpp"
 #include "server.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 #include "util/server_properties.hpp"
 
 #include <filesystem>

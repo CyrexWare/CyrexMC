@@ -1,10 +1,7 @@
 #include "mcbe_packet_router.hpp"
 
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "network/session/network_session.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 
 #include <iostream>
 using namespace cyrex::network::session;
@@ -32,75 +29,41 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
 
     if (!session->compressionEnabled)
     {
-        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
-                                       cyrex::text::format::Builder()
-                                           .color(text::format::Color::DARK_GRAY)
-                                           .text("compression inactive")
-                                           .build());
+
+        cyrex::logging::info(LOG_MCBE, "compression inactive.");
         payload.assign(data, data + len);
     }
     else
     {
         const uint8_t compressionMethod = data[0];
 
-        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
-                                       cyrex::text::format::Builder()
-                                           .color(text::format::Color::DARK_GRAY)
-                                           .text(std::format("compression method = 0x{:02X}", compressionMethod))
-                                           .build());
+        cyrex::logging::info(LOG_MCBE, "compression method = 0x{:02X}", compressionMethod);
 
         const uint8_t* body = data + 1;
         const size_t bodyLen = len - 1;
 
         if (compressionMethod == 0xFF)
         {
-            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
-                                           cyrex::text::format::Builder()
-                                               .color(text::format::Color::DARK_GRAY)
-                                               .text("compression inactive")
-                                               .build());
+            cyrex::logging::info(LOG_MCBE, "compression inactive.");
             payload.assign(body, body + bodyLen);
         }
         else if (compressionMethod == 0x00)
         {
-            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
-                                           cyrex::text::format::Builder()
-                                               .color(text::format::Color::DARK_GRAY)
-                                               .text("ZLIB decompressing...")
-                                               .build());
+            cyrex::logging::info(LOG_MCBE, "ZLIB decompressing...");
             if (!session->compressor().decompress(body, bodyLen, payload))
             {
-                cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_ERROR,
-                                               cyrex::text::format::Builder()
-                                                   .color(text::format::Color::DARK_GRAY)
-                                                   .text("failed to decompress!")
-                                                   .build());
+                cyrex::logging::error(LOG_MCBE, "failed to decompress!");
                 return;
             }
 
-            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
-                                           cyrex::text::format::Builder()
-                                               .color(text::format::Color::DARK_GRAY)
-                                               .text("decompressed size = " + std::to_string(payload.size()))
-                                               .build());
+            cyrex::logging::info(LOG_MCBE, "decompressed size = {}", payload.size());
         }
         else
         {
-            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_ERROR,
-                                           cyrex::text::format::Builder()
-                                               .color(text::format::Color::DARK_GRAY)
-                                               .text(&"unknwon compression method = "[(int)compressionMethod])
-                                               .build());
+            cyrex::logging::error(LOG_MCBE, "unknwon compression method = {}" , compressionMethod);
             return;
         }
     }
-
-    //std::cout << renderConsole(bedrock(Color::GREEN) + "[MCBE][DEBUG]", true)
-    //          << renderConsole(bedrock(Color::GRAY) + " final payload: ", false);
-
-    /*   for (uint8_t b : payload)
-        std::printf("%02X ", b);
-    std::cout << std::endl;*/
 
     session->onRaw(*p, payload.data(), payload.size());
 }

@@ -1,6 +1,6 @@
 #include "performance.hpp"
 
-#include "text/format/builder.hpp"
+#include "log/logging.hpp"
 
 #include <chrono>
 #include <sstream>
@@ -20,6 +20,7 @@ std::string makeReport()
     uptimeSeconds %= 60;
     uptimeMinutes %= 60;
 
+    /*
     cyrex::text::format::Builder b;
 
     b.color(cyrex::text::format::Color::AQUA)
@@ -51,6 +52,8 @@ std::string makeReport()
 
     b.color(cyrex::text::format::Color::DARK_GRAY).text("==========================").reset();
 
-    return b.build();
+    return b.build();*/
+    return {};
+
 }
 } // namespace cyrex::util
