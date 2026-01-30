@@ -30,7 +30,7 @@ public:
         return true;
     }
 
-    bool decodePayload(cyrex::network::io::BinaryReader&  /*in*/) override
+    bool decodePayload(cyrex::network::io::BinaryReader& /*in*/) override
     {
         //out.writeU32BE(protocol);
         //out.writeString(tryEncodeRequestForConnection());
