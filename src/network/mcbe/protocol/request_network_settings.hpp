@@ -29,12 +29,7 @@ protected:
     bool decodePayload(cyrex::network::io::BinaryReader& in) override
     {
         protocolVersion = in.readU32BE();
-        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
-                                       cyrex::text::format::Builder()
-                                           .color(text::format::Color::DARK_GRAY)
-                                           .text("Received Protocol Version (RequestNetworkSettingsPacket): " +
-                                                 std::to_string(protocolVersion))
-                                           .build());
+        cyrex::logging::info(LOG_MCBE, "Received Protocol Version (RequestNetworkSettingsPacket): {}", protocolVersion);
         return true;
     }
 

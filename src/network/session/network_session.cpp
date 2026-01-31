@@ -130,11 +130,7 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
 
             if (!compressor().compress(payload.data(), payload.length(), compressed))
             {
-                log::sendConsoleMessage(log::MessageType::E_RROR,
-                                        text::format::Builder()
-                                            .color(text::format::Color::DARK_GRAY)
-                                            .text("compression failed")
-                                            .build());
+                cyrex::logging::error(LOG_MCBE, "compression failed");
                 return;
             }
 
@@ -148,24 +144,11 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
         }
     }
 
-    log::sendConsoleMessage(log::MessageType::DEBUG,
-                            text::format::Builder()
-                                .color(text::format::Color::DARK_GRAY)
-                                .text("send packet id = 0x")
-                                .color(text::format::Color::GOLD)
-                                .text(std::format("{:02X}", static_cast<uint32_t>(packet.getDef().networkId)))
-                                .build());
-
+    logging::info(LOG_MCBE, "send packet id = {}0x{:02X}", logging::Color::GOLD, packet.getDef().networkId);
 
     const std::string dump = hexDump(out.data(), out.size());
 
-    log::sendConsoleMessage(log::MessageType::DEBUG,
-                            text::format::Builder()
-                                .color(text::format::Color::DARK_GRAY)
-                                .text("send payload = ")
-                                .color(text::format::Color::GRAY)
-                                .text(dump)
-                                .build());
+    logging::info(LOG_MCBE, "send payload = {}", dump);
 
     m_transport->send(m_guid, out.data(), out.size());
 }
