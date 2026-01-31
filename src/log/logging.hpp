@@ -12,41 +12,47 @@ namespace cyrex::logging
 enum class Color
 {
     CLEAR,
-    BLACK,
-    DARK_BLUE,
-    DARK_GREEN,
-    DARK_AQUA,
-    DARK_RED,
-    DARK_PURPLE,
     GOLD,
-    GRAY,
+    BLACK,
     DARK_GRAY,
+    GRAY,
+    WHITE,
     BLUE,
+    DARK_BLUE,
     GREEN,
+    DARK_GREEN,
     AQUA,
+    DARK_AQUA,
     RED,
-    LIGHT_PURPLE,
+    DARK_RED,
+    PURPLE,
+    DARK_PURPLE,
     YELLOW,
-    WHITE
+    DARK_YELLOW,
 };
 
-inline const std::unordered_map<Color, std::string_view> colorToConsoleCode{
-    {Color::CLEAR, "\033[0m"},
-    {Color::BLACK, "\033[30m"},
+inline const std::unordered_map<Color, std::string_view> colorToConsoleCode
+{
+    {Color::CLEAR,      "\033[0m"},
+    {Color::GOLD,       "\033[33m"},
+    {Color::BLACK,      "\033[30m"},
+    {Color::DARK_GRAY,  "\033[90m"},
+    {Color::GRAY,       "\033[37m"},
+    {Color::WHITE,      "\033[97m"},
+    {Color::BLUE,       "\033[94m"},
+    {Color::DARK_BLUE,  "\033[34m"},
+    {Color::GREEN,      "\033[92m"},
     {Color::DARK_GREEN, "\033[32m"},
-    {Color::DARK_AQUA, "\033[36m"},
-    {Color::DARK_RED, "\033[31m"},
-    {Color::DARK_PURPLE, "\033[35m"},
-    {Color::GOLD, "\033[33m"},
-    {Color::GRAY, "\033[37m"},
-    {Color::DARK_GRAY, "\033[90m"},
-    {Color::BLUE, "\033[94m"},
-    {Color::GREEN, "\033[92m"},
-    {Color::AQUA, "\033[96m"},
-    {Color::RED, "\033[91m"},
-    {Color::LIGHT_PURPLE, "\033[95m"},
-    {Color::YELLOW, "\033[93m"},
-    {Color::WHITE, "\033[97m"},
+    {Color::AQUA,       "\033[96m"},
+    {Color::DARK_AQUA,  "\033[36m"},
+    {Color::RED,        "\033[91m"},
+    {Color::DARK_RED,   "\033[31m"},
+    {Color::PURPLE,     "\033[95m"},
+    {Color::DARK_PURPLE,"\033[35m"},
+    {Color::BLUE,       "\033[94m"},
+    {Color::DARK_BLUE,  "\033[34m"},
+    {Color::YELLOW,     "\033[93m"},      
+    {Color::DARK_YELLOW,"\033[33m"}
 };
 
 enum class MessageLevel
@@ -65,7 +71,7 @@ struct MessageCategory
     GroupId group;
     GroupId subgroup;
 
-    Color defaultColor = Color::GRAY;
+    Color color = Color::GRAY;
 
     bool enabledByDefault = true;
 };
@@ -82,24 +88,24 @@ void print(MessageLevel level, MessageCategory category, std::format_string<Args
 
     if (true) // includeTime
     {
-        out += std::format("{}[{}]{}", Color::GRAY, cyrex::util::currentTime(), Color::CLEAR);
+        out += std::format("{}[{}]{}", Color::DARK_GRAY, cyrex::util::currentTime(), Color::CLEAR);
     }
 
     if (!category.group.empty())
     {
-        out += std::format("{}[{}]{}", category.defaultColor, category.group, Color::CLEAR);
+        out += std::format("{}[{}]{}", category.color, category.group, Color::CLEAR);
     }
 
     if (!category.subgroup.empty())
     {
-        out += std::format("{}[{}]{}", category.defaultColor, category.subgroup, Color::CLEAR);
+        out += std::format("{}[{}]{}", category.color, category.subgroup, Color::CLEAR);
     }
 
     out += " ";
 
     out += std::format(fmt, std::forward<Args>(args)...);
 
-    std::println("{}", out);
+    std::println("{}{}", out, Color::CLEAR);
 }
 
 template <class... Args>
@@ -180,13 +186,6 @@ struct formatter<cyrex::logging::Color> : formatter<string_view>
 };
 } // namespace std
 
-constexpr cyrex::logging::MessageCategory LOG_MCBE{
-    "MCBE",
-    "",
-};
+constexpr cyrex::logging::MessageCategory LOG_MCBE{"MCBE", "", cyrex::logging::Color::GREEN};
 
-constexpr cyrex::logging::MessageCategory LOG_RAKNET{
-    "RAKNET",
-    "",
-};
-
+constexpr cyrex::logging::MessageCategory LOG_RAKNET{"RAKNET", "", cyrex::logging::Color::BLUE};
