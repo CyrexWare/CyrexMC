@@ -42,7 +42,27 @@ inline const std::unordered_map<Color, std::string_view>
                        {Color::PURPLE, "\033[95m"}, {Color::DARK_PURPLE, "\033[35m"},
                        {Color::BLUE, "\033[94m"},   {Color::DARK_BLUE, "\033[34m"},
                        {Color::YELLOW, "\033[93m"}, {Color::DARK_YELLOW, "\033[33m"}};
+} // namespace cyrex::logging
 
+namespace std
+{
+template <>
+struct formatter<cyrex::logging::Color> : formatter<string_view>
+{
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return formatter<string_view>::parse(ctx);
+    }
+
+    auto format(cyrex::logging::Color color, format_context& ctx) const
+    {
+        return formatter<string_view>::format(cyrex::logging::colorToConsoleCode.at(color), ctx);
+    }
+};
+} // namespace std
+
+namespace cyrex::logging
+{
 enum class MessageLevel
 {
     Info,
@@ -157,22 +177,6 @@ void fatal(std::format_string<Args...> fmt, Args&&... args)
 }
 
 } // namespace cyrex::logging
-namespace std
-{
-template <>
-struct formatter<cyrex::logging::Color> : formatter<string_view>
-{
-    constexpr auto parse(format_parse_context& ctx)
-    {
-        return formatter<string_view>::parse(ctx);
-    }
-
-    auto format(cyrex::logging::Color color, format_context& ctx) const
-    {
-        return formatter<string_view>::format(cyrex::logging::colorToConsoleCode.at(color), ctx);
-    }
-};
-} // namespace std
 
 constexpr cyrex::logging::MessageCategory LOG_MCBE{"MCBE", "", cyrex::logging::Color::GREEN};
 

@@ -30,7 +30,7 @@ jobs:
       matrix:
         platform:
         - { name: Windows VS2022 x64, os: windows-2022  }
-        - { name: Linux GCC,      os: ubuntu-latest }
+        - { name: Linux GCC,      os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++  }
         - { name: Linux Clang,    os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ }
         config:
         - { name: Shared, flags: -DBUILD_SHARED_LIBS=TRUE }
