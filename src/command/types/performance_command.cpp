@@ -23,5 +23,5 @@ cyrex::command::Permission cyrex::command::types::PerformanceCommand::permission
 
 void cyrex::command::types::PerformanceCommand::execute(CommandContext&)
 {
-    cyrex::logging::info("{}", cyrex::util::makeReport());
+    cyrex::util::logServerStatus();
 }
