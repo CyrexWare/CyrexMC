@@ -60,7 +60,7 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
         }
         else
         {
-            cyrex::logging::error(LOG_MCBE, "unknwon compression method = {}" , compressionMethod);
+            cyrex::logging::error(LOG_MCBE, "unknwon compression method = {}", compressionMethod);
             return;
         }
     }

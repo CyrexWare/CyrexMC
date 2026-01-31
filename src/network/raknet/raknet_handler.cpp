@@ -6,6 +6,7 @@
 #include "raknet_motd.hpp"
 #include "raknet_transport.hpp"
 #include "server.hpp"
+
 #include <RakNet/MessageIdentifiers.h>
 #include <iostream>
 #include <memory>
