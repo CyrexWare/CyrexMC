@@ -143,7 +143,7 @@ void cyrex::Server::run()
     while (m_running)
     {
         m_raknet->poll();
-        std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     if (commandThread.joinable())
