@@ -22,7 +22,7 @@ public:
     {
     }
 
-    [[nodiscard]] [[nodiscard]] [[nodiscard]] const PacketDef& getDef() const
+    [[nodiscard]] const PacketDef& getDef() const
     {
         return m_def;
     }

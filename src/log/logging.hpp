@@ -24,10 +24,7 @@ struct MessageCategory
     bool enabledByDefault = true;
 };
 
-constexpr MessageCategory defaultCategory{
-    "CyrexMc",
-    "",
-};
+constexpr MessageCategory defaultCategory{"CyrexMC", "", cyrex::logging::Color::DARK_RED};
 
 template <class... Args>
 void print(MessageLevel level, MessageCategory category, std::format_string<Args...> fmt, Args&&... args)
@@ -117,5 +114,5 @@ void fatal(std::format_string<Args...> fmt, Args&&... args)
 
 // NOLINTBEGIN
 constexpr cyrex::logging::MessageCategory LOG_MCBE{"MCBE", "", cyrex::logging::Color::GREEN};
-constexpr cyrex::logging::MessageCategory LOG_RAKNET{"RAKNET", "", cyrex::logging::Color::BLUE};
+constexpr cyrex::logging::MessageCategory LOG_RAKNET{"RakNet", "", cyrex::logging::Color::BLUE};
 // NOLINTEND

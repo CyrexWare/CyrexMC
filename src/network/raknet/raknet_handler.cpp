@@ -29,8 +29,7 @@ cyrex::network::raknet::RaknetHandler::RaknetHandler(cyrex::Server& server) : m_
     rakPeer->SetOfflinePingResponse(response.c_str(), response.size());
 
     m_transportImpl = std::make_unique<RaknetTransport>(rakPeer);
-
-    cyrex::logging::log(LOG_RAKNET, "listening on {}", server.getPort());
+    cyrex::logging::log(LOG_RAKNET, "Server began to listen on {} [IPv4]", server.getPort());
 }
 
 cyrex::network::raknet::RaknetHandler::~RaknetHandler() = default;
