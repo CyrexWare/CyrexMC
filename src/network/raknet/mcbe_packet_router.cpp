@@ -18,18 +18,10 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     if (len == 0)
         return;
 
-    //std::cout << renderConsole(bedrock(Color::GREEN) + "[MCBE]", true)
-    //          << renderConsole(bedrock(Color::DARK_GRAY) + " raw payload ", false) << "(" << len << " bytes) : ";
-
-    //for (size_t i = 0; i < len; i++)
-    //    std::printf("%02X ", data[i]);
-    //std::cout << std::endl;
-
     std::vector<uint8_t> payload;
 
     if (!session->compressionEnabled)
     {
-
         cyrex::logging::info(LOG_MCBE, "compression inactive.");
         payload.assign(data, data + len);
     }
