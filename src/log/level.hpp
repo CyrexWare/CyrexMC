@@ -17,6 +17,9 @@ enum class MessageLevel
     Fatal,
 };
 
-inline const std::unordered_map<MessageLevel, Color>
-    levelToColor{{Info, Color::DARK_GRAY}, {Log, Color::GRAY}, {Warn, Color::YELLOW}, {Error, Color::RED}, {Fatal, Color::RED}};
+inline const std::unordered_map<MessageLevel, Color> levelToColor{{MessageLevel::Info, Color::DARK_GRAY},
+                                                                  {MessageLevel::Log, Color::GRAY},
+                                                                  {MessageLevel::Warn, Color::YELLOW},
+                                                                  {MessageLevel::Error, Color::RED},
+                                                                  {MessageLevel::Fatal, Color::RED}};
 } // namespace cyrex::logging

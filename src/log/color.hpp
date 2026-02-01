@@ -2,6 +2,7 @@
 
 #include <format>
 #include <unordered_map>
+#include <string_view>
 
 namespace cyrex::logging
 {
