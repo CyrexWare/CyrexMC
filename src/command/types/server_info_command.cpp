@@ -2,11 +2,11 @@
 
 #include "command/command_context.hpp"
 #include "info.hpp"
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/color.hpp"
+#include "log/level.hpp"
+#include "log/logging.hpp"
+#include "network/mcbe/protocol/protocol_info.hpp"
 #include "server.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 
 namespace cyrex::command::types
 {
@@ -33,30 +33,35 @@ Permission ServerInfoCommand::permission() const
 
 void ServerInfoCommand::execute(CommandContext& ctx)
 {
-    using cyrex::text::format::Builder;
-    using cyrex::text::format::Color;
+    // improve this log overtime...
+    // you dont know how long it took me to perfect this code to the new logging sys :(
+    cyrex::logging::info("{}",
+                         std::format("\n{}=== CyrexMC Server Information ==={}\n"
+                                     "{}Build Version:{} {} ({})\n"
+                                     "{}Supported Game Version:{} {}\n"
+                                     "{}Players:{} {}/{}\n"
+                                     "{}Port:{} {}\n",
+                                     cyrex::logging::Color::BLUE,
+                                     cyrex::logging::Color::GOLD,
 
-    Builder builder;
+                                     cyrex::logging::Color::WHITE,
+                                     cyrex::logging::Color::GOLD,
+                                     cyrex::Info::version().toString(),
+                                     cyrex::Info::buildTypeString(),
 
-    builder.color(Color::GOLD)
-        .text("\nCyrex MC Version: ")
-        .color(Color::WHITE)
-        .text(cyrex::Info::version().toString())
-        .text(" (")
-        .text(cyrex::Info::buildTypeString())
-        .text(")\n");
+                                     cyrex::logging::Color::WHITE,
+                                     cyrex::logging::Color::GOLD,
+                                     // this is so long, lwk we should shorten it up
+                                     cyrex::network::mcbe::protocol::ProtocolInfo::minecraftVersion,
 
-    builder.color(Color::GOLD)
-        .text("Players: ")
-        .color(Color::WHITE)
-        .text(std::to_string(ctx.server.getPlayerCount()))
-        .text("/")
-        .text(std::to_string(ctx.server.getMaxPlayers()))
-        .text("\n");
+                                     cyrex::logging::Color::WHITE,
+                                     cyrex::logging::Color::GOLD,
+                                     ctx.server.getPlayerCount(),
+                                     ctx.server.getMaxPlayers(),
 
-    builder.color(Color::GOLD).text("Port: ").color(Color::WHITE).text(std::to_string(ctx.server.getPort())).text("\n");
-
-    cyrex::log::sendConsoleMessage(cyrex::log::MessageType::INFO, builder.build());
+                                     cyrex::logging::Color::WHITE,
+                                     cyrex::logging::Color::GOLD,
+                                     ctx.server.getPort()));
 }
 
 } // namespace cyrex::command::types

@@ -1,12 +1,9 @@
 #pragma once
 
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_direction.hpp"
 #include "network/session/network_session.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 
 #include <iostream>
 

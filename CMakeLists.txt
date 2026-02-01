@@ -57,7 +57,8 @@ file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
 
 add_executable(CyrexMC
     server/main.cpp
-    ${ENGINE_SOURCES})
+    ${ENGINE_SOURCES}
+)
 
 target_compile_features(CyrexMC PRIVATE cxx_std_23)
 

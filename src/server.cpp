@@ -1,10 +1,7 @@
 #include "server.hpp"
 
-#include "log/console_logger.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/raknet/raknet_handler.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 
 #include <algorithm>
 #include <chrono>
