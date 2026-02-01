@@ -2,5 +2,12 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/googletest-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/libdeflate-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/raknet-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/snappy-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/snappy-src/third_party/benchmark" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/snappy-src/third_party/googletest" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/wolfssl-src" vcs="Git" />
   </component>
 </project>

@@ -23,14 +23,14 @@ ZlibCompressor::~ZlibCompressor()
     libdeflate_free_decompressor(m_decompressor);
 }
 
-bool ZlibCompressor::compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output)
+CompressionStatus ZlibCompressor::compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output)
 {
     const bool compressible = !m_minCompressionSize.has_value() || inputSize >= *m_minCompressionSize;
 
     if (!compressible)
     {
         output.assign(input, input + inputSize);
-        return true;
+        return CompressionStatus::RAW;
     }
 
     const size_t bound = libdeflate_deflate_compress_bound(m_compressor, inputSize);
@@ -39,13 +39,13 @@ bool ZlibCompressor::compress(const uint8_t* input, size_t inputSize, std::vecto
     const size_t written = libdeflate_deflate_compress(m_compressor, input, inputSize, output.data(), bound);
 
     if (written == 0)
-        return false;
+        return CompressionStatus::FAILED;
 
     output.resize(written);
-    return true;
+    return CompressionStatus::SUCCESS;
 }
 
-bool ZlibCompressor::decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output)
+CompressionStatus ZlibCompressor::decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output)
 {
     output.resize(m_maxDecompressionSize);
 
@@ -53,10 +53,10 @@ bool ZlibCompressor::decompress(const uint8_t* input, size_t inputSize, std::vec
     auto res = libdeflate_deflate_decompress(m_decompressor, input, inputSize, output.data(), output.size(), &actualSize);
 
     if (res != LIBDEFLATE_SUCCESS)
-        return false;
+        return CompressionStatus::FAILED;
 
     output.resize(actualSize);
-    return true;
+    return CompressionStatus::SUCCESS;
 }
 
 cyrex::mcpe::protocol::types::CompressionAlgorithm ZlibCompressor::networkId() const noexcept

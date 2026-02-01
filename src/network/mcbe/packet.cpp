@@ -2,6 +2,8 @@
 
 #include "packet_def.hpp"
 
+#include <cassert>
+
 bool cyrex::network::mcbe::Packet::encode(cyrex::network::io::BinaryWriter& out) const
 {
     cyrex::network::io::BinaryWriter payload;
@@ -10,9 +12,7 @@ bool cyrex::network::mcbe::Packet::encode(cyrex::network::io::BinaryWriter& out)
     {
         return false;
     }
-
-    out.writeI8(0xFE);
-    out.writeVarUInt(payload.length() + 1);
+    out.writeVarUInt(payload.length() + io::BinaryWriter::getVarUIntSize(payload.length()));
     out.writeVarUInt(m_def.networkId);
     out.writeBuffer(payload.data(), payload.length());
 

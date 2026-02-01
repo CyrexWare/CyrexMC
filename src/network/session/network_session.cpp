@@ -143,25 +143,31 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
     {
         out.assign(payload.data(), payload.data() + payload.length());
     }
-    else if (compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::ZLIB)
+    else if (
+        compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::ZLIB
+        || compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::SNAPPY
+        )
     {
         auto threshold = compressor().compressionThreshold().value_or(0);
 
         if (payload.length() >= threshold)
         {
             std::vector<uint8_t> compressed;
-
-            if (!compressor().compress(payload.data(), payload.length(), compressed))
-            {
-                log::sendConsoleMessage(log::MessageType::E_RROR,
+            switch (compressor().compress(payload.data(), payload.length(), compressed)) {
+                case mcbe::compression::CompressionStatus::FAILED:
+                    log::sendConsoleMessage(log::MessageType::E_RROR,
                                         text::format::Builder()
                                             .color(text::format::Color::DARK_GRAY)
                                             .text("compression failed")
                                             .build());
-                return;
+                    return;
+                case mcbe::compression::CompressionStatus::SUCCESS:
+                    out.push_back(static_cast<uint8_t>(compressor().networkId()));
+                    break;
+                case mcbe::compression::CompressionStatus::RAW:
+                    out.push_back(static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::NONE));
+                    break;
             }
-
-            out.push_back(static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::ZLIB));
             out.insert(out.end(), compressed.begin(), compressed.end());
         }
         else
@@ -170,16 +176,11 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
             out.insert(out.end(), payload.data(), payload.data() + payload.length());
         }
     }
-
-    log::sendConsoleMessage(log::MessageType::DEBUG,
-                            text::format::Builder()
-                                .color(text::format::Color::DARK_GRAY)
-                                .text("send packet id = 0x")
-                                .color(text::format::Color::GOLD)
-                                .text(std::format("{:02X}", static_cast<uint32_t>(packet.getDef().networkId)))
-                                .build());
-
-
+    if (encryptionEnabled)
+    {
+        out.clear();//TODO: encryption
+    }
+    out.insert(out.begin(), 0xFE);
     const std::string dump = hexDump(out.data(), out.size());
 
     log::sendConsoleMessage(log::MessageType::DEBUG,

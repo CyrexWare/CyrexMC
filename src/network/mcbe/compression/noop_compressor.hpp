@@ -8,16 +8,16 @@ namespace cyrex::network::mcbe::compression
 class NoopCompressor final : public Compressor
 {
 public:
-    bool decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) override
+    CompressionStatus decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) override
     {
         output.assign(input, input + inputSize);
-        return true;
+        return CompressionStatus::RAW;
     }
 
-    bool compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) override
+    CompressionStatus compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) override
     {
         output.assign(input, input + inputSize);
-        return true;
+        return CompressionStatus::SUCCESS;
     }
 
     [[nodiscard]] cyrex::mcpe::protocol::types::CompressionAlgorithm networkId() const noexcept override

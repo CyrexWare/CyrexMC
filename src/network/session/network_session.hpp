@@ -5,6 +5,7 @@
 #include "network/mcbe/compression/compressor.hpp"
 #include "network/mcbe/compression/noop_compressor.hpp"
 #include "network/mcbe/compression/zlib_compressor.hpp"
+#include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_def.hpp"
 #include "network/mcbe/packet_factory.hpp"
@@ -40,6 +41,7 @@ public:
     }
 
     bool compressionEnabled = false;
+    bool encryptionEnabled = false;
     Phase phase = Phase::HANDSHAKE;
     bool markedForDisconnect = false;
 
@@ -77,6 +79,11 @@ public:
         return m_address;
     }
 
+    // [[nodiscard]] mcbe::encryption::AES cipherBlock() const
+    // {
+    //     return m_cipher;
+    // }
+
 private:
     void sendInternal(cyrex::network::mcbe::Packet& packet);
     std::queue<std::function<void()>> m_sendQueue;
@@ -87,6 +94,7 @@ private:
 
     std::uint32_t m_protocolId{0};
     std::unique_ptr<cyrex::network::mcbe::compression::Compressor> m_compressor;
+    // mcbe::encryption::AES m_cipher; //TODO: check this
 
     cyrex::network::mcbe::PacketFactory m_packetFactory;
 };

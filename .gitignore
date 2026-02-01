@@ -50,3 +50,6 @@ build.ninja
 
 # Visual Studio
 .vs
+
+# Clion
+.idea

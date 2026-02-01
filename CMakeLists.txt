@@ -50,6 +50,38 @@ FetchContent_Declare(libdeflate
 )
 FetchContent_MakeAvailable(libdeflate)
 
+FetchContent_Declare(
+    wolfssl
+    GIT_REPOSITORY https://github.com/wolfSSL/wolfssl
+    GIT_TAG v5.8.4-stable
+)
+set(WOLFSSL_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(WOLFSSL_AESGCM ON CACHE BOOL "" FORCE)
+set(WOLFSSL_AESCTR ON CACHE BOOL "" FORCE)
+set(WOLFSSL_AES_CTR ON CACHE BOOL "" FORCE)
+set(WOLFSSL_AES_DIRECT ON CACHE BOOL "" FORCE)
+set(WOLFSSL_BASE64_ENCODE ON CACHE BOOL "" FORCE)
+set(WOLFSSL_OPENSSLEXTRA ON CACHE BOOL "" FORCE)
+set(WOLFSSL_CRYPT_TESTS OFF CACHE BOOL "" FORCE)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(wolfssl)
+
+FetchContent_Declare(
+    snappy
+    GIT_REPOSITORY https://github.com/google/snappy
+    GIT_TAG 1.2.2
+)
+set(SNAPPY_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(snappy)
+
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG v3.12.0
+)
+FetchContent_MakeAvailable(json)
+
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/src/**.cpp"
     "${PROJECT_SOURCE_DIR}/src/**.hpp"
@@ -67,10 +99,19 @@ target_include_directories(CyrexMC PRIVATE
     "${PROJECT_SOURCE_DIR}/server"
 )
 
+target_compile_definitions(CyrexMC PRIVATE
+    WOLFSSL_AESGCM_STREAM
+    WOLFSSL_AES_COUNTER
+    WOLFSSL_AES_DIRECT
+)
+
 target_link_libraries(CyrexMC PRIVATE
     raknet
     magic_enum::magic_enum
     libdeflate_static
+    wolfssl::wolfssl
+    snappy
+    nlohmann_json::nlohmann_json
 )
 
 CyrexMC_set_option(

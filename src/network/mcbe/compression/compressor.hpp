@@ -10,14 +10,19 @@
 
 namespace cyrex::network::mcbe::compression
 {
-
+enum class CompressionStatus : std::uint8_t
+{
+    FAILED,
+    SUCCESS,
+    RAW,
+};
 class Compressor
 {
 public:
     virtual ~Compressor() = default;
 
-    virtual bool decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) = 0;
-    virtual bool compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) = 0;
+    virtual CompressionStatus decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) = 0;
+    virtual CompressionStatus compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) = 0;
     [[nodiscard]] virtual cyrex::mcpe::protocol::types::CompressionAlgorithm networkId() const noexcept = 0;
     [[nodiscard]] virtual std::optional<size_t> compressionThreshold() const noexcept = 0;
 };

@@ -14,7 +14,7 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     cyrex::network::session::NetworkSession* session = connections.get(p->guid);
     if (!session)
         return;
-
+    //SKIP 0xFE
     const uint8_t* data = p->data + 1;
     const size_t len = p->length - 1;
 
@@ -29,6 +29,10 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     //std::cout << std::endl;
 
     std::vector<uint8_t> payload;
+    if (session->encryptionEnabled)
+    {
+        //TODO: uh hmm
+    }
 
     if (!session->compressionEnabled)
     {
@@ -52,7 +56,7 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
         const uint8_t* body = data + 1;
         const size_t bodyLen = len - 1;
 
-        if (compressionMethod == 0xFF)
+        if (compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::NONE))
         {
             cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
                                            cyrex::text::format::Builder()
@@ -61,14 +65,26 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
                                                .build());
             payload.assign(body, body + bodyLen);
         }
-        else if (compressionMethod == 0x00)
+        else if (
+            compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::ZLIB)
+            || compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::SNAPPY))
         {
+            if (compressionMethod != static_cast<uint8_t>(session->compressor().networkId()))
+            {
+                cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_ERROR,
+                                               cyrex::text::format::Builder()
+                                                   .color(text::format::Color::DARK_GRAY)
+                                                   .text("wrong decompression alg!")
+                                                   .build());
+                return;
+            }
             cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_DEBUG,
                                            cyrex::text::format::Builder()
                                                .color(text::format::Color::DARK_GRAY)
-                                               .text("ZLIB decompressing...")
+                                               .text("decompressing...")
                                                .build());
-            if (!session->compressor().decompress(body, bodyLen, payload))
+            mcbe::compression::CompressionStatus const status = session->compressor().decompress(body, bodyLen, payload);
+            if (status == mcbe::compression::CompressionStatus::FAILED)
             {
                 cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_ERROR,
                                                cyrex::text::format::Builder()
@@ -94,13 +110,6 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
             return;
         }
     }
-
-    //std::cout << renderConsole(bedrock(Color::GREEN) + "[MCBE][DEBUG]", true)
-    //          << renderConsole(bedrock(Color::GRAY) + " final payload: ", false);
-
-    /*   for (uint8_t b : payload)
-        std::printf("%02X ", b);
-    std::cout << std::endl;*/
 
     session->onRaw(*p, payload.data(), payload.size());
 }
