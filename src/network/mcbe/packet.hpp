@@ -44,12 +44,12 @@ public:
     [[nodiscard]] static const PacketDef& getDefStatic()
     {
         static const PacketDef def{networkId,
-                             direction,
-                             allowBeforeLogin,
-                             +[]() -> std::unique_ptr<Packet>
-                             {
-                                 return std::unique_ptr<Packet>(std::make_unique<PacketType>());
-                             }};
+                                   direction,
+                                   allowBeforeLogin,
+                                   +[]() -> std::unique_ptr<Packet>
+                                   {
+                                       return std::unique_ptr<Packet>(std::make_unique<PacketType>());
+                                   }};
         return def;
     }
 
