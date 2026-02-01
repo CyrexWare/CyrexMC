@@ -6,6 +6,11 @@ if (MSVC)
     add_compile_options(/FS)
 endif()
 
+add_compile_definitions(
+        _CRT_SECURE_NO_WARNINGS
+        _WINSOCK_DEPRECATED_NO_WARNINGS
+)
+
 include(FetchContent)
 enable_testing()
 
@@ -24,7 +29,7 @@ endif()
 FetchContent_Declare(RakNet
     SYSTEM
     GIT_REPOSITORY https://github.com/CyrexWare/RakNet
-    GIT_TAG 700207323fe306ec6154371b866360cbbf058afe
+    GIT_TAG main
 )
 FetchContent_MakeAvailable(RakNet)
 
