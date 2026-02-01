@@ -74,12 +74,12 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
 
 bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVersion)
 {
-    auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::PlayStatusPacketDef>();
-    packet->status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
+    cyrex::network::mcbe::protocol::PlayStatusPacket packet;
+    packet.status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
                          ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
                          : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
 
-    send(*packet);
+    send(packet);
     return true;
 }
 
@@ -171,13 +171,13 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
     setProtocolId(version);
 
     // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
-    auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::NetworkSettingsPacketDef>();
-    packet->compressionThreshold = cyrex::network::mcbe::protocol::NetworkSettingsPacket::compressEverything;
-    packet->compressionAlgorithm = 0;
-    packet->enableClientThrottling = false;
-    packet->clientThrottleThreshold = 0;
-    packet->clientThrottleScalar = 0.0f;
-    send(*packet, true);
+    cyrex::network::mcbe::protocol::NetworkSettingsPacket packet;;
+    packet.compressionThreshold = cyrex::network::mcbe::protocol::NetworkSettingsPacket::compressEverything;
+    packet.compressionAlgorithm = 0;
+    packet.enableClientThrottling = false;
+    packet.clientThrottleThreshold = 0;
+    packet.clientThrottleScalar = 0.0f;
+    send(packet, true);
     // mark compression as ready to go lol!
     compressionEnabled = true;
 

@@ -2,7 +2,6 @@
 
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
-#include "packet.hpp"
 #include "packet_direction.hpp"
 
 #include <memory>
@@ -17,57 +16,26 @@ class NetworkSession;
 namespace cyrex::network::mcbe
 {
 
+
 class PacketDef
 {
 public:
-    virtual ~PacketDef() = default;
+    using CreateFunc = std::unique_ptr<Packet> (*)();
 
     const uint32_t networkId;
     const PacketDirection direction;
     const bool allowBeforeLogin;
+    CreateFunc create;
 
-    PacketDef(uint32_t networkId, PacketDirection direction, bool allowBeforeLogin) :
+    constexpr PacketDef(uint32_t networkId, PacketDirection direction, bool allowBeforeLogin, CreateFunc create) :
         networkId{networkId},
         direction{direction},
-        allowBeforeLogin{allowBeforeLogin}
+        allowBeforeLogin{allowBeforeLogin},
+        create{create}
     {
     }
 
-    [[nodiscard]] virtual std::unique_ptr<Packet> create() const = 0;
-
-    std::unique_ptr<Packet> decode(cyrex::network::io::BinaryReader& in) const
-    {
-        auto packet = create();
-        if (!packet)
-        {
-            return {};
-        }
-
-        if (!packet->decode(in))
-        {
-            return {};
-        }
-
-        return packet;
-    }
+    std::unique_ptr<Packet> decode(cyrex::network::io::BinaryReader& in) const;
 };
 
-template <typename T>
-class PacketDefImpl : public PacketDef
-{
-public:
-    using PacketType = T;
-
-    using PacketDef::PacketDef;
-
-    PacketDefImpl(uint32_t networkId, PacketDirection direction, bool allowBeforeLogin) :
-        PacketDef{networkId, direction, allowBeforeLogin}
-    {
-    }
-
-    [[nodiscard]] std::unique_ptr<Packet> create() const override
-    {
-        return std::make_unique<T>(*this);
-    }
-};
 } // namespace cyrex::network::mcbe

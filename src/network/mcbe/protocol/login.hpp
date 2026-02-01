@@ -9,13 +9,10 @@
 
 namespace cyrex::network::mcbe::protocol
 {
-class LoginPacket final : public cyrex::network::mcbe::Packet
+class LoginPacket final :
+    public cyrex::network::mcbe::PacketImpl<LoginPacket, ProtocolInfo::loginPacket, cyrex::network::mcbe::PacketDirection::Serverbound, false>
 {
-    friend class LoginPacketDef;
-
 public:
-    using Packet::Packet;
-
     uint32_t protocol = 0;
     std::string authInfoJson;
     std::string clientDataJwt;
@@ -34,7 +31,7 @@ public:
         return true;
     }
 
-    bool handle(cyrex::network::session::NetworkSession& /*session*/) override
+    bool handle(cyrex::network::session::NetworkSession& session) override
     {
         return true;
     }
@@ -65,12 +62,4 @@ private:
     }
 };
 
-class LoginPacketDef final : public cyrex::network::mcbe::PacketDefImpl<LoginPacket>
-{
-public:
-    LoginPacketDef() :
-        PacketDefImpl{ProtocolInfo::loginPacket, cyrex::network::mcbe::PacketDirection::Serverbound, false}
-    {
-    }
-};
 } // namespace cyrex::network::mcbe::protocol

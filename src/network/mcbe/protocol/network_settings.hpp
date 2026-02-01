@@ -13,10 +13,9 @@ using namespace cyrex::network::session;
 
 namespace cyrex::network::mcbe::protocol
 {
-class NetworkSettingsPacket final : public cyrex::network::mcbe::Packet
+class NetworkSettingsPacket final : public cyrex::network::mcbe::PacketImpl<NetworkSettingsPacket, ProtocolInfo::networkSettingsPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
 {
 public:
-    using Packet::Packet;
 
     static constexpr uint16_t compressNothing = 0;
     static constexpr uint16_t compressEverything = 1;
@@ -49,15 +48,6 @@ public:
     bool handle(cyrex::network::session::NetworkSession&) override
     {
         return true;
-    }
-};
-
-class NetworkSettingsPacketDef final : public cyrex::network::mcbe::PacketDefImpl<NetworkSettingsPacket>
-{
-public:
-    NetworkSettingsPacketDef() :
-        PacketDefImpl{ProtocolInfo::networkSettingsPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true}
-    {
     }
 };
 } // namespace cyrex::network::mcbe::protocol

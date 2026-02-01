@@ -11,10 +11,9 @@
 
 namespace cyrex::network::mcbe::protocol
 {
-class PlayStatusPacket final : public cyrex::network::mcbe::Packet
+class PlayStatusPacket final : public cyrex::network::mcbe::PacketImpl<PlayStatusPacket, ProtocolInfo::playStatusPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
 {
 public:
-    using Packet::Packet;
 
     // Mabye make this separately?
     static constexpr uint32_t loginSuccess = 0;
@@ -47,15 +46,6 @@ public:
     bool handle(cyrex::network::session::NetworkSession& /*session*/) override
     {
         return true;
-    }
-};
-
-class PlayStatusPacketDef final : public cyrex::network::mcbe::PacketDefImpl<PlayStatusPacket>
-{
-public:
-    PlayStatusPacketDef() :
-        PacketDefImpl{ProtocolInfo::playStatusPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true}
-    {
     }
 };
 } // namespace cyrex::network::mcbe::protocol

@@ -9,8 +9,8 @@
 
 void cyrex::network::mcbe::PacketFactory::registerAll()
 {
-    add<cyrex::network::mcbe::protocol::RequestNetworkSettingsPacketDef>();
-    add<cyrex::network::mcbe::protocol::NetworkSettingsPacketDef>();
-    add<cyrex::network::mcbe::protocol::LoginPacketDef>();
-    add<cyrex::network::mcbe::protocol::PlayStatusPacketDef>();
+    add<cyrex::network::mcbe::protocol::RequestNetworkSettingsPacket>();
+    add<cyrex::network::mcbe::protocol::NetworkSettingsPacket>();
+    add<cyrex::network::mcbe::protocol::LoginPacket>();
+    add<cyrex::network::mcbe::protocol::PlayStatusPacket>();
 }
