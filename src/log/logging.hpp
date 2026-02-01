@@ -24,11 +24,7 @@ struct MessageCategory
     bool enabledByDefault = true;
 };
 
-constexpr MessageCategory defaultCategory{"CyrexMC",
-                                          "",
-                                          // mb better color in the future, btw lapinozz/glalie please let this change through
-                                          // ik yall probably love the basic white, but i think we need to add some color :)
-                                          cyrex::logging::Color::DARK_RED};
+constexpr MessageCategory defaultCategory{"CyrexMC", "", cyrex::logging::Color::DARK_RED};
 
 template <class... Args>
 void print(MessageLevel level, MessageCategory category, std::format_string<Args...> fmt, Args&&... args)
@@ -117,7 +113,6 @@ void fatal(std::format_string<Args...> fmt, Args&&... args)
 } // namespace cyrex::logging
 
 // NOLINTBEGIN
-// i know for a feeling they going to complain about me making this lowercase lol
 constexpr cyrex::logging::MessageCategory LOG_MCBE{"MCBE", "", cyrex::logging::Color::GREEN};
 constexpr cyrex::logging::MessageCategory LOG_RAKNET{"RakNet", "", cyrex::logging::Color::BLUE};
 // NOLINTEND
