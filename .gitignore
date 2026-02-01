@@ -50,3 +50,4 @@ build.ninja
 
 # Visual Studio
 .vs
+enc_temp_folder/

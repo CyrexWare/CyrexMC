@@ -25,7 +25,7 @@ public:
     const uint32_t networkId;
     const PacketDirection direction;
     const bool allowBeforeLogin;
-    CreateFunc create;
+    const CreateFunc create;
 
     constexpr PacketDef(uint32_t networkId, PacketDirection direction, bool allowBeforeLogin, CreateFunc create) :
         networkId{networkId},

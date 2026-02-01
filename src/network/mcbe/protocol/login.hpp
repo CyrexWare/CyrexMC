@@ -31,7 +31,7 @@ public:
         return true;
     }
 
-    bool handle(cyrex::network::session::NetworkSession& session) override
+    bool handle(cyrex::network::session::NetworkSession& /*session*/) override
     {
         return true;
     }

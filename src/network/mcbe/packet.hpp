@@ -43,7 +43,7 @@ class PacketImpl : public Packet
 public:
     [[nodiscard]] static const PacketDef& getDefStatic()
     {
-        static PacketDef def{networkId,
+        static const PacketDef def{networkId,
                              direction,
                              allowBeforeLogin,
                              +[]() -> std::unique_ptr<Packet>
