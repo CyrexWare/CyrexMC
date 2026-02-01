@@ -1,8 +1,8 @@
 #pragma once
 
 #include <format>
-#include <unordered_map>
 #include <string_view>
+#include <unordered_map>
 
 namespace cyrex::logging
 {
