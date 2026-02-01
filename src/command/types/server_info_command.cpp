@@ -33,8 +33,6 @@ Permission ServerInfoCommand::permission() const
 
 void ServerInfoCommand::execute(CommandContext& ctx)
 {
-    // improve this log overtime...
-    // you dont know how long it took me to perfect this code to the new logging sys :(
     cyrex::logging::info("{}",
                          std::format("\n{}=== CyrexMC Server Information ==={}\n"
                                      "{}Build Version:{} {} ({})\n"
@@ -51,7 +49,6 @@ void ServerInfoCommand::execute(CommandContext& ctx)
 
                                      cyrex::logging::Color::WHITE,
                                      cyrex::logging::Color::GOLD,
-                                     // this is so long, lwk we should shorten it up
                                      cyrex::network::mcbe::protocol::ProtocolInfo::minecraftVersion,
 
                                      cyrex::logging::Color::WHITE,

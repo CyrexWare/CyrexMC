@@ -8,9 +8,7 @@ const std::string kName = "CyrexMC";
 const std::string
     kDescription = "C++ Minecraft Bedrock Server Software built from scratch emphasizing speed and correctness";
 
-// we need a better version..., i dont know what to consider it rn
 const cyrex::Info::Version kVersion{0, 0, 1};
-// Currently the server software is in development
 const cyrex::Info::BuildType kBuildType = cyrex::Info::BuildType::Development;
 } // namespace
 
