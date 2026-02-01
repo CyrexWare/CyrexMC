@@ -18,7 +18,7 @@ inline std::string formatMessage(MessageType type, std::string_view message, boo
 
     if (includeTime)
     {
-        out += text::format::color(text::format::Color::DARK_GRAY, "[" + cyrex::util::currentTime() + "]");
+        out += text::format::color(text::format::Color::DARK_GRAY, "[" + cyrex::util::currentTime() + "]" + " ");
     }
 
     out += color(meta.color, meta.tag);

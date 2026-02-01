@@ -1,3 +1,4 @@
+#include "info.hpp"
 #include "log/console_logger.hpp"
 #include "log/message_type.hpp"
 #include "network/mcbe/packet_factory.hpp"
@@ -81,7 +82,7 @@ int main()
             cyrex::log::sendConsoleMessage(cyrex::log::MessageType::E_RROR,
                                            cyrex::text::format::Builder()
                                                .color(cyrex::text::format::Color::RED)
-                                               .text("Another instance of the server is already running.\n")
+                                               .text("Another instance of the server is already running.")
                                                .build());
 
             cyrex::log::sendConsoleMessage(cyrex::log::MessageType::E_RROR,
@@ -110,10 +111,37 @@ int main()
     std::signal(SIGHUP, onSignal);
 #endif
 
+    cyrex::log::sendConsoleMessage(cyrex::log::MessageType::INFO,
+                                   cyrex::text::format::Builder()
+                                       .color(cyrex::text::format::Color::DARK_GRAY)
+                                       .text("CyrexMC Build Version: ")
+                                       .color(cyrex::text::format::Color::DARK_BLUE)
+                                       .text(cyrex::Info::version().toString())
+                                       .build());
+
+    cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_LOG,
+                                   cyrex::text::format::Builder()
+                                       .color(cyrex::text::format::Color::DARK_GRAY)
+                                       .text("Current Supported Game Version: ")
+                                       .color(cyrex::text::format::Color::DARK_GREEN)
+                                       .text(std::string(cyrex::network::mcbe::protocol::ProtocolInfo::minecraftVersion))
+                                       .build());
+
+    if (cyrex::Info::buildType() == cyrex::Info::BuildType::Development)
+    {
+        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::WARN,
+                                       cyrex::text::format::Builder()
+                                           .color(cyrex::text::format::Color::DARK_GRAY)
+                                           .text("You are currently using a development build of CyrexMC. For "
+                                                 "stability and "
+                                                 "optimal performance, we recommend using a production build if one is "
+                                                 "currently available.")
+                                           .build());
+    }
+
     auto props = cyrex::util::ServerProperties::load("server.properties");
     cyrex::Server server(cyrex::Server::Config::fromProperties(props));
     server.run();
-
     removeLock();
     return 0;
 }

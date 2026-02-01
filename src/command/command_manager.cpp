@@ -1,6 +1,7 @@
 #include "command_manager.hpp"
 
 #include "command/types/performance_command.hpp"
+#include "command/types/server_info_command.hpp"
 #include "command/types/stop_command.hpp"
 #include "command_context.hpp"
 #include "log/console_logger.hpp"
@@ -20,6 +21,7 @@ void cyrex::command::CommandManager::registerDefaults()
 {
     registerCommand(std::make_unique<cyrex::command::types::StopCommand>());
     registerCommand(std::make_unique<cyrex::command::types::PerformanceCommand>());
+    registerCommand(std::make_unique<cyrex::command::types::ServerInfoCommand>());
 }
 
 void cyrex::command::CommandManager::registerCommand(std::unique_ptr<CommandBase> command)

@@ -1,6 +1,10 @@
 #include "server.hpp"
 
+#include "log/console_logger.hpp"
+#include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/raknet/raknet_handler.hpp"
+#include "text/format/builder.hpp"
+#include "text/format/color.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -139,7 +143,7 @@ void cyrex::Server::run()
     while (m_running)
     {
         m_raknet->poll();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(50));
     }
 
     if (commandThread.joinable())

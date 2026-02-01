@@ -35,7 +35,7 @@ cyrex::network::raknet::RaknetHandler::RaknetHandler(cyrex::Server& server) : m_
     cyrex::log::sendConsoleMessage(cyrex::log::MessageType::RAKNET_LOG,
                                    cyrex::text::format::Builder()
                                        .color(text::format::Color::DARK_GRAY)
-                                       .text("listening on " + std::to_string(server.getPort()))
+                                       .text("Server began to listen on " + std::to_string(server.getPort()) + " [IPv4]")
                                        .build());
 }
 

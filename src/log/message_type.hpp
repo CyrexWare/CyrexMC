@@ -34,35 +34,35 @@ inline MessageStyle style(MessageType type)
     switch (type)
     {
         case MessageType::MCBE_LOG:
-            return {"[MCBE]", cyrex::text::format::Color::GREEN};
+            return {"[Mcbe]", cyrex::text::format::Color::GREEN};
         case MessageType::MCBE_DEBUG:
-            return {"[MCBE][DEBUG]", cyrex::text::format::Color::GREEN};
+            return {"[Mcbe][Debug]", cyrex::text::format::Color::GREEN};
         case MessageType::MCBE_INFO:
-            return {"[MCBE][INFO]", cyrex::text::format::Color::AQUA};
+            return {"[Mcbe][Info]", cyrex::text::format::Color::AQUA};
         case MessageType::MCBE_WARN:
-            return {"[MCBE][WARN]", cyrex::text::format::Color::YELLOW};
+            return {"[Mcbe][Warn]", cyrex::text::format::Color::GOLD};
         case MessageType::MCBE_ERROR:
-            return {"[MCBE][ERROR]", cyrex::text::format::Color::RED};
+            return {"[Mcbe][Error]", cyrex::text::format::Color::RED};
 
         case MessageType::LOG:
             return {"[Cyrex]", cyrex::text::format::Color::BLUE};
         case MessageType::DEBUG:
-            return {"[Cyrex][DEBUG]", cyrex::text::format::Color::BLUE};
+            return {"[Cyrex][Debug]", cyrex::text::format::Color::BLUE};
         case MessageType::INFO:
-            return {"[Cyrex][INFO]", cyrex::text::format::Color::AQUA};
+            return {"[Cyrex][Info]", cyrex::text::format::Color::AQUA};
         case MessageType::WARN:
-            return {"[Cyrex][WARN]", cyrex::text::format::Color::YELLOW};
+            return {"[Cyrex][Warn]", cyrex::text::format::Color::GOLD};
         case MessageType::E_RROR:
-            return {"[Cyrex][ERROR]", cyrex::text::format::Color::RED};
+            return {"[Cyrex][Error]", cyrex::text::format::Color::RED};
 
         case MessageType::RAKNET_LOG:
-            return {"[RAKNET]", cyrex::text::format::Color::RED};
+            return {"[RakNet]", cyrex::text::format::Color::RED};
         case MessageType::RAKNET_DEBUG:
-            return {"[RAKNET][DEBUG]", cyrex::text::format::Color::RED};
+            return {"[RakNet][Debug]", cyrex::text::format::Color::RED};
         case MessageType::RAKNET_WARN:
-            return {"[RAKNET][WARN]", cyrex::text::format::Color::YELLOW};
+            return {"[RakNet][Warn]", cyrex::text::format::Color::GOLD};
         case MessageType::RAKNET_ERROR:
-            return {"[RAKNET][ERROR]", cyrex::text::format::Color::RED};
+            return {"[RakNet][Error]", cyrex::text::format::Color::RED};
     }
 
     return {"[UNKNOWN]", cyrex::text::format::Color::GRAY};
