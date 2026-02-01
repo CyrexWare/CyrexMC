@@ -30,7 +30,9 @@ cyrex::network::raknet::RaknetHandler::RaknetHandler(cyrex::Server& server) : m_
 
     m_transportImpl = std::make_unique<RaknetTransport>(rakPeer);
     // sadly lapinozz started to normalize white instead of dark gray, tough life..
-    cyrex::logging::log(LOG_RAKNET, "Server began to listen on {} [IPv4]", /*cyrex::logging::Color::DARK_GRAY,*/ server.getPort());
+    cyrex::logging::log(LOG_RAKNET,
+                        "Server began to listen on {} [IPv4]",
+                        /*cyrex::logging::Color::DARK_GRAY,*/ server.getPort());
 }
 
 cyrex::network::raknet::RaknetHandler::~RaknetHandler() = default;
