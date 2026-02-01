@@ -57,5 +57,8 @@ public:
     {
         return getDefStatic();
     }
+
+protected:
+    PacketImpl() = default;
 };
 } // namespace cyrex::network::mcbe
