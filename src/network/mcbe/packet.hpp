@@ -40,6 +40,8 @@ public:
 template <typename PacketType, uint32_t networkId, PacketDirection direction, bool allowBeforeLogin>
 class PacketImpl : public Packet
 {
+    friend PacketType;
+
 public:
     [[nodiscard]] static const PacketDef& getDefStatic()
     {
@@ -58,7 +60,7 @@ public:
         return getDefStatic();
     }
 
-protected:
+private:
     PacketImpl() = default;
 };
 } // namespace cyrex::network::mcbe
