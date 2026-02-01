@@ -18,10 +18,13 @@
 namespace cyrex::network::mcbe::protocol
 {
 
-class RequestNetworkSettingsPacket final : public cyrex::network::mcbe::PacketImpl<RequestNetworkSettingsPacket, ProtocolInfo::requestNetworkSettingsPacket, cyrex::network::mcbe::PacketDirection::Serverbound, true>
+class RequestNetworkSettingsPacket final :
+    public cyrex::network::mcbe::PacketImpl<RequestNetworkSettingsPacket,
+                                            ProtocolInfo::requestNetworkSettingsPacket,
+                                            cyrex::network::mcbe::PacketDirection::Serverbound,
+                                            true>
 {
 public:
-
     uint32_t protocolVersion = 0;
 
 protected:

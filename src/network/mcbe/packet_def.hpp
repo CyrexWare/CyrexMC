@@ -15,7 +15,7 @@ class NetworkSession;
 
 namespace cyrex::network::mcbe
 {
-
+class Packet;
 
 class PacketDef
 {

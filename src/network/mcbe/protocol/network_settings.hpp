@@ -13,10 +13,11 @@ using namespace cyrex::network::session;
 
 namespace cyrex::network::mcbe::protocol
 {
-class NetworkSettingsPacket final : public cyrex::network::mcbe::PacketImpl<NetworkSettingsPacket, ProtocolInfo::networkSettingsPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
+class NetworkSettingsPacket final :
+    public cyrex::network::mcbe::
+        PacketImpl<NetworkSettingsPacket, ProtocolInfo::networkSettingsPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
 {
 public:
-
     static constexpr uint16_t compressNothing = 0;
     static constexpr uint16_t compressEverything = 1;
 

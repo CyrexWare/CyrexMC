@@ -11,10 +11,11 @@
 
 namespace cyrex::network::mcbe::protocol
 {
-class PlayStatusPacket final : public cyrex::network::mcbe::PacketImpl<PlayStatusPacket, ProtocolInfo::playStatusPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
+class PlayStatusPacket final :
+    public cyrex::network::mcbe::
+        PacketImpl<PlayStatusPacket, ProtocolInfo::playStatusPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
 {
 public:
-
     // Mabye make this separately?
     static constexpr uint32_t loginSuccess = 0;
     static constexpr uint32_t loginFailedClient = 1;

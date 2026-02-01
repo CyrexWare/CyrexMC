@@ -76,8 +76,8 @@ bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVer
 {
     cyrex::network::mcbe::protocol::PlayStatusPacket packet;
     packet.status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
-                         ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
-                         : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
+                        ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
+                        : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
 
     send(packet);
     return true;
@@ -171,7 +171,7 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
     setProtocolId(version);
 
     // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
-    cyrex::network::mcbe::protocol::NetworkSettingsPacket packet;;
+    cyrex::network::mcbe::protocol::NetworkSettingsPacket packet;
     packet.compressionThreshold = cyrex::network::mcbe::protocol::NetworkSettingsPacket::compressEverything;
     packet.compressionAlgorithm = 0;
     packet.enableClientThrottling = false;
