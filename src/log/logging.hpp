@@ -1,7 +1,8 @@
 #pragma once
 
-#include "util/time.hpp"
 #include "color.hpp"
+#include "level.hpp"
+#include "util/time.hpp"
 
 #include <format>
 #include <print>
@@ -10,14 +11,6 @@
 
 namespace cyrex::logging
 {
-enum class MessageLevel
-{
-    Info,
-    Log,
-    Warn,
-    Error,
-    Fatal,
-};
 
 struct MessageCategory
 {
@@ -41,10 +34,7 @@ void print(MessageLevel level, MessageCategory category, std::format_string<Args
 {
     std::string out;
 
-    if (true) // includeTime
-    {
-        out += std::format("{}[{}]{}", Color::DARK_GRAY, cyrex::util::currentTime(), Color::CLEAR);
-    }
+    out += std::format("{}[{}]{}", Color::DARK_GRAY, cyrex::util::currentTime(), Color::CLEAR);
 
     if (!category.group.empty())
     {
@@ -60,7 +50,7 @@ void print(MessageLevel level, MessageCategory category, std::format_string<Args
 
     out += std::format(fmt, std::forward<Args>(args)...);
 
-    std::println("{}{}", out, Color::CLEAR);
+    std::println("{}{}{}", levelToColor[level], out, Color::CLEAR);
 }
 
 template <class... Args>
@@ -125,6 +115,7 @@ void fatal(std::format_string<Args...> fmt, Args&&... args)
 
 } // namespace cyrex::logging
 
+// NOLINTBEGIN
 constexpr cyrex::logging::MessageCategory LOG_MCBE{"MCBE", "", cyrex::logging::Color::GREEN};
-
 constexpr cyrex::logging::MessageCategory LOG_RAKNET{"RAKNET", "", cyrex::logging::Color::BLUE};
+// NOLINTEND
