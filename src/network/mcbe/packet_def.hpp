@@ -33,7 +33,7 @@ public:
     {
     }
 
-    [[nodiscard]] [[nodiscard]] virtual std::unique_ptr<Packet> create() const = 0;
+    [[nodiscard]] virtual std::unique_ptr<Packet> create() const = 0;
 
     std::unique_ptr<Packet> decode(cyrex::network::io::BinaryReader& in) const
     {
@@ -65,7 +65,7 @@ public:
     {
     }
 
-    [[nodiscard]] [[nodiscard]] std::unique_ptr<Packet> create() const override
+    [[nodiscard]] std::unique_ptr<Packet> create() const override
     {
         return std::make_unique<T>(*this);
     }

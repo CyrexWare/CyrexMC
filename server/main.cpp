@@ -1,3 +1,4 @@
+#include "info.hpp"
 #include "log/logging.hpp"
 #include "network/mcbe/packet_factory.hpp"
 #include "server.hpp"
@@ -98,10 +99,23 @@ int main()
     std::signal(SIGHUP, onSignal);
 #endif
 
+    cyrex::logging::info("Build Version: {}{}", cyrex::logging::Color::AQUA, cyrex::Info::version().toString());
+    log(LOG_MCBE,
+        "Current Supported Game Version: {}{}",
+        cyrex::logging::Color::AQUA,
+        cyrex::network::mcbe::protocol::ProtocolInfo::minecraftVersion);
+    if (cyrex::Info::buildType() == cyrex::Info::BuildType::Development)
+    {
+        cyrex::logging::warn(
+            "{}You are currently using a development build of CyrexMC. "
+            "For stability and optimal performance, we recommend using "
+            "a production build if one is currently available.",
+            cyrex::logging::Color::RED);
+    }
+
     auto props = cyrex::util::ServerProperties::load("server.properties");
     cyrex::Server server(cyrex::Server::Config::fromProperties(props));
     server.run();
-
     removeLock();
     return 0;
 }
