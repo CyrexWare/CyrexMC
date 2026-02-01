@@ -50,7 +50,7 @@ void print(MessageLevel level, MessageCategory category, std::format_string<Args
 
     out += std::format(fmt, std::forward<Args>(args)...);
 
-    std::println("{}{}{}", levelToColor[level], out, Color::CLEAR);
+    std::println("{}{}{}", levelToColor.at(level), out, Color::CLEAR);
 }
 
 template <class... Args>
