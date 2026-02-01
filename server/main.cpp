@@ -1,9 +1,6 @@
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "network/mcbe/packet_factory.hpp"
 #include "server.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 #include "util/server_properties.hpp"
 
 #include <filesystem>
@@ -78,17 +75,8 @@ int main()
 
         if (pid != 0 && isProcessAlive(pid))
         {
-            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::E_RROR,
-                                           cyrex::text::format::Builder()
-                                               .color(cyrex::text::format::Color::RED)
-                                               .text("Another instance of the server is already running.\n")
-                                               .build());
-
-            cyrex::log::sendConsoleMessage(cyrex::log::MessageType::E_RROR,
-                                           cyrex::text::format::Builder()
-                                               .color(cyrex::text::format::Color::RED)
-                                               .text("Press ENTER to safely close this instance.")
-                                               .build());
+            cyrex::logging::error(LOG_MCBE, "Another instance of the server is already running");
+            cyrex::logging::error(LOG_MCBE, "Press ENTER to safely close this instance.");
 
             std::cin.get();
             return 1;

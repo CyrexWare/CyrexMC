@@ -3,11 +3,8 @@
 #include "command/types/performance_command.hpp"
 #include "command/types/stop_command.hpp"
 #include "command_context.hpp"
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "server.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -50,11 +47,7 @@ void cyrex::command::CommandManager::executeConsole(const std::string& line)
     if (!cmd)
     {
         // TODO: check if its console or player
-        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_INFO,
-                                       cyrex::text::format::Builder()
-                                           .color(text::format::Color::RED)
-                                           .text("The command you have entered does not exist.")
-                                           .build());
+        cyrex::logging::error(LOG_MCBE, "The command you have entered does not exist.");
         return;
     }
 
@@ -63,11 +56,7 @@ void cyrex::command::CommandManager::executeConsole(const std::string& line)
     if (!hasPermission(sourceLevel, cmd->permission()))
     {
         // TODO: check if its console or player
-        cyrex::log::sendConsoleMessage(cyrex::log::MessageType::MCBE_INFO,
-                                       cyrex::text::format::Builder()
-                                           .color(text::format::Color::RED)
-                                           .text("The command you have entered does not exist.")
-                                           .build());
+        cyrex::logging::error(LOG_MCBE, "The command you have entered does not exist.");
         return;
     }
 

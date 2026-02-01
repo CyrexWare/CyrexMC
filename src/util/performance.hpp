@@ -4,5 +4,5 @@
 
 namespace cyrex::util
 {
-std::string makeReport();
+void logServerStatus();
 }
