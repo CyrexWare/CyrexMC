@@ -1,6 +1,7 @@
 #include "info.hpp"
 #include "log/logging.hpp"
 #include "network/mcbe/packet_factory.hpp"
+#include "network/mcbe/protocol/protocol_info.hpp"
 #include "server.hpp"
 #include "util/server_properties.hpp"
 
@@ -100,10 +101,10 @@ int main()
 #endif
 
     cyrex::logging::info("Build Version: {}{}", cyrex::logging::Color::AQUA, cyrex::Info::version().toString());
-    log(LOG_MCBE,
-        "Current Supported Game Version: {}{}",
-        cyrex::logging::Color::AQUA,
-        cyrex::network::mcbe::protocol::ProtocolInfo::minecraftVersion);
+    cyrex::logging::log(LOG_MCBE,
+                        "Current Supported Game Version: {}{}",
+                        cyrex::logging::Color::AQUA,
+                        cyrex::network::mcbe::protocol::ProtocolInfo::minecraftVersion);
     if (cyrex::Info::buildType() == cyrex::Info::BuildType::Development)
     {
         cyrex::logging::warn(
