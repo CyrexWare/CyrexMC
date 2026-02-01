@@ -21,16 +21,12 @@ public:
     static constexpr uint16_t compressNothing = 0;
     static constexpr uint16_t compressEverything = 1;
 
-    int8_t compressionThreshold = 1;
-    int8_t compressionAlgorithm = 0;
-
-    int16_t padding = 0;
+    int16_t compressionThreshold = 1;
+    int16_t compressionAlgorithm = 0;
 
     bool enableClientThrottling = false;
     int8_t clientThrottleThreshold = 0;
     float clientThrottleScalar = 0.0f;
-
-    int8_t trailingZero = 0;
 
 protected:
     bool decodePayload(cyrex::network::io::BinaryReader&) override
@@ -41,13 +37,11 @@ protected:
 
     bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
     {
-        out.writeI8(compressionThreshold);
-        out.writeI8(compressionAlgorithm);
-        out.writeI16LE(padding);
+        out.writeI16LE(compressionThreshold);
+        out.writeI16LE(compressionAlgorithm);
         out.writeBool(enableClientThrottling);
         out.writeI8(clientThrottleThreshold);
         out.writeFloatLE(clientThrottleScalar);
-        out.writeI8(trailingZero);
         return true;
     }
 

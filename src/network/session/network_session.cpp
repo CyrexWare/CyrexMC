@@ -173,12 +173,10 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
     // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
     auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::NetworkSettingsPacketDef>();
     packet->compressionThreshold = cyrex::network::mcbe::protocol::NetworkSettingsPacket::compressEverything;
-    packet->compressionAlgorithm = 1;
-    packet->padding = 00;
+    packet->compressionAlgorithm = 0;
     packet->enableClientThrottling = false;
     packet->clientThrottleThreshold = 0;
     packet->clientThrottleScalar = 0.0f;
-    packet->trailingZero = 0;
     send(*packet, true);
     // mark compression as ready to go lol!
     compressionEnabled = true;
