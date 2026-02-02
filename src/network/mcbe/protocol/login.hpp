@@ -1,24 +1,18 @@
 #pragma once
 
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_direction.hpp"
 #include "network/session/network_session.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 
 #include <iostream>
 
 namespace cyrex::network::mcbe::protocol
 {
-class LoginPacket final : public cyrex::network::mcbe::Packet
+class LoginPacket final :
+    public cyrex::network::mcbe::PacketImpl<LoginPacket, ProtocolInfo::loginPacket, cyrex::network::mcbe::PacketDirection::Serverbound, false>
 {
-    friend class LoginPacketDef;
-
 public:
-    using Packet::Packet;
-
     uint32_t protocol = 0;
     std::string authInfoJson;
     std::string clientDataJwt;
@@ -68,12 +62,4 @@ private:
     }
 };
 
-class LoginPacketDef final : public cyrex::network::mcbe::PacketDefImpl<LoginPacket>
-{
-public:
-    LoginPacketDef() :
-        PacketDefImpl{ProtocolInfo::loginPacket, cyrex::network::mcbe::PacketDirection::Serverbound, false}
-    {
-    }
-};
 } // namespace cyrex::network::mcbe::protocol

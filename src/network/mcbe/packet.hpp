@@ -3,6 +3,8 @@
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
+#include "packet_def.hpp"
+#include "packet_direction.hpp"
 
 namespace cyrex::network::session
 {
@@ -18,14 +20,9 @@ class Packet
 {
 public:
     virtual ~Packet() = default;
-    Packet(const PacketDef& def) : m_def{def}
-    {
-    }
+    Packet() = default;
 
-    [[nodiscard]] [[nodiscard]] [[nodiscard]] const PacketDef& getDef() const
-    {
-        return m_def;
-    }
+    [[nodiscard]] virtual const PacketDef& getDef() const = 0;
 
     bool decode(cyrex::network::io::BinaryReader& in)
     {
@@ -38,8 +35,32 @@ public:
     virtual bool encodePayload(cyrex::network::io::BinaryWriter& out) const = 0;
 
     virtual bool handle(cyrex::network::session::NetworkSession& session) = 0;
+};
+
+template <typename PacketType, uint32_t networkId, PacketDirection direction, bool allowBeforeLogin>
+class PacketImpl : public Packet
+{
+    friend PacketType;
+
+public:
+    [[nodiscard]] static const PacketDef& getDefStatic()
+    {
+        static const PacketDef def{networkId,
+                                   direction,
+                                   allowBeforeLogin,
+                                   +[]() -> std::unique_ptr<Packet>
+                                   {
+                                       return std::unique_ptr<Packet>(std::make_unique<PacketType>());
+                                   }};
+        return def;
+    }
+
+    [[nodiscard]] const PacketDef& getDef() const override
+    {
+        return getDefStatic();
+    }
 
 private:
-    const PacketDef& m_def;
+    PacketImpl() = default;
 };
 } // namespace cyrex::network::mcbe

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assert.h"
+#include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_def.hpp"
 #include "network/mcbe/packet_direction.hpp"
 
@@ -32,12 +33,12 @@ public:
     template <typename T>
     void add()
     {
-        auto def = std::make_unique<T>();
-        assert(!m_entries.contains(def->networkId));
-        m_entries.emplace(def->networkId, std::move(def));
+        const auto& def = T::getDefStatic();
+        assert(!m_entries.contains(def.networkId));
+        m_entries.emplace(def.networkId, &def);
     }
 
-    [[nodiscard]] PacketDef* find(uint32_t id) const
+    [[nodiscard]] const PacketDef* find(uint32_t id) const
     {
         auto it = m_entries.find(id);
         if (it == m_entries.end())
@@ -45,10 +46,10 @@ public:
             return nullptr;
         }
 
-        return it->second.get();
+        return it->second;
     }
 
-    [[nodiscard]] PacketDef& get(uint32_t id) const
+    [[nodiscard]] const PacketDef& get(uint32_t id) const
     {
         auto ptr = find(id);
         assert(ptr);
@@ -66,17 +67,9 @@ public:
         return def->create();
     }
 
-    template <typename T>
-    [[nodiscard]] auto create() const
-    {
-        T t;
-        return dynamicPointerCastUnique<typename T::PacketType>(get(t.networkId).create());
-    }
-
-
     void registerAll();
 
 private:
-    std::unordered_map<uint32_t, std::unique_ptr<PacketDef>> m_entries;
+    std::unordered_map<uint32_t, const PacketDef*> m_entries;
 };
 } // namespace cyrex::network::mcbe

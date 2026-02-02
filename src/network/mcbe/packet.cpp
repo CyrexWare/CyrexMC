@@ -12,9 +12,9 @@ bool cyrex::network::mcbe::Packet::encode(cyrex::network::io::BinaryWriter& out)
     {
         return false;
     }
-    out.writeVarUInt(payload.length() + io::BinaryWriter::getVarUIntSize(payload.length()));
-    out.writeVarUInt(m_def.networkId);
-    out.writeBuffer(payload.data(), payload.length());
 
+    out.writeVarUInt(payload.length() + io::BinaryWriter::getVarUIntSize(getDef().networkId));
+    out.writeVarUInt(getDef().networkId);
+    out.writeBuffer(payload.data(), payload.length());
     return true;
 }

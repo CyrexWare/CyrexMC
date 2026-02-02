@@ -1,12 +1,9 @@
 #include "raknet_connections.hpp"
 
-#include "log/console_logger.hpp"
-#include "log/message_type.hpp"
+#include "log/logging.hpp"
 #include "network/mcbe/compression/zlib_compressor.hpp"
 #include "network/session/network_session.hpp"
 #include "raknet_handler.hpp"
-#include "text/format/builder.hpp"
-#include "text/format/color.hpp"
 
 #include <iostream>
 
@@ -23,11 +20,7 @@ void cyrex::network::raknet::RaknetConnections::onConnect(const RakNet::RakNetGU
 
     m_sessions.emplace(guid, std::move(session));
 
-    cyrex::log::sendConsoleMessage(cyrex::log::MessageType::RAKNET_LOG,
-                                   cyrex::text::format::Builder()
-                                       .color(text::format::Color::DARK_GRAY)
-                                       .text("New incoming connection")
-                                       .build());
+    cyrex::logging::log(LOG_RAKNET, "New incoming connection");
 }
 
 void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
@@ -37,11 +30,7 @@ void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNe
         return;
 
     it->second->markedForDisconnect = true;
-    cyrex::log::sendConsoleMessage(cyrex::log::MessageType::RAKNET_LOG,
-                                   cyrex::text::format::Builder()
-                                       .color(text::format::Color::DARK_GRAY)
-                                       .text("Client disconnected")
-                                       .build());
+    cyrex::logging::log(LOG_RAKNET, "Client disconnected");
 }
 
 void cyrex::network::raknet::RaknetConnections::tick()

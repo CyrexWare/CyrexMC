@@ -72,6 +72,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/google/snappy
     GIT_TAG 1.2.2
 )
+set(BENCHMARK_ENABLE_EXCEPTIONS ON CACHE BOOL "" FORCE)
 set(SNAPPY_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(snappy)
 

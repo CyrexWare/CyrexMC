@@ -23,9 +23,9 @@ public:
 
     CompressionStatus compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) override;
 
-    [[nodiscard]] [[nodiscard]] cyrex::mcpe::protocol::types::CompressionAlgorithm networkId() const noexcept override;
+    [[nodiscard]] cyrex::mcpe::protocol::types::CompressionAlgorithm networkId() const noexcept override;
 
-    [[nodiscard]] [[nodiscard]] std::optional<size_t> compressionThreshold() const noexcept override;
+    [[nodiscard]] std::optional<size_t> compressionThreshold() const noexcept override;
 
 private:
     int m_level;
