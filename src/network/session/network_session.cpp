@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 using namespace cyrex::network::io;
 
@@ -197,6 +198,16 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
 void NetworkSession::setCompressor(std::unique_ptr<cyrex::network::mcbe::compression::Compressor> comp)
 {
     m_compressor = std::move(comp);
+}
+
+bool NetworkSession::handleLogin(uint32_t version, std::string authInfoJson, std::string clientDataJwt)
+{
+    if (!cyrex::network::mcbe::protocol::isProtocolMabyeAccepted(version))
+    {
+        return false;
+    }
+    auto authData = nlohmann::json::parse(authInfoJson);
+    return true;
 }
 
 bool NetworkSession::handleRequestNetworkSettings(uint32_t version)

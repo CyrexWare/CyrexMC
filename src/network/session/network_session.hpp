@@ -49,6 +49,7 @@ public:
     void send(cyrex::network::mcbe::Packet& packet, bool immediately = false);
     void flush();
     bool disconnectUserForIncompatiableProtocol(uint32_t);
+    bool handleLogin(uint32_t version, std::string authInfoJson, std::string clientDataJwt);
     bool handleRequestNetworkSettings(uint32_t version);
     void tick();
 
