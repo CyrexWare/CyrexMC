@@ -67,6 +67,10 @@ set(WOLFSSL_CRYPT_TESTS OFF CACHE BOOL "" FORCE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(wolfssl)
 
+# force -isystem for wolfssl
+get_target_property(wolfssl_IID wolfssl INTERFACE_INCLUDE_DIRECTORIES)
+set_target_properties(wolfssl PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${wolfssl_IID}")
+
 FetchContent_Declare(
     snappy
     GIT_REPOSITORY https://github.com/google/snappy
