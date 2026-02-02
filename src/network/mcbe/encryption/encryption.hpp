@@ -32,9 +32,9 @@ struct AES
     }
 };
 
-bool initializeAes(AES& aes, ecc_key& serverKey, std::string_view playerKey);
+[[nodiscard]] bool initializeAes(AES& aes, ecc_key& serverKey, std::string_view playerKey);
 void cleanupAes(AES& aes);
-bool encrypt(AES& aes, const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output);
-bool decrypt(AES& aes, const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output);
+[[nodiscard]] bool encrypt(AES& aes, const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output);
+[[nodiscard]] bool decrypt(AES& aes, const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output);
 
 } // namespace cyrex::network::mcbe::encryption
