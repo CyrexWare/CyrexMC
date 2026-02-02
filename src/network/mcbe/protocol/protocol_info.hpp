@@ -34,7 +34,6 @@ struct ProtocolInfo
 // no way im planning multiprotocol??
 constexpr bool isProtocolMabyeAccepted(std::uint32_t protocol)
 {
-    return std::ranges::any_of(ProtocolInfo::acceptedProtocols,
-                       [protocol](auto p) { return p == protocol; });
+    return std::ranges::any_of(ProtocolInfo::acceptedProtocols, [protocol](auto p) { return p == protocol; });
 }
 } // namespace cyrex::network::mcbe::protocol

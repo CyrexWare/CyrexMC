@@ -31,7 +31,7 @@ set(RUN_CLANG_TIDY "${CMAKE_CURRENT_SOURCE_DIR}/run-clang-tidy")
 message(STATUS "run-clang-tidy path: ${RUN_CLANG_TIDY}")
 
 # Run
-execute_process(COMMAND ${Python_EXECUTABLE} ${RUN_CLANG_TIDY} -clang-tidy-binary ${CLANG_TIDY_EXECUTABLE} -quiet -p ${PROJECT_BINARY_DIR} "^((?!_deps).)*$" RESULTS_VARIABLE EXIT_CODE)
+execute_process(COMMAND ${Python_EXECUTABLE} ${RUN_CLANG_TIDY} -clang-tidy-binary ${CLANG_TIDY_EXECUTABLE} -fix -quiet -p ${PROJECT_BINARY_DIR} "^((?!_deps).)*$" RESULTS_VARIABLE EXIT_CODE)
 if(NOT EXIT_CODE STREQUAL 0)
     message(FATAL_ERROR "Analysis failed")
 endif()

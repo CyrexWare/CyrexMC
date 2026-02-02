@@ -9,9 +9,9 @@
 
 #include <iomanip>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <vector>
-#include <nlohmann/json.hpp>
 
 using namespace cyrex::network::io;
 
@@ -121,17 +121,16 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
     {
         out.assign(payload.data(), payload.data() + payload.length());
     }
-    else if (
-        compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::ZLIB
-        || compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::SNAPPY
-        )
+    else if (compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::ZLIB ||
+             compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::SNAPPY)
     {
         auto threshold = compressor().compressionThreshold().value_or(0);
 
         if (payload.length() >= threshold)
         {
             std::vector<uint8_t> compressed;
-            switch (compressor().compress(payload.data(), payload.length(), compressed)) {
+            switch (compressor().compress(payload.data(), payload.length(), compressed))
+            {
                 case mcbe::compression::CompressionStatus::FAILED:
                     cyrex::logging::error("compression failed");
                     return;
@@ -154,7 +153,7 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
     }
     if (encryptionEnabled)
     {
-        out.clear();//TODO: encryption
+        out.clear(); //TODO: encryption
     }
     out.insert(out.begin(), 0xFE);
 

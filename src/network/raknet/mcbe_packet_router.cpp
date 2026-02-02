@@ -43,9 +43,8 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
             cyrex::logging::info(LOG_MCBE, "compression inactive.");
             payload.assign(body, body + bodyLen);
         }
-        else if (
-            compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::ZLIB)
-            || compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::SNAPPY))
+        else if (compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::ZLIB) ||
+                 compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::SNAPPY))
         {
             if (compressionMethod != static_cast<uint8_t>(session->compressor().networkId()))
             {
@@ -53,7 +52,7 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
                 return;
             }
             cyrex::logging::info(LOG_MCBE, "decompressing...");
-            mcbe::compression::CompressionStatus const status = session->compressor().decompress(body, bodyLen, payload);
+            const mcbe::compression::CompressionStatus status = session->compressor().decompress(body, bodyLen, payload);
             if (status == mcbe::compression::CompressionStatus::FAILED)
             {
                 cyrex::logging::error(LOG_MCBE, "failed to decompress!");
