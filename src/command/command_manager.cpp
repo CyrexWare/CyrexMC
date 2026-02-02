@@ -9,14 +9,14 @@
 #include <iostream>
 #include <sstream>
 
-cyrex::command::CommandManager::CommandManager(cyrex::Server& server) : m_server(server)
+cyrex::command::CommandManager::CommandManager(Server& server) : m_server(server)
 {
 }
 
 void cyrex::command::CommandManager::registerDefaults()
 {
-    registerCommand(std::make_unique<cyrex::command::types::StopCommand>());
-    registerCommand(std::make_unique<cyrex::command::types::PerformanceCommand>());
+    registerCommand(std::make_unique<types::StopCommand>());
+    registerCommand(std::make_unique<types::PerformanceCommand>());
 }
 
 void cyrex::command::CommandManager::registerCommand(std::unique_ptr<CommandBase> command)

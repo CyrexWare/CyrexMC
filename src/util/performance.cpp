@@ -21,8 +21,8 @@ void logServerStatus()
     uptimeMinutes %= 60;
 
     logging::log(LOG_MCBE, "=== Server Performance ===");
-    logging::log(LOG_MCBE, "Uptime: {}{}h {}m {}s", logging::Color::WHITE, uptimeHours, uptimeMinutes, uptimeSeconds);
-    logging::log(LOG_MCBE, "CPU Threads: {}{}", logging::Color::WHITE, std::thread::hardware_concurrency());
+    logging::log(LOG_MCBE, "Uptime: {}{}h {}m {}s", logging::AnsiColor::WHITE, uptimeHours, uptimeMinutes, uptimeSeconds);
+    logging::log(LOG_MCBE, "CPU Threads: {}{}", logging::AnsiColor::WHITE, std::thread::hardware_concurrency());
     logging::log(LOG_MCBE, "==========================");
 }
 } // namespace cyrex::util

@@ -1,13 +1,12 @@
 #pragma once
 
-#include "color.hpp"
+#include "../text/color.hpp"
 #include "level.hpp"
 #include "util/time.hpp"
 
 #include <format>
 #include <print>
 #include <string_view>
-#include <unordered_map>
 
 namespace cyrex::logging
 {
@@ -15,42 +14,36 @@ namespace cyrex::logging
 struct MessageCategory
 {
     using GroupId = std::string_view;
-
     GroupId group;
     GroupId subgroup;
-
-    Color color = Color::GRAY;
-
+    AnsiColor color = AnsiColor::GRAY;
     bool enabledByDefault = true;
 };
 
-constexpr MessageCategory defaultCategory{
-    "CyrexMc",
-    "",
-};
+constexpr MessageCategory defaultCategory{.group = "CyrexMc"};
 
 template <class... Args>
 void print(MessageLevel level, MessageCategory category, std::format_string<Args...> fmt, Args&&... args)
 {
-    std::string out;
+    using namespace literals;
 
-    out += std::format("{}[{}]{}", Color::DARK_GRAY, cyrex::util::currentTime(), Color::CLEAR);
+    std::string out;
+    out = std::format("{}{}[{}]{}", out, AnsiColor::DARK_GRAY, util::currentTime(), "CLEAR"_ac);
 
     if (!category.group.empty())
     {
-        out += std::format("{}[{}]{}", category.color, category.group, Color::CLEAR);
+        out = std::format("{}{}[{}]{}", out, category.color, category.group, "CLEAR"_ac);
     }
 
     if (!category.subgroup.empty())
     {
-        out += std::format("{}[{}]{}", category.color, category.subgroup, Color::CLEAR);
+        out = std::format("{}{}[{}]{}", out, category.color, category.subgroup, "CLEAR"_ac);
     }
 
-    out += " ";
+    const std::string msg = std::format(fmt, std::forward<Args>(args)...);
 
-    out += std::format(fmt, std::forward<Args>(args)...);
-
-    std::println("{}{}{}", levelToColor.at(level), out, Color::CLEAR);
+    out = std::format("{} {}", out, msg);
+    std::println("{}{}{}", messageLevelToAnsiColor(level), out, "CLEAR"_ac);
 }
 
 template <class... Args>
@@ -116,6 +109,6 @@ void fatal(std::format_string<Args...> fmt, Args&&... args)
 } // namespace cyrex::logging
 
 // NOLINTBEGIN
-constexpr cyrex::logging::MessageCategory LOG_MCBE{"MCBE", "", cyrex::logging::Color::GREEN};
-constexpr cyrex::logging::MessageCategory LOG_RAKNET{"RAKNET", "", cyrex::logging::Color::BLUE};
+constexpr cyrex::logging::MessageCategory LOG_MCBE{.group = "MCBE", .subgroup = "", .color = cyrex::logging::AnsiColor::GREEN};
+constexpr cyrex::logging::MessageCategory LOG_RAKNET{.group = "RAKNET", .subgroup = "", .color = cyrex::logging::AnsiColor::BLUE};
 // NOLINTEND

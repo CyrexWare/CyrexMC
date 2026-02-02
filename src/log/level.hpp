@@ -1,10 +1,6 @@
 #pragma once
 
-#include "color.hpp"
-
-#include <format>
-#include <string_view>
-#include <unordered_map>
+#include "../text/color.hpp"
 
 namespace cyrex::logging
 {
@@ -17,9 +13,16 @@ enum class MessageLevel
     Fatal,
 };
 
-inline const std::unordered_map<MessageLevel, Color> levelToColor{{MessageLevel::Info, Color::DARK_GRAY},
-                                                                  {MessageLevel::Log, Color::GRAY},
-                                                                  {MessageLevel::Warn, Color::YELLOW},
-                                                                  {MessageLevel::Error, Color::RED},
-                                                                  {MessageLevel::Fatal, Color::RED}};
+[[nodiscard]] constexpr AnsiColor messageLevelToAnsiColor(const MessageLevel level) noexcept
+{
+    switch (level)
+    {
+        case MessageLevel::Info: return AnsiColor::DARK_GRAY;
+        case MessageLevel::Log: return AnsiColor::GRAY;
+        case MessageLevel::Warn: return AnsiColor::YELLOW;
+        case MessageLevel::Error: return AnsiColor::RED;
+        case MessageLevel::Fatal: return AnsiColor::RED;
+    }
+}
+
 } // namespace cyrex::logging

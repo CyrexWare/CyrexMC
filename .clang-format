@@ -32,7 +32,7 @@ AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Never
-AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
@@ -60,23 +60,23 @@ Cpp11BracedListStyle: true
 # Braces
 BreakBeforeBraces: Custom
 BraceWrapping:
-    AfterCaseLabel: true
-    AfterClass: true
-    AfterControlStatement: Always
-    AfterEnum: true
-    AfterFunction: true
-    AfterNamespace: true
-    AfterStruct: true
-    AfterUnion: true
-    AfterExternBlock: true
-    BeforeCatch: false
-    BeforeElse: true
-    BeforeLambdaBody: true
-    BeforeWhile: false
-    IndentBraces: false
-    SplitEmptyFunction: true
-    SplitEmptyRecord: true
-    SplitEmptyNamespace: true
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: false
+  BeforeElse: true
+  BeforeLambdaBody: true
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
 
 # Namespaces
 CompactNamespaces: false
@@ -165,14 +165,14 @@ UseCRLF: false
 
 # Qualifiers (const, volatile, static, etc)
 QualifierAlignment: Custom
-QualifierOrder: ['static', 'inline', 'constexpr', 'const', 'volatile', 'type']
+QualifierOrder: [ 'static', 'inline', 'constexpr', 'const', 'volatile', 'type' ]
 
 ---
 Language: ObjC
 IndentWidth: 4
 BreakBeforeBraces: Custom
 BraceWrapping:
-    AfterObjCDeclaration: true
+  AfterObjCDeclaration: true
 
 ObjCBinPackProtocolList: Never
 ObjCBlockIndentWidth: 4

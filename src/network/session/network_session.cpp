@@ -48,8 +48,8 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
     const uint32_t packetLength = in.readVarUInt();
     const uint32_t packetId = in.readVarUInt();
 
-    cyrex::logging::info(LOG_MCBE, "packet length = {}", packetLength);
-    cyrex::logging::info(LOG_MCBE, "packet id = {}0x{:02X}", cyrex::logging::Color::GOLD, packetId);
+    logging::info(LOG_MCBE, "packet length = {}", packetLength);
+    logging::info(LOG_MCBE, "packet id = {}0x{:02X}", logging::AnsiColor::GOLD, packetId);
 
     const auto* packetDef = m_packetFactory.find(packetId);
     if (!packetDef)
@@ -74,16 +74,16 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
 
 bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVersion)
 {
-    auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::PlayStatusPacketDef>();
-    packet->status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
-                         ? cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedClient
-                         : cyrex::network::mcbe::protocol::PlayStatusPacket::loginFailedServer;
+    auto packet = m_packetFactory.create<mcbe::protocol::PlayStatusPacketDef>();
+    packet->status = protocolVersion < mcbe::protocol::ProtocolInfo::currentProtocol
+                         ? mcbe::protocol::PlayStatusPacket::loginFailedClient
+                         : mcbe::protocol::PlayStatusPacket::loginFailedServer;
 
     send(*packet);
     return true;
 }
 
-void NetworkSession::send(cyrex::network::mcbe::Packet& packet, bool immediately)
+void NetworkSession::send(mcbe::Packet& packet, bool immediately)
 {
     if (immediately)
     {
@@ -104,9 +104,9 @@ void NetworkSession::flush()
     }
 }
 
-void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
+void NetworkSession::sendInternal(mcbe::Packet& packet)
 {
-    if (packet.getDef().direction == cyrex::network::mcbe::PacketDirection::Serverbound)
+    if (packet.getDef().direction == mcbe::PacketDirection::Serverbound)
     {
         return;
     }
@@ -144,7 +144,7 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
         }
     }
 
-    logging::info(LOG_MCBE, "send packet id = {}0x{:02X}", logging::Color::GOLD, packet.getDef().networkId);
+    logging::info(LOG_MCBE, "send packet id = {}0x{:02X}", logging::AnsiColor::GOLD, packet.getDef().networkId);
 
     const std::string dump = hexDump(out.data(), out.size());
 
@@ -153,7 +153,7 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
     m_transport->send(m_guid, out.data(), out.size());
 }
 
-void NetworkSession::setCompressor(std::unique_ptr<cyrex::network::mcbe::compression::Compressor> comp)
+void NetworkSession::setCompressor(std::unique_ptr<mcbe::compression::Compressor> comp)
 {
     m_compressor = std::move(comp);
 }
@@ -171,8 +171,8 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
     setProtocolId(version);
 
     // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
-    auto packet = m_packetFactory.create<cyrex::network::mcbe::protocol::NetworkSettingsPacketDef>();
-    packet->compressionThreshold = cyrex::network::mcbe::protocol::NetworkSettingsPacket::compressEverything;
+    auto packet = m_packetFactory.create<mcbe::protocol::NetworkSettingsPacketDef>();
+    packet->compressionThreshold = mcbe::protocol::NetworkSettingsPacket::compressEverything;
     packet->compressionAlgorithm = 1;
     packet->padding = 00;
     packet->enableClientThrottling = false;
