@@ -50,10 +50,9 @@ build.ninja
 
 # Visual Studio
 .vs
-<<<<<<< HEAD
 
 # Clion
 .idea
-=======
 enc_temp_folder/
->>>>>>> origin
+_deps/
+
