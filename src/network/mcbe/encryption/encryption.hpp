@@ -17,9 +17,9 @@ struct AES
     int64_t encryptBlockCounter = 0;
     int64_t decryptBlockCounter = 0;
 
-    ecc_key* serverKey = nullptr;
-    Aes* encryptBlock = nullptr;
-    Aes* decryptBlock = nullptr;
+    ecc_key* serverKey{};
+    Aes* encryptBlock{};
+    Aes* decryptBlock{};
 
     std::vector<uint8_t> key;
     std::vector<uint8_t> salt;
@@ -27,7 +27,7 @@ struct AES
     bool isEncryptionEnabled = false;
 
     AES() = default;
-    AES(ecc_key* serverKey_, Aes* enc, Aes* dec) : serverKey(serverKey_), encryptBlock(enc), decryptBlock(dec)
+    AES(ecc_key* serverKey, Aes* enc, Aes* dec) : serverKey(serverKey), encryptBlock(enc), decryptBlock(dec)
     {
     }
 };

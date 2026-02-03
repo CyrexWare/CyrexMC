@@ -31,40 +31,41 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     }
     else
     {
-        const uint8_t compressionMethod = data[0];
+        const auto compressionMethod = static_cast<mcpe::protocol::types::CompressionAlgorithm>(data[0]);
 
-        cyrex::logging::info(LOG_MCBE, "compression method = 0x{:02X}", compressionMethod);
+        cyrex::logging::info(LOG_MCBE, "compression method = 0x{:02X}", std::to_underlying(compressionMethod));
 
         const uint8_t* body = data + 1;
         const size_t bodyLen = len - 1;
-
-        if (compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::NONE))
+        switch (compressionMethod)
         {
-            cyrex::logging::info(LOG_MCBE, "compression inactive.");
-            payload.assign(body, body + bodyLen);
-        }
-        else if (compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::ZLIB) ||
-                 compressionMethod == static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::SNAPPY))
-        {
-            if (compressionMethod != static_cast<uint8_t>(session->compressor().networkId()))
+            case mcpe::protocol::types::CompressionAlgorithm::NONE:
             {
-                cyrex::logging::error(LOG_MCBE, "invalid decompression alg...");
-                return;
+                cyrex::logging::info(LOG_MCBE, "compression inactive.");
+                payload.assign(body, body + bodyLen);
+                break;
             }
-            cyrex::logging::info(LOG_MCBE, "decompressing...");
-            const mcbe::compression::CompressionStatus status = session->compressor().decompress(body, bodyLen, payload);
-            if (status == mcbe::compression::CompressionStatus::FAILED)
+            case mcpe::protocol::types::CompressionAlgorithm::ZLIB:
+            case mcpe::protocol::types::CompressionAlgorithm::SNAPPY:
             {
-                cyrex::logging::error(LOG_MCBE, "failed to decompress!");
-                return;
+                if (compressionMethod != session->compressor().networkId())
+                {
+                    cyrex::logging::error(LOG_MCBE, "invalid decompression alg...");
+                    return;
+                }
+                cyrex::logging::info(LOG_MCBE, "decompressing...");
+                const mcbe::compression::CompressionStatus status = session->compressor().decompress(body, bodyLen, payload);
+                if (status == mcbe::compression::CompressionStatus::FAILED)
+                {
+                    cyrex::logging::error(LOG_MCBE, "failed to decompress!");
+                    return;
+                }
+                cyrex::logging::info(LOG_MCBE, "decompressed size = {}", payload.size());
+                break;
             }
-
-            cyrex::logging::info(LOG_MCBE, "decompressed size = {}", payload.size());
-        }
-        else
-        {
-            cyrex::logging::error(LOG_MCBE, "unknwon compression method = {}", compressionMethod);
-            return;
+            default:
+                cyrex::logging::error(LOG_MCBE, "unknwon compression method = {}", data[0]);
+                return;
         }
     }
 

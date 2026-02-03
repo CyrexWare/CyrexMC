@@ -135,11 +135,11 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
                     cyrex::logging::error("compression failed");
                     return;
                 case mcbe::compression::CompressionStatus::SUCCESS:
-                    out.push_back(static_cast<uint8_t>(compressor().networkId()));
+                    out.push_back(std::to_underlying(compressor().networkId()));
                     cyrex::logging::info("compression success");
                     break;
                 case mcbe::compression::CompressionStatus::RAW:
-                    out.push_back(static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::NONE));
+                    out.push_back(std::to_underlying(mcpe::protocol::types::CompressionAlgorithm::NONE));
                     cyrex::logging::info("compression raw");
                     break;
             }
@@ -147,7 +147,7 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
         }
         else
         {
-            out.push_back(static_cast<uint8_t>(mcpe::protocol::types::CompressionAlgorithm::NONE));
+            out.push_back(std::to_underlying(mcpe::protocol::types::CompressionAlgorithm::NONE));
             out.insert(out.end(), payload.data(), payload.data() + payload.length());
         }
     }
