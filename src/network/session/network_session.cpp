@@ -43,13 +43,14 @@ void NetworkSession::tick()
 
 void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data, size_t len)
 {
+    using namespace logging::literals;
     BinaryReader in(data, len);
 
     const uint32_t packetLength = in.readVarUInt();
     const uint32_t packetId = in.readVarUInt();
 
     logging::info(LOG_MCBE, "packet length = {}", packetLength);
-    logging::info(LOG_MCBE, "packet id = {}0x{:02X}", logging::AnsiColor::GOLD, packetId);
+    logging::info(LOG_MCBE, "packet id = {}0x{:02X}", "GOLD"_ac, packetId);
 
     const auto* packetDef = m_packetFactory.find(packetId);
     if (!packetDef)
@@ -106,6 +107,8 @@ void NetworkSession::flush()
 
 void NetworkSession::sendInternal(mcbe::Packet& packet)
 {
+    using namespace logging::literals;
+
     if (packet.getDef().direction == mcbe::PacketDirection::Serverbound)
     {
         return;
@@ -144,12 +147,9 @@ void NetworkSession::sendInternal(mcbe::Packet& packet)
         }
     }
 
-    logging::info(LOG_MCBE, "send packet id = {}0x{:02X}", logging::AnsiColor::GOLD, packet.getDef().networkId);
-
+    logging::info(LOG_MCBE, "send packet id = {}0x{:02X}", "GOLD"_ac, packet.getDef().networkId);
     const std::string dump = hexDump(out.data(), out.size());
-
     logging::info(LOG_MCBE, "send payload = {}", dump);
-
     m_transport->send(m_guid, out.data(), out.size());
 }
 
@@ -162,7 +162,7 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
 {
     // no guarentee that a protocol is accepted at the moment
     // we mabye will support multiple versions or make it easy for plugins to.
-    if (!cyrex::network::mcbe::protocol::isProtocolMabyeAccepted(version))
+    if (!mcbe::protocol::isProtocolMabyeAccepted(version))
     {
         //disconnectUserForIncompatiableProtocol(version);
         return false;

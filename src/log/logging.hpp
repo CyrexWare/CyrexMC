@@ -28,22 +28,22 @@ void print(MessageLevel level, MessageCategory category, std::format_string<Args
     using namespace literals;
 
     std::string out;
-    out = std::format("{}{}[{}]{}", out, AnsiColor::DARK_GRAY, util::currentTime(), "CLEAR"_ac);
+    out = std::format("{}{}[{}]{}", out, AnsiColor::DARK_GRAY, util::currentTime(), "Clear"_ac);
 
     if (!category.group.empty())
     {
-        out = std::format("{}{}[{}]{}", out, category.color, category.group, "CLEAR"_ac);
+        out = std::format("{}{}[{}]{}", out, category.color, category.group, "Clear"_ac);
     }
 
     if (!category.subgroup.empty())
     {
-        out = std::format("{}{}[{}]{}", out, category.color, category.subgroup, "CLEAR"_ac);
+        out = std::format("{}{}[{}]{}", out, category.color, category.subgroup, "Clear"_ac);
     }
 
     const std::string msg = std::format(fmt, std::forward<Args>(args)...);
 
     out = std::format("{} {}", out, msg);
-    std::println("{}{}{}", messageLevelToAnsiColor(level), out, "CLEAR"_ac);
+    std::println("{}{}{}", messageLevelToAnsiColor(level), out, "Clear"_ac);
 }
 
 template <class... Args>

@@ -65,7 +65,6 @@ using AnsiEscapeSequence = std::string_view;
 
 } // namespace cyrex::logging
 
-// user-defined literals should go in a namespace
 namespace cyrex::logging::literals
 {
 
@@ -76,8 +75,15 @@ consteval AnsiColor operator""_ac(const char* str, std::size_t len)
 
     char nameBuffer[32]{};
     for (std::size_t i = 0; i < len; ++i)
-        nameBuffer[i] = str[i]; // keep original case for magic_enum
-
+    {
+        char ch = str[i];
+        // allow the developer to do "Gold"_ac rather than "GOLD"_ac ^-^
+        if (ch >= 'a' && ch <= 'z')
+        {
+            ch += 'A' - 'a';
+        }
+        nameBuffer[i] = ch;
+    }
     std::string_view sv{nameBuffer, len};
 
     if (auto maybe_val = magic_enum::enum_cast<AnsiColor>(sv); maybe_val)

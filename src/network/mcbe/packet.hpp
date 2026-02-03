@@ -22,22 +22,22 @@ public:
     {
     }
 
-    [[nodiscard]] [[nodiscard]] [[nodiscard]] const PacketDef& getDef() const
+    [[nodiscard]] const PacketDef& getDef() const
     {
         return m_def;
     }
 
-    bool decode(cyrex::network::io::BinaryReader& in)
+    bool decode(io::BinaryReader& in)
     {
         return decodePayload(in);
     }
 
-    bool encode(cyrex::network::io::BinaryWriter& out) const;
+    bool encode(io::BinaryWriter& out) const;
 
-    virtual bool decodePayload(cyrex::network::io::BinaryReader& in) = 0;
-    virtual bool encodePayload(cyrex::network::io::BinaryWriter& out) const = 0;
+    virtual bool decodePayload(io::BinaryReader& in) = 0;
+    virtual bool encodePayload(io::BinaryWriter& out) const = 0;
 
-    virtual bool handle(cyrex::network::session::NetworkSession& session) = 0;
+    virtual bool handle(session::NetworkSession& session) = 0;
 
 private:
     const PacketDef& m_def;
