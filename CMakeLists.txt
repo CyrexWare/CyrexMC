@@ -117,7 +117,6 @@ target_link_libraries(CyrexMC PRIVATE
     wolfssl::wolfssl
     snappy
     nlohmann_json::nlohmann_json
-    jwt-cpp
 )
 
 CyrexMC_set_option(
