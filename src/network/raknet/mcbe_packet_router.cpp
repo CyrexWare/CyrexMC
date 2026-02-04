@@ -21,7 +21,11 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     std::vector<std::uint8_t> payload;
     if (session->encryptionEnabled)
     {
-        if (mcbe::encryption::decrypt(session->cipherBlock(), data, len, payload))
+        if (auto payloadOpt = session->getEncryptor().decrypt({data, len}))
+        {
+            payload = std::move(*payloadOpt);
+        }
+        else
         {
             cyrex::logging::error(LOG_MCBE, "failed to decrypt!");
             return;

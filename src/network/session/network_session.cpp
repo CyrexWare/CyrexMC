@@ -144,7 +144,7 @@ void NetworkSession::flush()
     m_sendQueue.clear();
 }
 
-void NetworkSession::sendInternal(const BinaryWriter& payload) const
+void NetworkSession::sendInternal(const BinaryWriter& payload)
 {
     const std::string buffer = hexDump(payload.data(), payload.length());
     logging::info("raw packet payload = {}", buffer);
@@ -191,7 +191,11 @@ void NetworkSession::sendInternal(const BinaryWriter& payload) const
     if (encryptionEnabled)
     {
         const std::vector<uint8_t> old(out);
-        if (mcbe::encryption::encrypt(cipherBlock(), old.data(), old.size(), out))
+        if (auto data = getEncryptor().encrypt(old))
+        {
+            out = std::move(*data);
+        }
+        else
         {
             logging::error("encryption failed");
             return;

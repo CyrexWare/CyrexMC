@@ -54,6 +54,7 @@ FetchContent_Declare(
     wolfssl
     GIT_REPOSITORY https://github.com/wolfSSL/wolfssl
     GIT_TAG v5.8.4-stable
+    OVERRIDE_FIND_PACKAGE
 )
 set(WOLFSSL_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -67,6 +68,14 @@ set(WOLFSSL_CRYPT_TESTS OFF CACHE BOOL "" FORCE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(wolfssl)
 
+SET(JWT_SSL_LIBRARY "wolfSSL")
+FetchContent_Declare(
+  jwt-cpp
+  GIT_REPOSITORY https://github.com/CyrexWare/jwt-cpp
+  GIT_TAG eaebed9c588993d8dc9c791f38ac43c7220c2103
+)
+FetchContent_MakeAvailable(jwt-cpp)
+
 # force -isystem for wolfssl
 get_target_property(wolfssl_IID wolfssl INTERFACE_INCLUDE_DIRECTORIES)
 set_target_properties(wolfssl PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${wolfssl_IID}")
@@ -79,13 +88,6 @@ FetchContent_Declare(
 set(BENCHMARK_ENABLE_EXCEPTIONS ON CACHE BOOL "" FORCE)
 set(SNAPPY_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(snappy)
-
-FetchContent_Declare(
-    json
-    GIT_REPOSITORY https://github.com/nlohmann/json
-    GIT_TAG v3.12.0
-)
-FetchContent_MakeAvailable(json)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/src/**.cpp"
@@ -117,6 +119,7 @@ target_link_libraries(CyrexMC PRIVATE
     wolfssl::wolfssl
     snappy
     nlohmann_json::nlohmann_json
+    jwt-cpp
 )
 
 CyrexMC_set_option(

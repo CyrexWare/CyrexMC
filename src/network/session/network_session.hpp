@@ -81,12 +81,13 @@ public:
         return m_address;
     }
 
-    mcbe::encryption::AES& cipherBlock()
+    [[nodiscard]] mcbe::encryption::AesEncryptor& getEncryptor()
     {
-        return m_cipher;
+        return *m_cipher;
     }
+
 private:
-    void sendInternal(const io::BinaryWriter& payload) const;
+    void sendInternal(const io::BinaryWriter& payload);
     std::vector<std::unique_ptr<mcbe::Packet>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
@@ -95,7 +96,7 @@ private:
 
     std::uint32_t m_protocolId{0};
     std::unique_ptr<mcbe::compression::Compressor> m_compressor;
-    mcbe::encryption::AES m_cipher;
+    std::optional<mcbe::encryption::AesEncryptor> m_cipher;
 
     mcbe::PacketFactory m_packetFactory;
 };

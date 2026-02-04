@@ -6,6 +6,7 @@
 #include "raknet_handler.hpp"
 
 #include <iostream>
+#include <ranges>
 
 using namespace cyrex::util;
 
