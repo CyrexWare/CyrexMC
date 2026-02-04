@@ -20,7 +20,7 @@ static uint64_t calculateChecksum(const int64_t blockCounter, const std::uint8_t
     return ri.readU64LE();
 }
 
-bool initializeAes(AES aes, ecc_key& serverKey, const std::string_view playerKey)
+bool initializeAes(AES &aes, ecc_key& serverKey, const std::string_view playerKey)
 {
     word32 keyLength = 48;
     word32 idx = 0;
@@ -54,7 +54,7 @@ bool initializeAes(AES aes, ecc_key& serverKey, const std::string_view playerKey
     return true;
 }
 
-void cleanupAes(AES aes)
+void cleanupAes(AES &aes)
 {
     if (aes.encryptBlock)
     {
@@ -72,7 +72,7 @@ void cleanupAes(AES aes)
     aes.salt.clear();
 }
 
-bool encrypt(AES aes, const std::uint8_t* input, const std::size_t inputSize, std::vector<uint8_t>& output)
+bool encrypt(AES &aes, const std::uint8_t* input, const std::size_t inputSize, std::vector<uint8_t>& output)
 {
     const std::uint64_t hash = calculateChecksum(aes.encryptBlockCounter++, aes.key.data(), input, static_cast<word32>(inputSize));
     std::vector<std::uint8_t> buffer;
@@ -84,7 +84,7 @@ bool encrypt(AES aes, const std::uint8_t* input, const std::size_t inputSize, st
     return true;
 }
 
-bool decrypt(AES aes, const std::uint8_t* input, const std::size_t inputSize, std::vector<std::uint8_t>& output)
+bool decrypt(AES &aes, const std::uint8_t* input, const std::size_t inputSize, std::vector<std::uint8_t>& output)
 {
     output.resize(inputSize);
     wc_AesCtrEncrypt(aes.decryptBlock, output.data(), input, inputSize);

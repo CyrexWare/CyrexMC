@@ -81,7 +81,7 @@ public:
         return m_address;
     }
 
-    [[nodiscard]] mcbe::encryption::AES cipherBlock() const
+    mcbe::encryption::AES& cipherBlock()
     {
         return m_cipher;
     }
