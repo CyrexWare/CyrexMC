@@ -32,7 +32,7 @@ void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNe
 
 void cyrex::network::raknet::RaknetConnections::tick()
 {
-    for (auto& [guid, session] : m_sessions)
+    for (const auto& session : m_sessions | std::views::values)
     {
         session->tick();
     }

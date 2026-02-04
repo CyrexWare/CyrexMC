@@ -30,12 +30,12 @@ enum class Phase
 class NetworkSession
 {
 public:
-    NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, cyrex::network::mcbe::Transport* transport) :
+    NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, mcbe::Transport* transport) :
         m_guid(guid),
         m_address(address),
         m_transport(transport),
 
-        m_compressor(std::make_unique<cyrex::network::mcbe::compression::NoopCompressor>())
+        m_compressor(std::make_unique<mcbe::compression::NoopCompressor>())
     {
         m_packetFactory.registerAll();
     }
@@ -46,16 +46,17 @@ public:
     bool markedForDisconnect = false;
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
-    void send(cyrex::network::mcbe::Packet& packet, bool immediately = false);
+    void send(std::unique_ptr<mcbe::Packet> packet, bool immediately = false);
+    void sendBatch(std::vector<std::unique_ptr<mcbe::Packet>> packets, bool immediately = false);
     void flush();
     bool disconnectUserForIncompatibleProtocol(uint32_t);
     bool handleLogin(uint32_t version, std::string authInfoJson, std::string clientDataJwt);
     bool handleRequestNetworkSettings(uint32_t version);
     void tick();
 
-    void setCompressor(std::unique_ptr<cyrex::network::mcbe::compression::Compressor> compressor);
+    void setCompressor(std::unique_ptr<mcbe::compression::Compressor> compressor);
 
-    [[nodiscard]] cyrex::network::mcbe::compression::Compressor& compressor() const
+    [[nodiscard]] mcbe::compression::Compressor& compressor() const
     {
         return *m_compressor;
     }
@@ -85,17 +86,17 @@ public:
         return m_cipher;
     }
 private:
-    void sendInternal(const cyrex::network::mcbe::Packet& packet) const;
-    std::queue<std::function<void()>> m_sendQueue;
+    void sendInternal(const io::BinaryWriter& payload) const;
+    std::vector<std::unique_ptr<mcbe::Packet>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
     RakNet::SystemAddress m_address;
-    cyrex::network::mcbe::Transport* m_transport;
+    mcbe::Transport* m_transport;
 
     std::uint32_t m_protocolId{0};
-    std::unique_ptr<cyrex::network::mcbe::compression::Compressor> m_compressor;
+    std::unique_ptr<mcbe::compression::Compressor> m_compressor;
     mcbe::encryption::AES m_cipher;
 
-    cyrex::network::mcbe::PacketFactory m_packetFactory;
+    mcbe::PacketFactory m_packetFactory;
 };
 } // namespace cyrex::network::session
