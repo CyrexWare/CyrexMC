@@ -43,7 +43,7 @@ public:
 
     [[nodiscard]] const PacketDef* find(const uint32_t id) const
     {
-        auto it = m_entries.find(id);
+        const auto it = m_entries.find(id);
         if (it == m_entries.end())
         {
             return nullptr;
@@ -59,9 +59,17 @@ public:
         return *ptr;
     }
 
+    void remove(const uint32_t id)
+    {
+        if (m_entries.contains(id))
+        {
+            m_entries.erase(id);
+        }
+    }
+
     [[nodiscard]] std::unique_ptr<Packet> create(const uint32_t id) const
     {
-        auto def = find(id);
+        const auto def = find(id);
         if (!def)
         {
             return {};
