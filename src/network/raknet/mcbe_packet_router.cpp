@@ -12,37 +12,39 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     if (!session)
         return;
     //SKIP 0xFE
-    const uint8_t* data = p->data + 1;
-    const size_t len = p->length - 1;
+    const std::uint8_t* data = p->data + 1;
+    const std::size_t len = p->length - 1;
 
     if (len == 0)
         return;
 
-    std::vector<uint8_t> payload;
+    std::vector<std::uint8_t> payload;
     if (session->encryptionEnabled)
     {
-        //TODO: uh hmm
-    }
-
-    if (!session->compressionEnabled)
-    {
-        cyrex::logging::info(LOG_MCBE, "compression inactive.");
-        payload.assign(data, data + len);
+        if (mcbe::encryption::decrypt(session->cipherBlock(), data, len, payload))
+        {
+            cyrex::logging::error(LOG_MCBE, "failed to decrypt!");
+            return;
+        }
     }
     else
     {
-        const auto compressionMethod = static_cast<mcpe::protocol::types::CompressionAlgorithm>(data[0]);
-
+        payload.assign(data, data + len);
+    }
+    if (!session->compressionEnabled)
+    {
+        cyrex::logging::info(LOG_MCBE, "compression inactive.");
+    }
+    else
+    {
+        const auto compressionMethod = static_cast<mcpe::protocol::types::CompressionAlgorithm>(payload[0]);
+        const std::vector old(payload);
         cyrex::logging::info(LOG_MCBE, "compression method = 0x{:02X}", std::to_underlying(compressionMethod));
-
-        const uint8_t* body = data + 1;
-        const size_t bodyLen = len - 1;
         switch (compressionMethod)
         {
             case mcpe::protocol::types::CompressionAlgorithm::NONE:
             {
                 cyrex::logging::info(LOG_MCBE, "compression inactive.");
-                payload.assign(body, body + bodyLen);
                 break;
             }
             case mcpe::protocol::types::CompressionAlgorithm::ZLIB:
@@ -54,7 +56,8 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
                     return;
                 }
                 cyrex::logging::info(LOG_MCBE, "decompressing...");
-                const mcbe::compression::CompressionStatus status = session->compressor().decompress(body, bodyLen, payload);
+
+                const mcbe::compression::CompressionStatus status = session->compressor().decompress(old.data() + 1, old.size() - 1, payload);
                 if (status == mcbe::compression::CompressionStatus::FAILED)
                 {
                     cyrex::logging::error(LOG_MCBE, "failed to decompress!");
@@ -64,7 +67,7 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
                 break;
             }
             default:
-                cyrex::logging::error(LOG_MCBE, "unknwon compression method = {}", data[0]);
+                cyrex::logging::error(LOG_MCBE, "unknown compression method = {}", payload[0]);
                 return;
         }
     }

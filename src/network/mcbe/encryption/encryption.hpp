@@ -14,17 +14,15 @@ namespace cyrex::network::mcbe::encryption
 
 struct AES
 {
-    int64_t encryptBlockCounter = 0;
-    int64_t decryptBlockCounter = 0;
+    std::int64_t encryptBlockCounter = 0;
+    std::int64_t decryptBlockCounter = 0;
 
     ecc_key* serverKey{};
     Aes* encryptBlock{};
     Aes* decryptBlock{};
 
-    std::vector<uint8_t> key;
-    std::vector<uint8_t> salt;
-
-    bool isEncryptionEnabled = false;
+    std::vector<std::uint8_t> key;
+    std::vector<std::uint8_t> salt;
 
     AES() = default;
     AES(ecc_key* serverKey, Aes* enc, Aes* dec) : serverKey(serverKey), encryptBlock(enc), decryptBlock(dec)
@@ -32,9 +30,9 @@ struct AES
     }
 };
 
-[[nodiscard]] bool initializeAes(AES& aes, ecc_key& serverKey, std::string_view playerKey);
-void cleanupAes(AES& aes);
-[[nodiscard]] bool encrypt(AES& aes, const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output);
-[[nodiscard]] bool decrypt(AES& aes, const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output);
+[[nodiscard]] bool initializeAes(AES aes, ecc_key& serverKey, std::string_view playerKey);
+void cleanupAes(AES aes);
+[[nodiscard]] bool encrypt(AES aes, const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output);
+[[nodiscard]] bool decrypt(AES aes, const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output);
 
 } // namespace cyrex::network::mcbe::encryption

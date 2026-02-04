@@ -3,6 +3,7 @@
 #include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
+#include "network/mcbe/compression/snappy_compressor.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
@@ -73,7 +74,7 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
     }
 }
 
-bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVersion)
+bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion)
 {
     cyrex::network::mcbe::protocol::PlayStatusPacket packet;
     packet.status = protocolVersion < cyrex::network::mcbe::protocol::ProtocolInfo::currentProtocol
@@ -84,7 +85,7 @@ bool NetworkSession::disconnectUserForIncompatiableProtocol(uint32_t protocolVer
     return true;
 }
 
-void NetworkSession::send(cyrex::network::mcbe::Packet& packet, bool immediately)
+void NetworkSession::send(cyrex::network::mcbe::Packet& packet, const bool immediately)
 {
     if (immediately)
     {
@@ -105,20 +106,20 @@ void NetworkSession::flush()
     }
 }
 
-void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
+void NetworkSession::sendInternal(const mcbe::Packet& packet) const
 {
-    if (packet.getDef().direction == cyrex::network::mcbe::PacketDirection::Serverbound)
+    if (packet.getDef().direction == mcbe::PacketDirection::Serverbound)
     {
         return;
     }
 
     BinaryWriter payload;
     packet.encode(payload);
-
+    const std::string dump0 = hexDump(payload.data(), payload.length());
+    logging::info("raw payload = {}", dump0);
     std::vector<uint8_t> out;
 
-    if (!compressionEnabled || compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::NONE)
-    {
+    if (!compressionEnabled) {
         out.assign(payload.data(), payload.data() + payload.length());
     }
     else if (compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::ZLIB ||
@@ -151,9 +152,19 @@ void NetworkSession::sendInternal(cyrex::network::mcbe::Packet& packet)
             out.insert(out.end(), payload.data(), payload.data() + payload.length());
         }
     }
+    else
+    {
+        out.push_back(std::to_underlying(mcpe::protocol::types::CompressionAlgorithm::NONE));
+        out.insert(out.end(), payload.data(), payload.data() + payload.length());
+    }
     if (encryptionEnabled)
     {
-        out.clear(); //TODO: encryption
+        const std::vector<uint8_t> old(out);
+        if (mcbe::encryption::encrypt(cipherBlock(), old.data(), old.size(), out))
+        {
+            logging::error("encryption failed");
+            return;
+        }
     }
     out.insert(out.begin(), 0xFE);
 
@@ -172,9 +183,9 @@ void NetworkSession::setCompressor(std::unique_ptr<cyrex::network::mcbe::compres
 
 bool NetworkSession::handleLogin(uint32_t version, std::string authInfoJson, std::string clientDataJwt)
 {
-    if (cyrex::network::mcbe::protocol::isProtocolMabyeAccepted(version))
+    if (!cyrex::network::mcbe::protocol::isProtocolMabyeAccepted(version))
     {
-        disconnectUserForIncompatiableProtocol(version);
+        disconnectUserForIncompatibleProtocol(version);
         return false;
     }
     auto authData = nlohmann::json::parse(authInfoJson);
@@ -183,15 +194,23 @@ bool NetworkSession::handleLogin(uint32_t version, std::string authInfoJson, std
 
 bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
 {
+    if (!cyrex::network::mcbe::protocol::isProtocolMabyeAccepted(version))
+    {
+        disconnectUserForIncompatibleProtocol(version);
+        return false;
+    }
     // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
     cyrex::network::mcbe::protocol::NetworkSettingsPacket packet;
     packet.compressionThreshold = cyrex::network::mcbe::protocol::NetworkSettingsPacket::compressEverything;
-    packet.compressionAlgorithm = 0;
+    packet.compressionAlgorithm = std::to_underlying(cyrex::mcpe::protocol::types::CompressionAlgorithm::SNAPPY);
     packet.enableClientThrottling = false;
     packet.clientThrottleThreshold = 0;
     packet.clientThrottleScalar = 0.0f;
     send(packet, true);
-    // mark compression as ready to go lol!
+
+    // setCompressor(std::make_unique<cyrex::network::mcbe::compression::ZlibCompressor>(6, 256, 2 * 1024 * 1024));
+    setCompressor(std::make_unique<cyrex::network::mcbe::compression::SnappyCompressor>(std::optional<size_t>{256}, 2 * 1024 * 1024));
+
     compressionEnabled = true;
     return true;
 }

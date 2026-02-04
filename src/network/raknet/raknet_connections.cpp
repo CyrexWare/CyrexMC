@@ -15,9 +15,6 @@ void cyrex::network::raknet::RaknetConnections::onConnect(const RakNet::RakNetGU
 {
     auto session = std::make_unique<cyrex::network::session::NetworkSession>(guid, address, handler->transport());
 
-    session->setCompressor(
-        std::make_unique<cyrex::network::mcbe::compression::ZlibCompressor>(6, std::optional<size_t>{0}, 2 * 1024 * 1024));
-
     m_sessions.emplace(guid, std::move(session));
 
     cyrex::logging::log(LOG_RAKNET, "New incoming connection");

@@ -30,7 +30,7 @@ enum class Phase
 class NetworkSession
 {
 public:
-    NetworkSession(RakNet::RakNetGUID guid, RakNet::SystemAddress address, cyrex::network::mcbe::Transport* transport) :
+    NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, cyrex::network::mcbe::Transport* transport) :
         m_guid(guid),
         m_address(address),
         m_transport(transport),
@@ -48,7 +48,7 @@ public:
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
     void send(cyrex::network::mcbe::Packet& packet, bool immediately = false);
     void flush();
-    bool disconnectUserForIncompatiableProtocol(uint32_t);
+    bool disconnectUserForIncompatibleProtocol(uint32_t);
     bool handleLogin(uint32_t version, std::string authInfoJson, std::string clientDataJwt);
     bool handleRequestNetworkSettings(uint32_t version);
     void tick();
@@ -60,7 +60,7 @@ public:
         return *m_compressor;
     }
 
-    void setProtocolId(std::uint32_t protocolId)
+    void setProtocolId(const std::uint32_t protocolId)
     {
         m_protocolId = protocolId;
     }
@@ -80,13 +80,12 @@ public:
         return m_address;
     }
 
-    // [[nodiscard]] mcbe::encryption::AES cipherBlock() const
-    // {
-    //     return m_cipher;
-    // }
-
+    [[nodiscard]] mcbe::encryption::AES cipherBlock() const
+    {
+        return m_cipher;
+    }
 private:
-    void sendInternal(cyrex::network::mcbe::Packet& packet);
+    void sendInternal(const cyrex::network::mcbe::Packet& packet) const;
     std::queue<std::function<void()>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
@@ -95,7 +94,7 @@ private:
 
     std::uint32_t m_protocolId{0};
     std::unique_ptr<cyrex::network::mcbe::compression::Compressor> m_compressor;
-    // mcbe::encryption::AES m_cipher; //TODO: check this
+    mcbe::encryption::AES m_cipher;
 
     cyrex::network::mcbe::PacketFactory m_packetFactory;
 };

@@ -7,12 +7,12 @@
 namespace cyrex::network::mcbe::encryption
 {
 
-static uint64_t calculateChecksum(const int64_t blockCounter, const uint8_t* key, const uint8_t* inputBuffer, const word32 inputSize)
+static uint64_t calculateChecksum(const int64_t blockCounter, const std::uint8_t* key, const std::uint8_t* inputBuffer, const word32 inputSize)
 {
     uint8_t hash[32];
     wc_Sha256 sha;
     wc_InitSha256(&sha);
-    wc_Sha256Update(&sha, reinterpret_cast<const uint8_t*>(&blockCounter), 8);
+    wc_Sha256Update(&sha, reinterpret_cast<const std::uint8_t*>(&blockCounter), 8);
     wc_Sha256Update(&sha, inputBuffer, inputSize);
     wc_Sha256Update(&sha, key, 32);
     wc_Sha256Final(&sha, hash);
@@ -20,13 +20,13 @@ static uint64_t calculateChecksum(const int64_t blockCounter, const uint8_t* key
     return ri.readU64LE();
 }
 
-bool initializeAes(AES& aes, ecc_key& serverKey, const std::string_view playerKey)
+bool initializeAes(AES aes, ecc_key& serverKey, const std::string_view playerKey)
 {
     word32 keyLength = 48;
     word32 idx = 0;
     ecc_key playerPublicKey;
     wc_ecc_init(&playerPublicKey);
-    uint8_t sharedSecret[48];
+    std::uint8_t sharedSecret[48];
     if (wc_EccPublicKeyDecode(reinterpret_cast<const byte*>(playerKey.data()), &idx, &playerPublicKey, playerKey.size()) != 0 ||
         wc_ecc_shared_secret(&serverKey, &playerPublicKey, sharedSecret, &keyLength) != 0)
     {
@@ -34,15 +34,15 @@ bool initializeAes(AES& aes, ecc_key& serverKey, const std::string_view playerKe
         return false;
     }
     wc_ecc_free(&playerPublicKey);
-    uint8_t salt[16];
+    std::uint8_t salt[16];
     RAND_bytes(salt, 16);
-    uint8_t secretKeyBytes[32];
+    std::uint8_t secretKeyBytes[32];
     wc_Sha256 sha256;
     wc_InitSha256(&sha256);
     wc_Sha256Update(&sha256, salt, 16);
     wc_Sha256Update(&sha256, sharedSecret, keyLength);
     wc_Sha256Final(&sha256, secretKeyBytes);
-    uint8_t iv[16] = {};
+    std::uint8_t iv[16] = {};
     memcpy(iv, secretKeyBytes, 12);
     iv[15] = 0x02;
     wc_AesInit(aes.encryptBlock, nullptr, INVALID_DEVID);
@@ -51,11 +51,10 @@ bool initializeAes(AES& aes, ecc_key& serverKey, const std::string_view playerKe
     wc_AesSetKeyDirect(aes.decryptBlock, secretKeyBytes, 32, iv, AES_DECRYPTION);
     aes.key.assign(secretKeyBytes, secretKeyBytes + 32);
     aes.salt.assign(salt, salt + 16);
-    aes.isEncryptionEnabled = true;
     return true;
 }
 
-void cleanupAes(AES& aes)
+void cleanupAes(AES aes)
 {
     if (aes.encryptBlock)
     {
@@ -71,28 +70,27 @@ void cleanupAes(AES& aes)
     }
     aes.key.clear();
     aes.salt.clear();
-    aes.isEncryptionEnabled = false;
 }
 
-bool encrypt(AES& aes, const uint8_t* input, const size_t inputSize, std::vector<uint8_t>& output)
+bool encrypt(AES aes, const std::uint8_t* input, const std::size_t inputSize, std::vector<uint8_t>& output)
 {
-    const uint64_t hash = calculateChecksum(aes.encryptBlockCounter++, aes.key.data(), input, static_cast<word32>(inputSize));
-    std::vector<uint8_t> buffer;
+    const std::uint64_t hash = calculateChecksum(aes.encryptBlockCounter++, aes.key.data(), input, static_cast<word32>(inputSize));
+    std::vector<std::uint8_t> buffer;
     buffer.reserve(inputSize + 8);
     buffer.insert(buffer.end(), input, input + inputSize);
-    buffer.insert(buffer.end(), reinterpret_cast<const uint8_t*>(&hash), reinterpret_cast<const uint8_t*>(&hash) + 8);
+    buffer.insert(buffer.end(), reinterpret_cast<const std::uint8_t*>(&hash), reinterpret_cast<const std::uint8_t*>(&hash) + 8);
     output.resize(buffer.size());
     wc_AesCtrEncrypt(aes.encryptBlock, output.data(), buffer.data(), buffer.size());
     return true;
 }
 
-bool decrypt(AES& aes, const uint8_t* input, const size_t inputSize, std::vector<uint8_t>& output)
+bool decrypt(AES aes, const std::uint8_t* input, const std::size_t inputSize, std::vector<std::uint8_t>& output)
 {
     output.resize(inputSize);
     wc_AesCtrEncrypt(aes.decryptBlock, output.data(), input, inputSize);
     io::BinaryReader ri(output.data() + inputSize - 8, 8);
-    const uint64_t receivedHash = ri.readU64LE();
-    const uint64_t calculatedHash = calculateChecksum(aes.decryptBlockCounter++,
+    const std::uint64_t receivedHash = ri.readU64LE();
+    const std::uint64_t calculatedHash = calculateChecksum(aes.decryptBlockCounter++,
                                                       aes.key.data(),
                                                       output.data(),
                                                       static_cast<word32>(inputSize - 8));
