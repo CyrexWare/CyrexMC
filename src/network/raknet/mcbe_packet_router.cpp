@@ -4,6 +4,8 @@
 #include "network/session/network_session.hpp"
 
 #include <iostream>
+#include <utility>
+
 using namespace cyrex::network::session;
 
 void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::network::raknet::RaknetConnections& connections)
@@ -61,7 +63,8 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
                 }
                 cyrex::logging::info(LOG_MCBE, "decompressing...");
 
-                const mcbe::compression::CompressionStatus status = session->compressor().decompress(old.data() + 1, old.size() - 1, payload);
+                const mcbe::compression::CompressionStatus
+                    status = session->compressor().decompress(old.data() + 1, old.size() - 1, payload);
                 if (status == mcbe::compression::CompressionStatus::FAILED)
                 {
                     cyrex::logging::error(LOG_MCBE, "failed to decompress!");

@@ -10,9 +10,10 @@
 
 #include <iomanip>
 #include <iostream>
-#include <nlohmann/json.hpp>
 #include <mutex>
+#include <nlohmann/json.hpp>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 using namespace cyrex::network::io;
@@ -84,8 +85,8 @@ bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protoc
 {
     auto packet = std::make_unique<mcbe::protocol::PlayStatusPacket>();
     packet->status = protocolVersion < mcbe::protocol::ProtocolInfo::currentProtocol
-                        ? mcbe::protocol::PlayStatusPacket::loginFailedClient
-                        : mcbe::protocol::PlayStatusPacket::loginFailedServer;
+                         ? mcbe::protocol::PlayStatusPacket::loginFailedClient
+                         : mcbe::protocol::PlayStatusPacket::loginFailedServer;
 
     send(std::move(packet), true);
     return true;
@@ -150,7 +151,8 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     logging::info("raw packet payload = {}", buffer);
     std::vector<uint8_t> out;
 
-    if (!compressionEnabled) {
+    if (!compressionEnabled)
+    {
         out.assign(payload.data(), payload.data() + payload.length());
     }
     else if (compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::ZLIB ||
