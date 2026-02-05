@@ -3,7 +3,6 @@
 #include "compressor.hpp"
 
 #include <libdeflate.h>
-
 #include <memory>
 
 namespace cyrex::network::mcbe::compression
