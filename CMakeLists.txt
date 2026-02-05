@@ -68,7 +68,7 @@ set(WOLFSSL_CRYPT_TESTS OFF CACHE BOOL "" FORCE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(wolfssl)
 
-SET(JWT_SSL_LIBRARY "wolfSSL")
+SET(JWT_SSL_LIBRARY "wolfSSL" CACHE STRING "doc" FORCE)
 FetchContent_Declare(
   jwt-cpp
   GIT_REPOSITORY https://github.com/CyrexWare/jwt-cpp
