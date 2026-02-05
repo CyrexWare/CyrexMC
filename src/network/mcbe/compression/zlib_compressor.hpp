@@ -4,35 +4,47 @@
 
 #include <libdeflate.h>
 
+#include <memory>
+
 namespace cyrex::network::mcbe::compression
 {
 class ZlibCompressor final : public Compressor
 {
 public:
     static constexpr int defaultLevel = 7;
-    static constexpr size_t defaultThreshold = 256;
     static constexpr size_t defaultMaxDecompressionSize = 8 * 1024 * 1024;
 
-    explicit ZlibCompressor(int level = defaultLevel,
-                            std::optional<size_t> minSize = defaultThreshold,
-                            size_t maxDecompressionSize = defaultMaxDecompressionSize);
+    explicit ZlibCompressor(int level = defaultLevel, size_t maxDecompressionSize = defaultMaxDecompressionSize);
 
-    ~ZlibCompressor() override;
-
-    CompressionStatus decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) override;
-
-    CompressionStatus compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) override;
-
-    [[nodiscard]] cyrex::mcpe::protocol::types::CompressionAlgorithm networkId() const noexcept override;
-
-    [[nodiscard]] std::optional<size_t> compressionThreshold() const noexcept override;
+    std::optional<std::vector<uint8_t>> decompress(std::span<const uint8_t> input) const override;
+    std::optional<std::vector<uint8_t>> compress(std::span<const uint8_t> input) const override;
 
 private:
-    int m_level;
-    std::optional<size_t> m_minCompressionSize;
     size_t m_maxDecompressionSize;
 
-    libdeflate_compressor* m_compressor;
-    libdeflate_decompressor* m_decompressor;
+    struct CustomDeleter_libdeflate_compressor
+    {
+        void operator()(libdeflate_compressor* compressor) const
+        {
+            if (compressor)
+            {
+                libdeflate_free_compressor(compressor);
+            }
+        }
+    };
+
+    struct CustomDeleter_libdeflate_decompressor
+    {
+        void operator()(libdeflate_decompressor* decompressor) const
+        {
+            if (decompressor)
+            {
+                libdeflate_free_decompressor(decompressor);
+            }
+        }
+    };
+
+    std::unique_ptr<libdeflate_compressor, CustomDeleter_libdeflate_compressor> m_compressor;
+    std::unique_ptr<libdeflate_decompressor, CustomDeleter_libdeflate_decompressor> m_decompressor;
 };
 } // namespace cyrex::network::mcbe::compression

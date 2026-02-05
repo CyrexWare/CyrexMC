@@ -3,7 +3,7 @@
 #include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
-#include "network/mcbe/compression/snappy_compressor.hpp"
+#include "network/mcbe/compression/compressors.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
@@ -153,30 +153,18 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
 
     if (!compressionEnabled)
     {
-        out.assign(payload.data(), payload.data() + payload.length());
+        out = payload.buffer;
     }
-    else if (compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::ZLIB ||
-             compressor().networkId() == mcpe::protocol::types::CompressionAlgorithm::SNAPPY)
+    else
     {
-        auto threshold = compressor().compressionThreshold().value_or(0);
-
-        if (payload.length() >= threshold)
+        const auto* comp = cyrex::network::mcbe::compression::getCompressor(compressor);
+        if (comp && comp->shouldCompress(payload.length()))
         {
-            std::vector<uint8_t> compressed;
-            switch (compressor().compress(payload.data(), payload.length(), compressed))
-            {
-                case mcbe::compression::CompressionStatus::FAILED:
-                    cyrex::logging::error("compression failed");
-                    return;
-                case mcbe::compression::CompressionStatus::SUCCESS:
-                    out.push_back(std::to_underlying(compressor().networkId()));
-                    cyrex::logging::info("compression success");
-                    break;
-                case mcbe::compression::CompressionStatus::RAW:
-                    out.push_back(std::to_underlying(mcpe::protocol::types::CompressionAlgorithm::NONE));
-                    cyrex::logging::info("compression raw");
-                    break;
-            }
+            std::vector<uint8_t> compressed = *comp->compress(payload.buffer);
+
+            out.push_back(std::to_underlying(compressor));
+            cyrex::logging::info("compression success");
+
             out.insert(out.end(), compressed.begin(), compressed.end());
         }
         else
@@ -185,11 +173,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
             out.insert(out.end(), payload.data(), payload.data() + payload.length());
         }
     }
-    else
-    {
-        out.push_back(std::to_underlying(mcpe::protocol::types::CompressionAlgorithm::NONE));
-        out.insert(out.end(), payload.data(), payload.data() + payload.length());
-    }
+
     if (encryptionEnabled)
     {
         const std::vector<uint8_t> old(out);
@@ -212,11 +196,6 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     m_transport->send(m_guid, out.data(), out.size());
 }
 
-void NetworkSession::setCompressor(std::unique_ptr<mcbe::compression::Compressor> comp)
-{
-    m_compressor = std::move(comp);
-}
-
 bool NetworkSession::handleLogin(uint32_t version, std::string authInfoJson, std::string clientDataJwt)
 {
     if (!mcbe::protocol::isProtocolMabyeAccepted(version))
@@ -235,19 +214,20 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
         disconnectUserForIncompatibleProtocol(version);
         return false;
     }
+
+    compressor = mcpe::protocol::types::CompressionAlgorithm::ZLIB;
+
     // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
     auto packet = std::make_unique<mcbe::protocol::NetworkSettingsPacket>();
     packet->compressionThreshold = mcbe::protocol::NetworkSettingsPacket::compressEverything;
-    packet->compressionAlgorithm = std::to_underlying(mcpe::protocol::types::CompressionAlgorithm::SNAPPY);
+    packet->compressionAlgorithm = std::to_underlying(compressor);
     packet->enableClientThrottling = false;
     packet->clientThrottleThreshold = 0;
     packet->clientThrottleScalar = 0.0f;
     send(std::move(packet), true);
 
-    // setCompressor(std::make_unique<compression::ZlibCompressor>(6, 256, 2 * 1024 * 1024));
-    setCompressor(std::make_unique<mcbe::compression::SnappyCompressor>(std::optional<size_t>{256}, 2 * 1024 * 1024));
-
     compressionEnabled = true;
+
     return true;
 }
 

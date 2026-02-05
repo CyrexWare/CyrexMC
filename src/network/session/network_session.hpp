@@ -3,12 +3,11 @@
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/compression/compressor.hpp"
-#include "network/mcbe/compression/noop_compressor.hpp"
-#include "network/mcbe/compression/zlib_compressor.hpp"
 #include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_def.hpp"
 #include "network/mcbe/packet_factory.hpp"
+#include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
 #include "network/mcbe/transport.hpp"
 
 #include <RakNet/RakNetTypes.h>
@@ -33,14 +32,14 @@ public:
     NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, mcbe::Transport* transport) :
         m_guid(guid),
         m_address(address),
-        m_transport(transport),
-
-        m_compressor(std::make_unique<mcbe::compression::NoopCompressor>())
+        m_transport(transport)
     {
         m_packetFactory.registerAll();
     }
 
     bool compressionEnabled = false;
+    cyrex::mcpe::protocol::types::CompressionAlgorithm compressor;
+
     bool encryptionEnabled = false;
     Phase phase = Phase::HANDSHAKE;
     bool markedForDisconnect = false;
@@ -53,13 +52,6 @@ public:
     bool handleLogin(uint32_t version, std::string authInfoJson, std::string clientDataJwt);
     bool handleRequestNetworkSettings(uint32_t version);
     void tick();
-
-    void setCompressor(std::unique_ptr<mcbe::compression::Compressor> compressor);
-
-    [[nodiscard]] mcbe::compression::Compressor& compressor() const
-    {
-        return *m_compressor;
-    }
 
     void setProtocolId(const std::uint32_t protocolId)
     {
@@ -95,7 +87,6 @@ private:
     mcbe::Transport* m_transport;
 
     std::uint32_t m_protocolId{0};
-    std::unique_ptr<mcbe::compression::Compressor> m_compressor;
     std::optional<mcbe::encryption::AesEncryptor> m_cipher;
 
     mcbe::PacketFactory m_packetFactory;

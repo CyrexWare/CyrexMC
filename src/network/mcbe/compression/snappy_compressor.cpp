@@ -3,54 +3,39 @@
 namespace cyrex::network::mcbe::compression
 {
 
-SnappyCompressor::SnappyCompressor(std::optional<size_t> minSize, size_t maxDecompressionSize) :
-    m_minCompressionSize(minSize),
-    m_maxDecompressionSize(maxDecompressionSize)
+std::optional<std::vector<uint8_t>> SnappyCompressor::compress(std::span<const uint8_t> input) const
 {
-}
-
-CompressionStatus SnappyCompressor::compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output)
-{
-    const bool compressible = !m_minCompressionSize.has_value() || inputSize >= *m_minCompressionSize;
-
-    if (!compressible)
-    {
-        output.assign(input, input + inputSize);
-        return CompressionStatus::RAW;
-    }
-    size_t written = snappy::MaxCompressedLength(inputSize);
-    snappy::RawCompress(reinterpret_cast<const char*>(input), inputSize, reinterpret_cast<char*>(output.data()), &written);
+    size_t written = snappy::MaxCompressedLength(input.size());
+    std::vector<uint8_t> output(written);
+    snappy::RawCompress(reinterpret_cast<const char*>(input.data()),
+                        input.size(),
+                        reinterpret_cast<char*>(output.data()),
+                        &written);
     output.resize(written);
-    return CompressionStatus::SUCCESS;
+    return output;
 }
 
-CompressionStatus SnappyCompressor::decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output)
+std::optional<std::vector<uint8_t>> SnappyCompressor::decompress(std::span<const uint8_t> input) const
 {
-    output.resize(m_maxDecompressionSize);
-    if (!snappy::IsValidCompressedBuffer(reinterpret_cast<const char*>(input), inputSize))
+    if (!snappy::IsValidCompressedBuffer(reinterpret_cast<const char*>(input.data()), input.size()))
     {
-        return CompressionStatus::FAILED;
+        return std::nullopt;
     }
+
     size_t actualSize = 0;
-    if (!snappy::GetUncompressedLength(reinterpret_cast<const char*>(input), inputSize, &actualSize))
+    if (!snappy::GetUncompressedLength(reinterpret_cast<const char*>(input.data()), input.size(), &actualSize))
     {
-        return CompressionStatus::FAILED;
+        return std::nullopt;
     }
-    if (!snappy::RawUncompress(reinterpret_cast<const char*>(input), inputSize, reinterpret_cast<char*>(output.data())))
+
+    std::vector<uint8_t> output(actualSize);
+    if (!snappy::RawUncompress(reinterpret_cast<const char*>(input.data()),
+                               input.size(),
+                               reinterpret_cast<char*>(output.data())))
     {
-        return CompressionStatus::FAILED;
+        return std::nullopt;
     }
-    output.resize(actualSize);
-    return CompressionStatus::SUCCESS;
-}
 
-cyrex::mcpe::protocol::types::CompressionAlgorithm SnappyCompressor::networkId() const noexcept
-{
-    return cyrex::mcpe::protocol::types::CompressionAlgorithm::SNAPPY;
-}
-
-std::optional<size_t> SnappyCompressor::compressionThreshold() const noexcept
-{
-    return m_minCompressionSize;
+    return output;
 }
 } // namespace cyrex::network::mcbe::compression
