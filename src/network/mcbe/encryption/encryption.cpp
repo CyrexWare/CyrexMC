@@ -47,8 +47,8 @@ std::optional<std::vector<uint8_t>> AesEncryptor::decrypt(std::span<const uint8_
     io::BinaryReader ri(output.data() + input.size() - hashSize, hashSize);
     const Hash receivedHash = ri.readU64LE();
     const Hash calculatedHash = calculateChecksum(decryptBlock->counter++,
-                                                           key.data(),
-                                                           output.data(),
+                                                  key.data(),
+                                                  output.data(),
                                                   static_cast<word32>(input.size() - hashSize));
     if (calculatedHash != receivedHash)
     {

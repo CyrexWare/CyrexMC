@@ -1,21 +1,21 @@
 #pragma once
 
+#include <array>
 #include <assert.h>
 #include <memory>
+#include <optional>
+#include <span>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 #include <wolfssl/options.h>
-#include <wolfssl/wolfcrypt/aes.h>
-#include <wolfssl/wolfcrypt/ecc.h>
 #include <wolfssl/ssl.h>
-#include <wolfssl/wolfcrypt/random.h>
+#include <wolfssl/wolfcrypt/aes.h>
 #include <wolfssl/wolfcrypt/asn_public.h>
+#include <wolfssl/wolfcrypt/ecc.h>
+#include <wolfssl/wolfcrypt/random.h>
 
 #include <cstdint>
-#include <array>
-#include <span>
-#include <stdexcept>
-#include <optional>
 
 namespace cyrex::network::mcbe::encryption
 {
@@ -75,8 +75,7 @@ struct AesEncryptor
     std::array<uint8_t, 32> key;
     std::array<uint8_t, 16> salt;
 
-    AesEncryptor(EccKey* serverKey, std::string_view playerKey) :
-        serverKey(serverKey)
+    AesEncryptor(EccKey* serverKey, std::string_view playerKey) : serverKey(serverKey)
     {
         word32 idx;
         EccKey playerPublicKey;
