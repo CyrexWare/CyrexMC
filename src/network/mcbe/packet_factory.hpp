@@ -1,13 +1,13 @@
 #pragma once
 
-#include "assert.h"
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_def.hpp"
-#include "network/mcbe/packet_direction.hpp"
 
 #include <functional>
 #include <memory>
 #include <unordered_map>
+
+#include <cassert>
 
 template <typename Derived, typename Base>
 std::unique_ptr<Derived> dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr) noexcept
@@ -34,13 +34,16 @@ public:
     void add()
     {
         const auto& def = T::getDefStatic();
-        assert(!m_entries.contains(def.networkId));
+        if (m_entries.contains(def.networkId))
+        {
+            m_entries.erase(def.networkId);
+        }
         m_entries.emplace(def.networkId, &def);
     }
 
-    [[nodiscard]] const PacketDef* find(uint32_t id) const
+    [[nodiscard]] const PacketDef* find(const uint32_t id) const
     {
-        auto it = m_entries.find(id);
+        const auto it = m_entries.find(id);
         if (it == m_entries.end())
         {
             return nullptr;
@@ -49,16 +52,24 @@ public:
         return it->second;
     }
 
-    [[nodiscard]] const PacketDef& get(uint32_t id) const
+    [[nodiscard]] const PacketDef& get(const uint32_t id) const
     {
-        auto ptr = find(id);
+        const auto ptr = find(id);
         assert(ptr);
         return *ptr;
     }
 
-    [[nodiscard]] std::unique_ptr<Packet> create(uint32_t id) const
+    void remove(const uint32_t id)
     {
-        auto def = find(id);
+        if (m_entries.contains(id))
+        {
+            m_entries.erase(id);
+        }
+    }
+
+    [[nodiscard]] std::unique_ptr<Packet> create(const uint32_t id) const
+    {
+        const auto def = find(id);
         if (!def)
         {
             return {};

@@ -3,6 +3,7 @@
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
 
 #include <optional>
+#include <span>
 #include <vector>
 
 #include <cstddef>
@@ -16,9 +17,16 @@ class Compressor
 public:
     virtual ~Compressor() = default;
 
-    virtual bool decompress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) = 0;
-    virtual bool compress(const uint8_t* input, size_t inputSize, std::vector<uint8_t>& output) = 0;
-    [[nodiscard]] virtual cyrex::mcpe::protocol::types::CompressionAlgorithm networkId() const noexcept = 0;
-    [[nodiscard]] virtual std::optional<size_t> compressionThreshold() const noexcept = 0;
+    [[nodiscard]] virtual std::optional<std::vector<uint8_t>> decompress(std::span<const uint8_t> input) const = 0;
+    [[nodiscard]] virtual std::optional<std::vector<uint8_t>> compress(std::span<const uint8_t> input) const = 0;
+
+    [[nodiscard]] bool shouldCompress(const std::size_t inputSize) const
+    {
+        const bool compressible = !minCompressionSize.has_value() || inputSize >= *minCompressionSize;
+        return compressible;
+    }
+
+    static constexpr size_t defaultThreshold = 256;
+    std::optional<size_t> minCompressionSize = defaultThreshold;
 };
 } // namespace cyrex::network::mcbe::compression

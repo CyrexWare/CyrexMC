@@ -1,7 +1,6 @@
 #pragma once
 
 #include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
 #include "packet_direction.hpp"
 
 #include <memory>
@@ -27,7 +26,10 @@ public:
     const bool allowBeforeLogin;
     const CreateFunc create;
 
-    constexpr PacketDef(uint32_t networkId, PacketDirection direction, bool allowBeforeLogin, CreateFunc create) :
+    constexpr PacketDef(const uint32_t networkId,
+                        const PacketDirection direction,
+                        const bool allowBeforeLogin,
+                        const CreateFunc create) :
         networkId{networkId},
         direction{direction},
         allowBeforeLogin{allowBeforeLogin},

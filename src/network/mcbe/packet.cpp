@@ -2,19 +2,17 @@
 
 #include "packet_def.hpp"
 
-bool cyrex::network::mcbe::Packet::encode(cyrex::network::io::BinaryWriter& out) const
+bool cyrex::network::mcbe::Packet::encode(io::BinaryWriter& out) const
 {
-    cyrex::network::io::BinaryWriter payload;
+    io::BinaryWriter payload;
     payload.buffer.clear();
     if (!encodePayload(payload))
     {
         return false;
     }
-
-    out.writeI8(0xFE);
-    out.writeVarUInt(payload.length() + io::BinaryWriter::getVarUIntSize(getDef().networkId));
-    out.writeVarUInt(getDef().networkId);
+    const std::uint32_t header = getDef().networkId & 0x3FF | subClientId << 10;
+    out.writeVarUInt(payload.length() + io::BinaryWriter::getVarUIntSize(header));
+    out.writeVarUInt(header);
     out.writeBuffer(payload.data(), payload.length());
-
     return true;
 }
