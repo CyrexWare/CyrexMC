@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace cyrex::network::io
+namespace cyrex::nw::io
 {
 
 class BinaryReader
@@ -216,4 +216,4 @@ private:
     }
 };
 
-} // namespace cyrex::network::io
+} // namespace cyrex::nw::io

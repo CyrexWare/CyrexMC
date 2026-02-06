@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-using namespace cyrex::network::io;
+using namespace cyrex::nw::io;
 
 namespace
 {
@@ -36,7 +36,7 @@ std::string hexDump(const uint8_t* data, size_t len)
 }
 } // namespace
 
-namespace cyrex::network::session
+namespace cyrex::nw::session
 {
 
 // eh, we could just call flush directly, but we might expand this function
@@ -83,16 +83,16 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
 
 bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion)
 {
-    auto packet = std::make_unique<mcbe::protocol::PlayStatusPacket>();
-    packet->status = protocolVersion < mcbe::protocol::ProtocolInfo::currentProtocol
-                         ? mcbe::protocol::PlayStatusPacket::loginFailedClient
-                         : mcbe::protocol::PlayStatusPacket::loginFailedServer;
+    auto packet = std::make_unique<protocol::PlayStatusPacket>();
+    packet->status = protocolVersion < protocol::ProtocolInfo::currentProtocol
+                         ? protocol::PlayStatusPacket::loginFailedClient
+                         : protocol::PlayStatusPacket::loginFailedServer;
 
     send(std::move(packet), true);
     return true;
 }
 
-void NetworkSession::send(std::unique_ptr<mcbe::Packet> packet, const bool immediately)
+void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool immediately)
 {
     if (immediately)
     {
@@ -106,7 +106,7 @@ void NetworkSession::send(std::unique_ptr<mcbe::Packet> packet, const bool immed
     m_sendQueue.push_back(std::move(packet));
 }
 
-void NetworkSession::sendBatch(std::vector<std::unique_ptr<mcbe::Packet>> packets, const bool immediately)
+void NetworkSession::sendBatch(std::vector<std::unique_ptr<protocol::Packet>> packets, const bool immediately)
 {
     if (immediately)
     {
@@ -157,7 +157,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     }
     else
     {
-        const auto* comp = mcbe::compression::getCompressor(compressor);
+        const auto* comp = protocol::getCompressor(compressor);
         if (comp && comp->shouldCompress(payload.length()))
         {
             std::vector<uint8_t> compressed = *comp->compress(payload.buffer);
@@ -169,7 +169,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
         }
         else
         {
-            out.push_back(std::to_underlying(mcpe::protocol::types::CompressionAlgorithm::NONE));
+            out.push_back(std::to_underlying(protocol::CompressionAlgorithm::NONE));
             out.insert(out.end(), payload.data(), payload.data() + payload.length());
         }
     }
@@ -198,7 +198,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
 
 bool NetworkSession::handleLogin(const uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt)
 {
-    if (!mcbe::protocol::isProtocolMabyeAccepted(version))
+    if (!protocol::isProtocolMabyeAccepted(version))
     {
         disconnectUserForIncompatibleProtocol(version);
         return false;
@@ -209,17 +209,17 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
 
 bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
 {
-    if (!mcbe::protocol::isProtocolMabyeAccepted(version))
+    if (!protocol::isProtocolMabyeAccepted(version))
     {
         disconnectUserForIncompatibleProtocol(version);
         return false;
     }
 
-    compressor = mcpe::protocol::types::CompressionAlgorithm::ZLIB;
+    compressor = protocol::CompressionAlgorithm::ZLIB;
 
     // this packet needs to be properly handled, and we should call session's compressor networkId, right now this is just hardcoded
-    auto packet = std::make_unique<mcbe::protocol::NetworkSettingsPacket>();
-    packet->compressionThreshold = mcbe::protocol::NetworkSettingsPacket::compressEverything;
+    auto packet = std::make_unique<protocol::NetworkSettingsPacket>();
+    packet->compressionThreshold = protocol::NetworkSettingsPacket::compressEverything;
     packet->compressionAlgorithm = std::to_underlying(compressor);
     packet->enableClientThrottling = false;
     packet->clientThrottleThreshold = 0;
@@ -231,4 +231,4 @@ bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
     return true;
 }
 
-} // namespace cyrex::network::session
+} // namespace cyrex::nw::session

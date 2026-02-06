@@ -26,7 +26,7 @@ public:
         std::uint32_t maxPlayers;
         std::string serverName;
         std::string motd;
-        cyrex::mcpe::protocol::types::GameMode defaultGameMode;
+        cyrex::nw::protocol::GameMode defaultGameMode;
 
         static Config fromProperties(const cyrex::util::ServerProperties& props);
     };
@@ -41,8 +41,8 @@ public:
     [[nodiscard]] const std::string& getServerName() const;
     [[nodiscard]] const std::string& getMotd() const;
 
-    [[nodiscard]] cyrex::mcpe::protocol::types::GameMode getDefaultGameMode() const;
-    void setDefaultGameMode(cyrex::mcpe::protocol::types::GameMode mode);
+    [[nodiscard]] cyrex::nw::protocol::GameMode getDefaultGameMode() const;
+    void setDefaultGameMode(cyrex::nw::protocol::GameMode mode);
     void setDefaultGameModeFromString(std::string_view mode);
 
     void addPlayer(const RakNet::RakNetGUID& guid);
@@ -58,7 +58,7 @@ private:
     void commandLoop();
 
     Config m_config;
-    std::unique_ptr<cyrex::network::raknet::RaknetHandler> m_raknet;
+    std::unique_ptr<cyrex::nw::raknet::RaknetHandler> m_raknet;
     std::vector<RakNet::RakNetGUID> m_players;
     std::uint64_t m_serverUniqueId;
     std::atomic<bool> m_running;

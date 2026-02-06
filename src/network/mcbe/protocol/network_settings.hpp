@@ -8,14 +8,14 @@
 
 #include <cstdint>
 
-using namespace cyrex::network::io;
-using namespace cyrex::network::session;
+using namespace cyrex::nw::io;
+using namespace cyrex::nw::session;
 
-namespace cyrex::network::mcbe::protocol
+namespace cyrex::nw::protocol
 {
 class NetworkSettingsPacket final :
-    public cyrex::network::mcbe::
-        PacketImpl<NetworkSettingsPacket, ProtocolInfo::networkSettingsPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
+    public cyrex::nw::protocol::
+        PacketImpl<NetworkSettingsPacket, ProtocolInfo::networkSettingsPacket, cyrex::nw::protocol::PacketDirection::Clientbound, true>
 {
 public:
     static constexpr uint16_t compressNothing = 0;
@@ -29,13 +29,13 @@ public:
     float clientThrottleScalar = 0.0f;
 
 protected:
-    bool decodePayload(cyrex::network::io::BinaryReader&) override
+    bool decodePayload(cyrex::nw::io::BinaryReader&) override
     {
         // NOOP
         return false;
     }
 
-    bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
+    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
     {
         out.writeI16LE(compressionThreshold);
         out.writeI16LE(compressionAlgorithm);
@@ -46,9 +46,9 @@ protected:
     }
 
 public:
-    bool handle(cyrex::network::session::NetworkSession&) override
+    bool handle(cyrex::nw::session::NetworkSession&) override
     {
         return true;
     }
 };
-} // namespace cyrex::network::mcbe::protocol
+} // namespace cyrex::nw::protocol

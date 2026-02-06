@@ -10,18 +10,18 @@
 
 using namespace cyrex::util;
 
-void cyrex::network::raknet::RaknetConnections::onConnect(const RakNet::RakNetGUID& guid,
+void cyrex::nw::raknet::RaknetConnections::onConnect(const RakNet::RakNetGUID& guid,
                                                           RakNet::SystemAddress address,
-                                                          cyrex::network::raknet::RaknetHandler* handler)
+                                                          cyrex::nw::raknet::RaknetHandler* handler)
 {
-    auto session = std::make_unique<cyrex::network::session::NetworkSession>(guid, address, handler->transport());
+    auto session = std::make_unique<cyrex::nw::session::NetworkSession>(guid, address, handler->transport());
 
     m_sessions.emplace(guid, std::move(session));
 
     cyrex::logging::log(LOG_RAKNET, "New incoming connection");
 }
 
-void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
+void cyrex::nw::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
 {
     auto it = m_sessions.find(guid);
     if (it == m_sessions.end())
@@ -31,7 +31,7 @@ void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNe
     cyrex::logging::log(LOG_RAKNET, "Client disconnected");
 }
 
-void cyrex::network::raknet::RaknetConnections::tick()
+void cyrex::nw::raknet::RaknetConnections::tick()
 {
     for (const auto& session : m_sessions | std::views::values)
     {
@@ -39,7 +39,7 @@ void cyrex::network::raknet::RaknetConnections::tick()
     }
 }
 
-void cyrex::network::raknet::RaknetConnections::cleanup()
+void cyrex::nw::raknet::RaknetConnections::cleanup()
 {
     for (auto it = m_sessions.begin(); it != m_sessions.end();)
     {
@@ -51,7 +51,7 @@ void cyrex::network::raknet::RaknetConnections::cleanup()
 }
 
 
-cyrex::network::session::NetworkSession* cyrex::network::raknet::RaknetConnections::get(const RakNet::RakNetGUID& guid)
+cyrex::nw::session::NetworkSession* cyrex::nw::raknet::RaknetConnections::get(const RakNet::RakNetGUID& guid)
 {
     auto it = m_sessions.find(guid);
     if (it == m_sessions.end())

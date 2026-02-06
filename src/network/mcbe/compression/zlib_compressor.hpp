@@ -5,7 +5,7 @@
 #include <libdeflate.h>
 #include <memory>
 
-namespace cyrex::network::mcbe::compression
+namespace cyrex::nw::protocol
 {
 class ZlibCompressor final : public Compressor
 {
@@ -46,4 +46,4 @@ private:
     std::unique_ptr<libdeflate_compressor, CustomDeleter_libdeflate_compressor> m_compressor;
     std::unique_ptr<libdeflate_decompressor, CustomDeleter_libdeflate_decompressor> m_decompressor;
 };
-} // namespace cyrex::network::mcbe::compression
+} // namespace cyrex::nw::protocol
