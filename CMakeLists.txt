@@ -57,6 +57,7 @@ FetchContent_Declare(
 )
 set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
 set(GLM_ENABLE_CXX_17 ON CACHE BOOL "" FORCE)
+set(GLM_BUILD_LIBRARY ${BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glm)
 
 FetchContent_Declare(
