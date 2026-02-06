@@ -6,4 +6,4 @@
 namespace cyrex::nw::raknet
 {
 std::string buildMotd(const cyrex::Server& server);
-}
+} // namespace cyrex::nw::raknet
