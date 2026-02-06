@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace cyrex::network::mcbe::compression
+namespace cyrex::nw::protocol
 {
 
 ZlibCompressor::ZlibCompressor(int level, size_t maxDecompressionSize) :
@@ -47,4 +47,4 @@ std::optional<std::vector<uint8_t>> ZlibCompressor::decompress(std::span<const u
     output.resize(actualSize);
     return output;
 }
-} // namespace cyrex::network::mcbe::compression
+} // namespace cyrex::nw::protocol

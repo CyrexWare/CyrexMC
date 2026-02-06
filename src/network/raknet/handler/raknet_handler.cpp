@@ -10,7 +10,7 @@
 #include <RakNet/MessageIdentifiers.h>
 #include <string>
 
-namespace cyrex::network::raknet
+namespace cyrex::nw::raknet
 {
 
 RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
@@ -40,7 +40,7 @@ RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
 
 RaknetHandler::~RaknetHandler() = default;
 
-cyrex::network::mcbe::Transport* RaknetHandler::transport() const
+cyrex::nw::protocol::Transport* RaknetHandler::transport() const
 {
     return m_transportImpl.get();
 }
@@ -83,4 +83,4 @@ void RaknetHandler::handlePacket(Packet* packet)
     }
 }
 
-} // namespace cyrex::network::raknet
+} // namespace cyrex::nw::raknet

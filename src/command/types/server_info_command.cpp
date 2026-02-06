@@ -8,7 +8,7 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "server.hpp"
 
-namespace cyrex::command::types
+namespace cyrex::command
 {
 
 std::string ServerInfoCommand::name() const
@@ -49,7 +49,7 @@ void ServerInfoCommand::execute(CommandContext& ctx)
 
                                      cyrex::logging::Color::WHITE,
                                      cyrex::logging::Color::GOLD,
-                                     cyrex::network::mcbe::protocol::ProtocolInfo::minecraftVersion,
+                                     cyrex::nw::protocol::ProtocolInfo::minecraftVersion,
 
                                      cyrex::logging::Color::WHITE,
                                      cyrex::logging::Color::GOLD,
@@ -61,4 +61,4 @@ void ServerInfoCommand::execute(CommandContext& ctx)
                                      ctx.server.getPort()));
 }
 
-} // namespace cyrex::command::types
+} // namespace cyrex::command

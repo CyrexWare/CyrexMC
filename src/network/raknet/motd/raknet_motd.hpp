@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace cyrex::network::raknet
+namespace cyrex::nw::raknet
 {
 std::string buildMotd(const cyrex::Server& server);
 }

@@ -6,12 +6,12 @@
 #include "packet_def.hpp"
 #include "packet_direction.hpp"
 
-namespace cyrex::network::session
+namespace cyrex::nw::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::network::mcbe
+namespace cyrex::nw::protocol
 {
 
 class PacketDef;
@@ -64,4 +64,4 @@ public:
 private:
     PacketImpl() = default;
 };
-} // namespace cyrex::network::mcbe
+} // namespace cyrex::nw::protocol

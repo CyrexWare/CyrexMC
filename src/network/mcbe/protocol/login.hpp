@@ -7,31 +7,31 @@
 
 #include <iostream>
 
-namespace cyrex::network::mcbe::protocol
+namespace cyrex::nw::protocol
 {
 class LoginPacket final :
-    public cyrex::network::mcbe::PacketImpl<LoginPacket, ProtocolInfo::loginPacket, cyrex::network::mcbe::PacketDirection::Serverbound, false>
+    public cyrex::nw::protocol::PacketImpl<LoginPacket, ProtocolInfo::loginPacket, cyrex::nw::protocol::PacketDirection::Serverbound, false>
 {
 public:
     uint32_t protocol = 0;
     std::string authInfoJson;
     std::string clientDataJwt;
 
-    bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
+    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
     {
         out.writeU32BE(protocol);
         out.writeString(tryEncodeRequestForConnection());
         return true;
     }
 
-    bool decodePayload(cyrex::network::io::BinaryReader& in) override
+    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
     {
         protocol = in.readU32BE();
         tryDecodeRequestForConnection(in.readString());
         return true;
     }
 
-    bool handle(cyrex::network::session::NetworkSession& session) override
+    bool handle(cyrex::nw::session::NetworkSession& session) override
     {
         return session.handleLogin(protocol, authInfoJson, clientDataJwt);
     }
@@ -39,7 +39,7 @@ public:
 private:
     void tryDecodeRequestForConnection(const std::string& binary)
     {
-        cyrex::network::io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
+        cyrex::nw::io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
 
         const uint32_t authLen = cr.readU32LE();
         authInfoJson = cr.readBytes(authLen);
@@ -50,7 +50,7 @@ private:
 
     [[nodiscard]] std::string tryEncodeRequestForConnection() const
     {
-        cyrex::network::io::BinaryWriter cr{};
+        cyrex::nw::io::BinaryWriter cr{};
 
         cr.writeU32LE(static_cast<uint32_t>(authInfoJson.size()));
         cr.writeBuffer(reinterpret_cast<const uint8_t*>(authInfoJson.data()), authInfoJson.size());
@@ -62,4 +62,4 @@ private:
     }
 };
 
-} // namespace cyrex::network::mcbe::protocol
+} // namespace cyrex::nw::protocol

@@ -7,11 +7,11 @@
 #include <iostream>
 #include <utility>
 
-using namespace cyrex::network::session;
+using namespace cyrex::nw::session;
 
-void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::network::raknet::RaknetConnections& connections)
+void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::nw::raknet::RaknetConnections& connections)
 {
-    cyrex::network::session::NetworkSession* session = connections.get(p->guid);
+    cyrex::nw::session::NetworkSession* session = connections.get(p->guid);
     if (!session)
         return;
     //SKIP 0xFE
@@ -45,9 +45,9 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     }
     else
     {
-        const auto compressionMethod = static_cast<mcpe::protocol::types::CompressionAlgorithm>(payload.front());
+        const auto compressionMethod = static_cast<protocol::CompressionAlgorithm>(payload.front());
         cyrex::logging::info(LOG_MCBE, "compression method = 0x{:02X}", std::to_underlying(compressionMethod));
-        if (const auto* compressor = mcbe::compression::getCompressor(compressionMethod))
+        if (const auto* compressor = protocol::getCompressor(compressionMethod))
         {
             const std::vector old(payload);
             cyrex::logging::info(LOG_MCBE, "decompressing...");

@@ -2,7 +2,7 @@
 
 #include "command/command_base.hpp"
 
-namespace cyrex::command::types
+namespace cyrex::command
 {
 class StopCommand final : public CommandBase
 {
@@ -13,4 +13,4 @@ public:
     [[nodiscard]] Permission permission() const override;
     void execute(CommandContext& ctx) override;
 };
-} // namespace cyrex::command::types
+} // namespace cyrex::command

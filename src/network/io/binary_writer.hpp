@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <cstring>
 
-namespace cyrex::network::io
+namespace cyrex::nw::io
 {
 
 class BinaryWriter
@@ -206,4 +206,4 @@ public:
     }
 };
 
-} // namespace cyrex::network::io
+} // namespace cyrex::nw::io
