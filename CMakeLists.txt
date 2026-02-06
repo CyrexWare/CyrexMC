@@ -55,6 +55,8 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/g-truc/glm.git
     GIT_TAG 1.0.3
 )
+set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
+set(GLM_ENABLE_CXX_17 ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glm)
 
 FetchContent_Declare(
@@ -168,4 +170,5 @@ target_link_libraries(RunTests PUBLIC
 )
 
 include(GoogleTest)
+
 gtest_discover_tests(RunTests)
