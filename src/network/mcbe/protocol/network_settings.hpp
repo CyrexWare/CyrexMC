@@ -1,41 +1,30 @@
 #pragma once
 
-#include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
-#include "network/mcbe/packet.hpp"
-#include "network/mcbe/packet_direction.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-
-#include <cstdint>
-
-using namespace cyrex::network::io;
-using namespace cyrex::network::session;
 
 namespace cyrex::network::mcbe::protocol
 {
 class NetworkSettingsPacket final :
-    public cyrex::network::mcbe::
-        PacketImpl<NetworkSettingsPacket, ProtocolInfo::networkSettingsPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
+    public PacketImpl<NetworkSettingsPacket, ProtocolInfo::networkSettingsPacket, PacketDirection::Clientbound, true>
 {
 public:
     static constexpr uint16_t compressNothing = 0;
     static constexpr uint16_t compressEverything = 1;
 
-    int16_t compressionThreshold = 1;
-    int16_t compressionAlgorithm = 0;
+    std::int16_t compressionThreshold = 1;
+    std::int16_t compressionAlgorithm = 0;
 
     bool enableClientThrottling = false;
-    int8_t clientThrottleThreshold = 0;
+    std::int8_t clientThrottleThreshold = 0;
     float clientThrottleScalar = 0.0f;
 
-protected:
-    bool decodePayload(cyrex::network::io::BinaryReader&) override
+    bool decodePayload(io::BinaryReader&) override
     {
         // NOOP
         return false;
     }
 
-    bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeI16LE(compressionThreshold);
         out.writeI16LE(compressionAlgorithm);
@@ -45,8 +34,7 @@ protected:
         return true;
     }
 
-public:
-    bool handle(cyrex::network::session::NetworkSession&) override
+    bool handle(session::NetworkSession&) override
     {
         return true;
     }

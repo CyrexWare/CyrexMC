@@ -2,7 +2,7 @@
 
 #include "packet.hpp"
 
-std::unique_ptr<cyrex::network::mcbe::Packet> cyrex::network::mcbe::PacketDef::decode(cyrex::network::io::BinaryReader& in) const
+std::unique_ptr<cyrex::network::mcbe::Packet> cyrex::network::mcbe::PacketDef::decode(io::BinaryReader& in) const
 {
     auto packet = create();
     if (!packet)

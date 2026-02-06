@@ -5,7 +5,7 @@
 namespace cyrex::network::mcbe::compression
 {
 
-ZlibCompressor::ZlibCompressor(int level, size_t maxDecompressionSize) :
+ZlibCompressor::ZlibCompressor(const int level, const size_t maxDecompressionSize) :
     m_maxDecompressionSize(maxDecompressionSize),
     m_compressor{libdeflate_alloc_compressor(level)},
     m_decompressor{libdeflate_alloc_decompressor()}
@@ -16,7 +16,7 @@ ZlibCompressor::ZlibCompressor(int level, size_t maxDecompressionSize) :
     }
 }
 
-std::optional<std::vector<uint8_t>> ZlibCompressor::compress(std::span<const uint8_t> input) const
+std::optional<std::vector<uint8_t>> ZlibCompressor::compress(const std::span<const uint8_t> input) const
 {
     const size_t bound = libdeflate_deflate_compress_bound(m_compressor.get(), input.size());
     std::vector<uint8_t> output(bound);
@@ -32,7 +32,7 @@ std::optional<std::vector<uint8_t>> ZlibCompressor::compress(std::span<const uin
     return output;
 }
 
-std::optional<std::vector<uint8_t>> ZlibCompressor::decompress(std::span<const uint8_t> input) const
+std::optional<std::vector<uint8_t>> ZlibCompressor::decompress(const std::span<const uint8_t> input) const
 {
     std::vector<uint8_t> output(m_maxDecompressionSize);
 

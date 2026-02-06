@@ -2,8 +2,6 @@
 
 #include "packet_def.hpp"
 
-#include <cassert>
-
 bool cyrex::network::mcbe::Packet::encode(io::BinaryWriter& out) const
 {
     io::BinaryWriter payload;

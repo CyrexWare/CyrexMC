@@ -17,10 +17,10 @@ class Compressor
 public:
     virtual ~Compressor() = default;
 
-    virtual std::optional<std::vector<uint8_t>> decompress(std::span<const uint8_t> input) const = 0;
-    virtual std::optional<std::vector<uint8_t>> compress(std::span<const uint8_t> input) const = 0;
+    [[nodiscard]] virtual std::optional<std::vector<uint8_t>> decompress(std::span<const uint8_t> input) const = 0;
+    [[nodiscard]] virtual std::optional<std::vector<uint8_t>> compress(std::span<const uint8_t> input) const = 0;
 
-    bool shouldCompress(std::size_t inputSize) const
+    [[nodiscard]] bool shouldCompress(const std::size_t inputSize) const
     {
         const bool compressible = !minCompressionSize.has_value() || inputSize >= *minCompressionSize;
         return compressible;

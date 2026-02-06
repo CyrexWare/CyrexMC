@@ -1,22 +1,14 @@
 #pragma once
 
-#include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
-#include "network/mcbe/packet.hpp"
-#include "network/mcbe/packet_def.hpp"
-#include "network/mcbe/packet_direction.hpp"
-#include "network/mcbe/protocol/protocol_info.hpp"
-
-#include <cstdint>
+#include "network/session/network_session.hpp"
 
 namespace cyrex::network::mcbe::protocol
 {
 class PlayStatusPacket final :
-    public cyrex::network::mcbe::
-        PacketImpl<PlayStatusPacket, ProtocolInfo::playStatusPacket, cyrex::network::mcbe::PacketDirection::Clientbound, true>
+    public PacketImpl<PlayStatusPacket, ProtocolInfo::playStatusPacket, PacketDirection::Clientbound, true>
 {
 public:
-    // Mabye make this separately?
+    // Maybe make this separately?
     static constexpr uint32_t loginSuccess = 0;
     static constexpr uint32_t loginFailedClient = 1;
     static constexpr uint32_t loginFailedServer = 2;
@@ -30,7 +22,6 @@ public:
 
     uint32_t status = 0;
 
-protected:
     bool decodePayload(cyrex::network::io::BinaryReader& in) override
     {
         status = in.readU32BE();
@@ -43,7 +34,6 @@ protected:
         return true;
     }
 
-public:
     bool handle(cyrex::network::session::NetworkSession& /*session*/) override
     {
         return true;

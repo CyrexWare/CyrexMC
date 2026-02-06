@@ -198,7 +198,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
 
 bool NetworkSession::handleLogin(const uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt)
 {
-    if (!mcbe::protocol::isProtocolMabyeAccepted(version))
+    if (!mcbe::protocol::isSupportedProtocol(version))
     {
         disconnectUserForIncompatibleProtocol(version);
         return false;
@@ -209,7 +209,7 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
 
 bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
 {
-    if (!mcbe::protocol::isProtocolMabyeAccepted(version))
+    if (!mcbe::protocol::isSupportedProtocol(version))
     {
         disconnectUserForIncompatibleProtocol(version);
         return false;

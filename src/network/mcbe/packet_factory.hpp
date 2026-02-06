@@ -1,9 +1,8 @@
 #pragma once
 
-#include "assert.h"
+#include <cassert>
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_def.hpp"
-#include "network/mcbe/packet_direction.hpp"
 
 #include <functional>
 #include <memory>
@@ -54,7 +53,7 @@ public:
 
     [[nodiscard]] const PacketDef& get(const uint32_t id) const
     {
-        auto ptr = find(id);
+        const auto ptr = find(id);
         assert(ptr);
         return *ptr;
     }

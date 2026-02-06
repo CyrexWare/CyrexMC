@@ -1,7 +1,5 @@
 #pragma once
 
-#include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
 #include "network/mcbe/compression/compressor.hpp"
 #include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/packet.hpp"
@@ -13,9 +11,6 @@
 #include <RakNet/RakNetTypes.h>
 #include <functional>
 #include <memory>
-#include <queue>
-
-#include <cstdint>
 
 namespace cyrex::network::session
 {
