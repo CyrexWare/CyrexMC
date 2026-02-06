@@ -6,7 +6,7 @@
 
 namespace cyrex::nw::protocol
 {
-inline Compressor* getCompressor(mcpe::protocol::types::CompressionAlgorithm algo)
+inline Compressor* getCompressor(CompressionAlgorithm algo)
 {
     if (algo == CompressionAlgorithm::ZLIB)
     {

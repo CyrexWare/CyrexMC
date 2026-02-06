@@ -1,6 +1,7 @@
 #pragma once
 
 #include "network/mcbe/protocol/protocol_info.hpp"
+
 #include <cstdint>
 
 using namespace cyrex::nw::io;
@@ -38,7 +39,7 @@ public:
         out.writeFloatLE(clientThrottleScalar);
         return true;
     }
-    
+
     bool handle(cyrex::nw::session::NetworkSession&) override
     {
         return true;

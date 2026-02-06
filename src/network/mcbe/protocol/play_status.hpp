@@ -22,7 +22,7 @@ public:
     static constexpr uint32_t loginFailedVanillaEditor = 9;
 
     uint32_t status = 0;
-    
+
     bool decodePayload(cyrex::nw::io::BinaryReader& in) override
     {
         status = in.readU32BE();
