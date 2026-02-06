@@ -8,12 +8,12 @@ namespace cyrex::nw::protocol
 {
 inline Compressor* getCompressor(mcpe::protocol::types::CompressionAlgorithm algo)
 {
-    if (algo == mcpe::protocol::types::CompressionAlgorithm::ZLIB)
+    if (algo == CompressionAlgorithm::ZLIB)
     {
         static ZlibCompressor zlibCompressor;
         return &zlibCompressor;
     }
-    if (algo == mcpe::protocol::types::CompressionAlgorithm::SNAPPY)
+    if (algo == CompressionAlgorithm::SNAPPY)
     {
         static SnappyCompressor snappyCompressor;
         return &snappyCompressor;
