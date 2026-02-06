@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include <assert.h>
+#include <cassert>
 #include <memory>
 #include <optional>
 #include <span>
@@ -13,7 +13,6 @@
 #include <wolfssl/wolfcrypt/aes.h>
 #include <wolfssl/wolfcrypt/asn_public.h>
 #include <wolfssl/wolfcrypt/ecc.h>
-#include <wolfssl/wolfcrypt/random.h>
 
 #include <cstdint>
 
@@ -72,29 +71,26 @@ struct AesEncryptor
     AesBlockPtr encryptBlock = std::make_unique<AesBlock>();
     AesBlockPtr decryptBlock = std::make_unique<AesBlock>();
 
-    std::array<uint8_t, 32> key;
-    std::array<uint8_t, 16> salt;
+    std::array<uint8_t, 32> key{};
+    std::array<uint8_t, 16> salt{};
 
     AesEncryptor(EccKey* serverKey, std::string_view playerKey) : serverKey(serverKey)
     {
-        word32 idx;
+        word32 idx = 0;
         EccKey playerPublicKey;
         if (wc_EccPublicKeyDecode(reinterpret_cast<const byte*>(playerKey.data()), &idx, &playerPublicKey, playerKey.size()))
         {
-            throw std::runtime_error("couln't init ecc  key");
+            throw std::runtime_error("couldn't init ecc  key");
         }
 
-        word32 sharedSecretLength;
-        std::array<uint8_t, 48> sharedSecret;
+        word32 sharedSecretLength = 0;
+        std::array<uint8_t, 48> sharedSecret{};
         if (wc_ecc_shared_secret(serverKey, &playerPublicKey, sharedSecret.data(), &sharedSecretLength) != 0)
         {
-            throw std::runtime_error("couln't init ecc  key");
+            throw std::runtime_error("couldn't init ecc  key");
         }
-
-        salt = {};
         RAND_bytes(salt.data(), salt.size());
 
-        key = {};
         wc_Sha256 sha256;
         wc_InitSha256(&sha256);
         wc_Sha256Update(&sha256, salt.data(), salt.size());
@@ -102,15 +98,15 @@ struct AesEncryptor
         wc_Sha256Final(&sha256, key.data());
 
         std::array<::uint8_t, 16> iv{};
-        std::copy(key.begin(), key.end(), iv.begin());
-        iv[15] = 0x02;
+        std::ranges::copy(key, iv.begin());
+        iv.back() = 0x02;
 
         wc_AesSetKeyDirect(encryptBlock.get(), key.data(), key.size(), iv.data(), AES_ENCRYPTION);
         wc_AesSetKeyDirect(decryptBlock.get(), key.data(), key.size(), iv.data(), AES_DECRYPTION);
     }
 
-    [[nodiscard]] std::optional<std::vector<uint8_t>> encrypt(std::span<const uint8_t> input);
-    [[nodiscard]] std::optional<std::vector<uint8_t>> decrypt(std::span<const uint8_t> input);
+    [[nodiscard]] std::optional<std::vector<uint8_t>> encrypt(std::span<const uint8_t> input) const;
+    [[nodiscard]] std::optional<std::vector<uint8_t>> decrypt(std::span<const uint8_t> input) const;
 };
 
 

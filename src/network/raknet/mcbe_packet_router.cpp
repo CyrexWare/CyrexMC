@@ -18,7 +18,7 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     const std::uint8_t* data = p->data + 1;
     const std::size_t len = p->length - 1;
 
-    if (len == 0)
+    if (len <= 1)
         return;
 
     std::vector<std::uint8_t> payload;
@@ -45,19 +45,20 @@ void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::n
     }
     else
     {
-        const auto compressionMethod = static_cast<mcpe::protocol::types::CompressionAlgorithm>(payload[0]);
-        const std::vector old(payload);
+        const auto compressionMethod = static_cast<mcpe::protocol::types::CompressionAlgorithm>(payload.front());
         cyrex::logging::info(LOG_MCBE, "compression method = 0x{:02X}", std::to_underlying(compressionMethod));
-
-        if (const auto* compressor = cyrex::network::mcbe::compression::getCompressor(compressionMethod))
+        if (const auto* compressor = mcbe::compression::getCompressor(compressionMethod))
         {
+            const std::vector old(payload);
             cyrex::logging::info(LOG_MCBE, "decompressing...");
             payload = *compressor->decompress({old.data() + 1, old.size() - 1});
             cyrex::logging::info(LOG_MCBE, "decompressed size = {}", payload.size());
         }
         else
         {
+            session->onRaw(*p, payload.data() + 1, payload.size() - 1);
             cyrex::logging::info(LOG_MCBE, "compression inactive.");
+            return;
         }
     }
 

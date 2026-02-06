@@ -157,13 +157,13 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     }
     else
     {
-        const auto* comp = cyrex::network::mcbe::compression::getCompressor(compressor);
+        const auto* comp = mcbe::compression::getCompressor(compressor);
         if (comp && comp->shouldCompress(payload.length()))
         {
             std::vector<uint8_t> compressed = *comp->compress(payload.buffer);
 
             out.push_back(std::to_underlying(compressor));
-            cyrex::logging::info("compression success");
+            logging::info("compression success");
 
             out.insert(out.end(), compressed.begin(), compressed.end());
         }
@@ -176,7 +176,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
 
     if (encryptionEnabled)
     {
-        const std::vector<uint8_t> old(out);
+        const std::vector old(out);
         if (auto data = getEncryptor().encrypt(old))
         {
             out = std::move(*data);
@@ -196,7 +196,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     m_transport->send(m_guid, out.data(), out.size());
 }
 
-bool NetworkSession::handleLogin(uint32_t version, std::string authInfoJson, std::string clientDataJwt)
+bool NetworkSession::handleLogin(const uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt)
 {
     if (!mcbe::protocol::isProtocolMabyeAccepted(version))
     {
@@ -207,7 +207,7 @@ bool NetworkSession::handleLogin(uint32_t version, std::string authInfoJson, std
     return true;
 }
 
-bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
+bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
 {
     if (!mcbe::protocol::isProtocolMabyeAccepted(version))
     {
@@ -217,7 +217,7 @@ bool NetworkSession::handleRequestNetworkSettings(uint32_t version)
 
     compressor = mcpe::protocol::types::CompressionAlgorithm::ZLIB;
 
-    // this packet needs to be properly handled and we should call session's compressor networkId, right now this is just hardcoded
+    // this packet needs to be properly handled, and we should call session's compressor networkId, right now this is just hardcoded
     auto packet = std::make_unique<mcbe::protocol::NetworkSettingsPacket>();
     packet->compressionThreshold = mcbe::protocol::NetworkSettingsPacket::compressEverything;
     packet->compressionAlgorithm = std::to_underlying(compressor);

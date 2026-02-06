@@ -26,7 +26,7 @@ static uint64_t calculateChecksum(const int64_t blockCounter,
 using Hash = std::uint64_t;
 constexpr auto hashSize = sizeof(Hash);
 
-std::optional<std::vector<uint8_t>> AesEncryptor::encrypt(std::span<const uint8_t> input)
+std::optional<std::vector<uint8_t>> AesEncryptor::encrypt(const std::span<const uint8_t> input) const
 {
     const Hash hash = calculateChecksum(encryptBlock->counter++, key.data(), input.data(), input.size());
     std::vector<std::uint8_t> buffer;
@@ -40,7 +40,7 @@ std::optional<std::vector<uint8_t>> AesEncryptor::encrypt(std::span<const uint8_
     return output;
 }
 
-std::optional<std::vector<uint8_t>> AesEncryptor::decrypt(std::span<const uint8_t> input)
+std::optional<std::vector<uint8_t>> AesEncryptor::decrypt(const std::span<const uint8_t> input) const
 {
     std::vector<std::uint8_t> output(input.size());
     wc_AesCtrEncrypt(decryptBlock.get(), output.data(), input.data(), input.size());
