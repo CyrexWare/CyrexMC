@@ -49,7 +49,7 @@ public:
     void sendBatch(std::vector<std::unique_ptr<mcbe::Packet>> packets, bool immediately = false);
     void flush();
     bool disconnectUserForIncompatibleProtocol(uint32_t);
-    bool handleLogin(uint32_t version, const std::string&  authInfoJson, const std::string&  clientDataJwt);
+    bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
     bool handleRequestNetworkSettings(uint32_t version);
     void tick();
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <cassert>
 #include <memory>
 #include <optional>
 #include <span>
@@ -14,6 +13,7 @@
 #include <wolfssl/wolfcrypt/asn_public.h>
 #include <wolfssl/wolfcrypt/ecc.h>
 
+#include <cassert>
 #include <cstdint>
 
 namespace cyrex::network::mcbe::encryption
