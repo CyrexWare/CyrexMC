@@ -1,13 +1,13 @@
 #pragma once
 
-#include "assert.h"
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_def.hpp"
-#include "network/mcbe/packet_direction.hpp"
 
 #include <functional>
 #include <memory>
 #include <unordered_map>
+
+#include <cassert>
 
 template <typename Derived, typename Base>
 std::unique_ptr<Derived> dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr) noexcept
@@ -54,7 +54,7 @@ public:
 
     [[nodiscard]] const PacketDef& get(const uint32_t id) const
     {
-        auto ptr = find(id);
+        const auto ptr = find(id);
         assert(ptr);
         return *ptr;
     }

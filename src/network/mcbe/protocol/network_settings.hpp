@@ -1,11 +1,6 @@
 #pragma once
 
-#include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
-#include "network/mcbe/packet.hpp"
-#include "network/mcbe/packet_direction.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
-
 #include <cstdint>
 
 using namespace cyrex::nw::io;
@@ -21,14 +16,13 @@ public:
     static constexpr uint16_t compressNothing = 0;
     static constexpr uint16_t compressEverything = 1;
 
-    int16_t compressionThreshold = 1;
-    int16_t compressionAlgorithm = 0;
+    std::int16_t compressionThreshold = 1;
+    std::int16_t compressionAlgorithm = 0;
 
     bool enableClientThrottling = false;
-    int8_t clientThrottleThreshold = 0;
+    std::int8_t clientThrottleThreshold = 0;
     float clientThrottleScalar = 0.0f;
 
-protected:
     bool decodePayload(cyrex::nw::io::BinaryReader&) override
     {
         // NOOP
@@ -44,11 +38,11 @@ protected:
         out.writeFloatLE(clientThrottleScalar);
         return true;
     }
-
-public:
+    
     bool handle(cyrex::nw::session::NetworkSession&) override
     {
         return true;
     }
 };
+
 } // namespace cyrex::nw::protocol

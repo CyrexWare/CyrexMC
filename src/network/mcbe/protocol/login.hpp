@@ -1,19 +1,14 @@
 #pragma once
 
-#include "log/logging.hpp"
-#include "network/mcbe/packet.hpp"
-#include "network/mcbe/packet_direction.hpp"
 #include "network/session/network_session.hpp"
-
 #include <iostream>
 
 namespace cyrex::nw::protocol
 {
-class LoginPacket final :
-    public cyrex::nw::protocol::PacketImpl<LoginPacket, ProtocolInfo::loginPacket, cyrex::nw::protocol::PacketDirection::Serverbound, false>
+class LoginPacket final : public cyrex::nw::protocol::PacketImpl<LoginPacket, ProtocolInfo::loginPacket, cyrex::nw::protocol::PacketDirection::Serverbound, false>
 {
 public:
-    uint32_t protocol = 0;
+    std::uint32_t protocol = 0;
     std::string authInfoJson;
     std::string clientDataJwt;
 

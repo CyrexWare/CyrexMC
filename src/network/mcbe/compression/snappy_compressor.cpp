@@ -3,7 +3,7 @@
 namespace cyrex::nw::protocol
 {
 
-std::optional<std::vector<uint8_t>> SnappyCompressor::compress(std::span<const uint8_t> input) const
+std::optional<std::vector<uint8_t>> SnappyCompressor::compress(const std::span<const uint8_t> input) const
 {
     size_t written = snappy::MaxCompressedLength(input.size());
     std::vector<uint8_t> output(written);
@@ -15,7 +15,7 @@ std::optional<std::vector<uint8_t>> SnappyCompressor::compress(std::span<const u
     return output;
 }
 
-std::optional<std::vector<uint8_t>> SnappyCompressor::decompress(std::span<const uint8_t> input) const
+std::optional<std::vector<uint8_t>> SnappyCompressor::decompress(const std::span<const uint8_t> input) const
 {
     if (!snappy::IsValidCompressedBuffer(reinterpret_cast<const char*>(input.data()), input.size()))
     {
