@@ -97,13 +97,13 @@ public:
         writeU64LE(std::bit_cast<uint64_t>(v));
     }
 
-    void writeVector2(const cyrex::math::Vector2& v)
+    void writeVector2(const math::Vector2& v)
     {
         writeFloatLE(v.x);
         writeFloatLE(v.y);
     }
 
-    void writeVector3(const cyrex::math::Vector3& v)
+    void writeVector3(const math::Vector3& v)
     {
         writeFloatLE(v.x);
         writeFloatLE(v.y);
