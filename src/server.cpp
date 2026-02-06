@@ -1,7 +1,7 @@
 #include "server.hpp"
 
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "network/raknet/raknet_handler.hpp"
+#include "network/raknet/handler/raknet_handler.hpp"
 
 #include <algorithm>
 #include <chrono>

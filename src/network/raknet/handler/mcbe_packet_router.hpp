@@ -1,5 +1,5 @@
 #pragma once
-#include "raknet_connections.hpp"
+#include "network/raknet/connection/raknet_connections.hpp"
 
 namespace cyrex::network::raknet
 {

@@ -3,7 +3,7 @@
 #include "log/logging.hpp"
 #include "network/mcbe/compression/zlib_compressor.hpp"
 #include "network/session/network_session.hpp"
-#include "raknet_handler.hpp"
+#include "network/raknet/handler/raknet_handler.hpp"
 
 #include <iostream>
 #include <ranges>
