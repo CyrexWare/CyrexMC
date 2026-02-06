@@ -1,4 +1,5 @@
 #include "util/server_properties.hpp"
+
 #include "network/mcbe/protocol/types/GameMode.hpp"
 
 #include <filesystem>
