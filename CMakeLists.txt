@@ -73,6 +73,8 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/CyrexWare/jwt-cpp
   GIT_TAG eaebed9c588993d8dc9c791f38ac43c7220c2103
 )
+set(JWT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(JWT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(jwt-cpp)
 
 # force -isystem for wolfssl
@@ -97,6 +99,13 @@ add_executable(CyrexMC
     server/main.cpp
     ${ENGINE_SOURCES}
 )
+
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
 
 target_compile_features(CyrexMC PRIVATE cxx_std_23)
 
