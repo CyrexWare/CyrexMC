@@ -20,9 +20,9 @@ namespace cyrex::nw::protocol
 
 class RequestNetworkSettingsPacket final :
     public cyrex::nw::protocol::PacketImpl<RequestNetworkSettingsPacket,
-                                            ProtocolInfo::requestNetworkSettingsPacket,
-                                            cyrex::nw::protocol::PacketDirection::Serverbound,
-                                            true>
+                                           ProtocolInfo::requestNetworkSettingsPacket,
+                                           cyrex::nw::protocol::PacketDirection::Serverbound,
+                                           true>
 {
 public:
     uint32_t protocolVersion = 0;

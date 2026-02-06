@@ -11,8 +11,8 @@
 using namespace cyrex::util;
 
 void cyrex::nw::raknet::RaknetConnections::onConnect(const RakNet::RakNetGUID& guid,
-                                                          RakNet::SystemAddress address,
-                                                          cyrex::nw::raknet::RaknetHandler* handler)
+                                                     RakNet::SystemAddress address,
+                                                     cyrex::nw::raknet::RaknetHandler* handler)
 {
     auto session = std::make_unique<cyrex::nw::session::NetworkSession>(guid, address, handler->transport());
 
