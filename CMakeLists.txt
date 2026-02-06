@@ -121,6 +121,7 @@ target_compile_features(CyrexMC PRIVATE cxx_std_23)
 target_include_directories(CyrexMC PRIVATE
     "${PROJECT_SOURCE_DIR}/src"
     "${PROJECT_SOURCE_DIR}/server"
+    "${glm_SOURCE_DIR}/glm"
 )
 
 target_compile_definitions(CyrexMC PRIVATE
@@ -137,7 +138,7 @@ target_link_libraries(CyrexMC PRIVATE
     snappy
     nlohmann_json::nlohmann_json
     jwt-cpp
-    glm
+    #glm
 )
 
 CyrexMC_set_option(
@@ -172,3 +173,4 @@ target_link_libraries(RunTests PUBLIC
 include(GoogleTest)
 
 gtest_discover_tests(RunTests)
+
