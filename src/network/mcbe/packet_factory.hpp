@@ -1,12 +1,13 @@
 #pragma once
 
-#include <cassert>
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_def.hpp"
 
 #include <functional>
 #include <memory>
 #include <unordered_map>
+
+#include <cassert>
 
 template <typename Derived, typename Base>
 std::unique_ptr<Derived> dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr) noexcept

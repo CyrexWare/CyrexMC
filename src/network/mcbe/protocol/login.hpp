@@ -4,8 +4,7 @@
 
 namespace cyrex::network::mcbe::protocol
 {
-class LoginPacket final :
-    public PacketImpl<LoginPacket, ProtocolInfo::loginPacket, PacketDirection::Serverbound, false>
+class LoginPacket final : public PacketImpl<LoginPacket, ProtocolInfo::loginPacket, PacketDirection::Serverbound, false>
 {
 public:
     std::uint32_t protocol = 0;
