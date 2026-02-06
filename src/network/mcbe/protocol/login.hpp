@@ -24,16 +24,16 @@ public:
         return true;
     }
 
-    bool decodePayload(cyrex::network::io::BinaryReader& /*in*/) override
+    bool decodePayload(cyrex::network::io::BinaryReader& in) override
     {
-        //out.writeU32BE(protocol);
-        //out.writeString(tryEncodeRequestForConnection());
+        protocol = in.readU32BE();
+        tryDecodeRequestForConnection(in.readString());
         return true;
     }
 
-    bool handle(cyrex::network::session::NetworkSession& /*session*/) override
+    bool handle(cyrex::network::session::NetworkSession& session) override
     {
-        return true;
+        return session.handleLogin(protocol, authInfoJson, clientDataJwt);
     }
 
 private:

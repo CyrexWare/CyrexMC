@@ -1,6 +1,6 @@
 #pragma once
 
-#include "raknet_guid_hash.hpp"
+#include "network/raknet/util/raknet_guid_hash.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <memory>

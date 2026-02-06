@@ -2,7 +2,7 @@
 
 #include "command/command_manager.hpp"
 #include "network/mcbe/protocol/types/GameMode.hpp"
-#include "network/raknet/raknet_handler.hpp"
+#include "network/raknet/handler/raknet_handler.hpp"
 #include "util/server_properties.hpp"
 
 #include <RakNet/RakNetTypes.h>

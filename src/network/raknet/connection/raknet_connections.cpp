@@ -2,10 +2,11 @@
 
 #include "log/logging.hpp"
 #include "network/mcbe/compression/zlib_compressor.hpp"
+#include "network/raknet/handler/raknet_handler.hpp"
 #include "network/session/network_session.hpp"
-#include "raknet_handler.hpp"
 
 #include <iostream>
+#include <ranges>
 
 using namespace cyrex::util;
 
@@ -14,9 +15,6 @@ void cyrex::network::raknet::RaknetConnections::onConnect(const RakNet::RakNetGU
                                                           cyrex::network::raknet::RaknetHandler* handler)
 {
     auto session = std::make_unique<cyrex::network::session::NetworkSession>(guid, address, handler->transport());
-
-    session->setCompressor(
-        std::make_unique<cyrex::network::mcbe::compression::ZlibCompressor>(6, std::optional<size_t>{0}, 2 * 1024 * 1024));
 
     m_sessions.emplace(guid, std::move(session));
 
@@ -35,7 +33,7 @@ void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNe
 
 void cyrex::network::raknet::RaknetConnections::tick()
 {
-    for (auto& [guid, session] : m_sessions)
+    for (const auto& session : m_sessions | std::views::values)
     {
         session->tick();
     }

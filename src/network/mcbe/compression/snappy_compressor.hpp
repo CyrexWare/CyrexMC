@@ -1,0 +1,15 @@
+#pragma once
+
+#include "compressor.hpp"
+
+#include <snappy.h>
+
+namespace cyrex::network::mcbe::compression
+{
+class SnappyCompressor final : public Compressor
+{
+public:
+    std::optional<std::vector<uint8_t>> decompress(std::span<const uint8_t> input) const override;
+    std::optional<std::vector<uint8_t>> compress(std::span<const uint8_t> input) const override;
+};
+} // namespace cyrex::network::mcbe::compression

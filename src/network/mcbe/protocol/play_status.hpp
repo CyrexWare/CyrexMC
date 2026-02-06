@@ -34,13 +34,13 @@ protected:
     bool decodePayload(cyrex::network::io::BinaryReader& in) override
     {
         status = in.readU32BE();
-        return false;
+        return true;
     }
 
     bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
     {
         out.writeU32BE(status);
-        return false;
+        return true;
     }
 
 public:
