@@ -57,7 +57,6 @@ FetchContent_Declare(
 )
 set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
 set(GLM_ENABLE_CXX_17 ON CACHE BOOL "" FORCE)
-set(GLM_BUILD_LIBRARY ${BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glm)
 
 FetchContent_Declare(
@@ -138,7 +137,7 @@ target_link_libraries(CyrexMC PRIVATE
     snappy
     nlohmann_json::nlohmann_json
     jwt-cpp
-    glm
+    glm::glm-header-only
 )
 
 CyrexMC_set_option(
