@@ -2,9 +2,9 @@
 
 #include "log/logging.hpp"
 #include "mcbe_packet_router.hpp"
-#include "network/session/network_session.hpp"
-#include "network/raknet/motd/raknet_motd.hpp"
 #include "network/raknet/connection/raknet_transport.hpp"
+#include "network/raknet/motd/raknet_motd.hpp"
+#include "network/session/network_session.hpp"
 #include "server.hpp"
 
 #include <RakNet/MessageIdentifiers.h>
