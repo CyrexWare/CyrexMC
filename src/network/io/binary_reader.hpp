@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math/vector2.hpp"
-#include "math/vector3.hpp"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
 
 #include <bit>
 #include <stdexcept>
@@ -190,12 +190,12 @@ public:
         return s;
     }
 
-    math::Vector2 readVector2()
+    glm::vec2 readVector2()
     {
         return {readFloatLE(), readFloatLE()};
     }
 
-    math::Vector3 readVector3()
+    glm::vec3 readVector3()
     {
         return {readFloatLE(), readFloatLE(), readFloatLE()};
     }

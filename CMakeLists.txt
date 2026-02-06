@@ -51,6 +51,13 @@ FetchContent_Declare(libdeflate
 FetchContent_MakeAvailable(libdeflate)
 
 FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.3
+)
+FetchContent_MakeAvailable(glm)
+
+FetchContent_Declare(
     wolfssl
     GIT_REPOSITORY https://github.com/wolfSSL/wolfssl
     GIT_TAG v5.8.4-stable
@@ -128,6 +135,7 @@ target_link_libraries(CyrexMC PRIVATE
     snappy
     nlohmann_json::nlohmann_json
     jwt-cpp
+    glm
 )
 
 CyrexMC_set_option(

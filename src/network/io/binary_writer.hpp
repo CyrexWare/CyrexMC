@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math/vector2.hpp"
-#include "math/vector3.hpp"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
 
 #include <bit>
 #include <string>
@@ -97,13 +97,13 @@ public:
         writeU64LE(std::bit_cast<uint64_t>(v));
     }
 
-    void writeVector2(const math::Vector2& v)
+    void writeVector2(const glm::vec2& v)
     {
         writeFloatLE(v.x);
         writeFloatLE(v.y);
     }
 
-    void writeVector3(const math::Vector3& v)
+    void writeVector3(const glm::vec3& v)
     {
         writeFloatLE(v.x);
         writeFloatLE(v.y);
