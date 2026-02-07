@@ -7,7 +7,6 @@
 bool cyrex::nw::protocol::Packet::encode(io::BinaryWriter& out) const
 {
     io::BinaryWriter payload;
-    payload.buffer.clear();
     if (!encodePayload(payload))
     {
         return false;
