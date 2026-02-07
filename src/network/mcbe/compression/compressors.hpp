@@ -4,16 +4,16 @@
 #include "snappy_compressor.hpp"
 #include "zlib_compressor.hpp"
 
-namespace cyrex::network::mcbe::compression
+namespace cyrex::nw::protocol
 {
-inline Compressor* getCompressor(mcpe::protocol::types::CompressionAlgorithm algo)
+inline Compressor* getCompressor(CompressionAlgorithm algo)
 {
-    if (algo == mcpe::protocol::types::CompressionAlgorithm::ZLIB)
+    if (algo == CompressionAlgorithm::ZLIB)
     {
         static ZlibCompressor zlibCompressor;
         return &zlibCompressor;
     }
-    if (algo == mcpe::protocol::types::CompressionAlgorithm::SNAPPY)
+    if (algo == CompressionAlgorithm::SNAPPY)
     {
         static SnappyCompressor snappyCompressor;
         return &snappyCompressor;
@@ -21,4 +21,4 @@ inline Compressor* getCompressor(mcpe::protocol::types::CompressionAlgorithm alg
 
     return nullptr;
 }
-} // namespace cyrex::network::mcbe::compression
+} // namespace cyrex::nw::protocol

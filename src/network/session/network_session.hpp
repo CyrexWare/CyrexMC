@@ -12,7 +12,7 @@
 #include <functional>
 #include <memory>
 
-namespace cyrex::network::session
+namespace cyrex::nw::session
 {
 
 enum class Phase
@@ -24,7 +24,7 @@ enum class Phase
 class NetworkSession
 {
 public:
-    NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, mcbe::Transport* transport) :
+    NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, protocol::Transport* transport) :
         m_guid(guid),
         m_address(address),
         m_transport(transport)
@@ -33,15 +33,15 @@ public:
     }
 
     bool compressionEnabled = false;
-    cyrex::mcpe::protocol::types::CompressionAlgorithm compressor;
+    cyrex::nw::protocol::CompressionAlgorithm compressor;
 
     bool encryptionEnabled = false;
     Phase phase = Phase::HANDSHAKE;
     bool markedForDisconnect = false;
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
-    void send(std::unique_ptr<mcbe::Packet> packet, bool immediately = false);
-    void sendBatch(std::vector<std::unique_ptr<mcbe::Packet>> packets, bool immediately = false);
+    void send(std::unique_ptr<protocol::Packet> packet, bool immediately = false);
+    void sendBatch(std::vector<std::unique_ptr<protocol::Packet>> packets, bool immediately = false);
     void flush();
     bool disconnectUserForIncompatibleProtocol(uint32_t);
     bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
@@ -68,22 +68,22 @@ public:
         return m_address;
     }
 
-    [[nodiscard]] mcbe::encryption::AesEncryptor& getEncryptor()
+    [[nodiscard]] protocol::AesEncryptor& getEncryptor()
     {
         return *m_cipher;
     }
 
 private:
     void sendInternal(const io::BinaryWriter& payload);
-    std::vector<std::unique_ptr<mcbe::Packet>> m_sendQueue;
+    std::vector<std::unique_ptr<protocol::Packet>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
     RakNet::SystemAddress m_address;
-    mcbe::Transport* m_transport;
+    protocol::Transport* m_transport;
 
     std::uint32_t m_protocolId{0};
-    std::optional<mcbe::encryption::AesEncryptor> m_cipher;
+    std::optional<protocol::AesEncryptor> m_cipher;
 
-    mcbe::PacketFactory m_packetFactory;
+    protocol::PacketFactory m_packetFactory;
 };
-} // namespace cyrex::network::session
+} // namespace cyrex::nw::session

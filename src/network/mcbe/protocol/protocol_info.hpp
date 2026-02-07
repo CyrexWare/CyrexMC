@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-namespace cyrex::network::mcbe::protocol
+namespace cyrex::nw::protocol
 {
 
 struct ProtocolInfo
@@ -34,4 +34,4 @@ constexpr bool isSupportedProtocol(std::uint32_t protocol)
 {
     return std::ranges::any_of(ProtocolInfo::acceptedProtocols, [protocol](auto p) { return p == protocol; });
 }
-} // namespace cyrex::network::mcbe::protocol
+} // namespace cyrex::nw::protocol

@@ -1,17 +1,17 @@
 #pragma once
 
-#include "raknet_guid_hash.hpp"
+#include "network/raknet/util/raknet_guid_hash.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <memory>
 #include <unordered_map>
 
-namespace cyrex::network::session
+namespace cyrex::nw::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::network::raknet
+namespace cyrex::nw::raknet
 {
 class RaknetHandler;
 
@@ -25,9 +25,9 @@ public:
 
     void tick();
 
-    cyrex::network::session::NetworkSession* get(const RakNet::RakNetGUID& guid);
+    cyrex::nw::session::NetworkSession* get(const RakNet::RakNetGUID& guid);
 
 private:
-    std::unordered_map<RakNet::RakNetGUID, std::unique_ptr<cyrex::network::session::NetworkSession>> m_sessions;
+    std::unordered_map<RakNet::RakNetGUID, std::unique_ptr<cyrex::nw::session::NetworkSession>> m_sessions;
 };
-} // namespace cyrex::network::raknet
+} // namespace cyrex::nw::raknet

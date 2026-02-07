@@ -51,6 +51,15 @@ FetchContent_Declare(libdeflate
 FetchContent_MakeAvailable(libdeflate)
 
 FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.3
+)
+set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
+set(GLM_ENABLE_CXX_17 ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(glm)
+
+FetchContent_Declare(
     wolfssl
     GIT_REPOSITORY https://github.com/wolfSSL/wolfssl
     GIT_TAG v5.8.4-stable
@@ -128,6 +137,7 @@ target_link_libraries(CyrexMC PRIVATE
     snappy
     nlohmann_json::nlohmann_json
     jwt-cpp
+    glm::glm-header-only
 )
 
 CyrexMC_set_option(
@@ -160,4 +170,6 @@ target_link_libraries(RunTests PUBLIC
 )
 
 include(GoogleTest)
+
 gtest_discover_tests(RunTests)
+

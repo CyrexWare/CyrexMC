@@ -1,10 +1,9 @@
 #pragma once
 
 #include "network/mcbe/transport.hpp"
-#include "raknet_connections.hpp"
-#include "raknet_peer.hpp"
+#include "network/raknet/connection/raknet_connections.hpp"
+#include "network/raknet/connection/raknet_peer.hpp"
 
-#include <RakNet/RakNetTypes.h>
 #include <memory>
 
 namespace cyrex
@@ -12,7 +11,7 @@ namespace cyrex
 class Server;
 }
 
-namespace cyrex::network::raknet
+namespace cyrex::nw::raknet
 {
 
 class RaknetHandler
@@ -22,16 +21,15 @@ public:
     ~RaknetHandler();
 
     void poll();
-    cyrex::network::mcbe::Transport* transport();
+    cyrex::nw::protocol::Transport* transport() const;
 
 private:
-    void handlePacket(RakNet::Packet* p);
+    void handlePacket(RakNet::Packet* packet);
 
     cyrex::Server& m_server;
-
     std::unique_ptr<RaknetPeer> m_peer;
     RaknetConnections m_connections;
-    std::unique_ptr<cyrex::network::mcbe::Transport> m_transportImpl;
+    std::unique_ptr<cyrex::nw::protocol::Transport> m_transportImpl;
 };
 
-} // namespace cyrex::network::raknet
+} // namespace cyrex::nw::raknet

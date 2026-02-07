@@ -2,7 +2,9 @@
 
 #include "packet_def.hpp"
 
-bool cyrex::network::mcbe::Packet::encode(io::BinaryWriter& out) const
+#include <cassert>
+
+bool cyrex::nw::protocol::Packet::encode(io::BinaryWriter& out) const
 {
     io::BinaryWriter payload;
     payload.buffer.clear();

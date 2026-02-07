@@ -4,10 +4,9 @@
 #include <cctype>
 #include <cstdint>
 
-namespace cyrex::mcpe::protocol::types
+namespace cyrex::nw::protocol
 {
 
-// somewhat valid implemention, i wouldnt say fully but eh it works
 enum class GameMode : std::uint8_t
 {
     SURVIVAL = 0,
@@ -46,7 +45,6 @@ constexpr bool iequals(std::string_view a, std::string_view b) noexcept
 
     for (size_t i = 0; i < a.size(); ++i)
     {
-        // the fact toupper exists is just amazing
         if (std::toupper(static_cast<unsigned char>(a[i])) != std::toupper(static_cast<unsigned char>(b[i])))
             return false;
     }
@@ -84,4 +82,4 @@ constexpr GameMode fromString(std::string_view str) noexcept
     return GameMode::DEFAULT;
 }
 
-} // namespace cyrex::mcpe::protocol::types
+} // namespace cyrex::nw::protocol

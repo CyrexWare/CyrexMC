@@ -2,10 +2,11 @@
 
 #include "network/session/network_session.hpp"
 
-namespace cyrex::network::mcbe::protocol
+namespace cyrex::nw::protocol
 {
 class PlayStatusPacket final :
-    public PacketImpl<PlayStatusPacket, ProtocolInfo::playStatusPacket, PacketDirection::Clientbound, true>
+    public cyrex::nw::protocol::
+        PacketImpl<PlayStatusPacket, ProtocolInfo::playStatusPacket, cyrex::nw::protocol::PacketDirection::Clientbound, true>
 {
 public:
     // Maybe make this separately?
@@ -22,21 +23,21 @@ public:
 
     uint32_t status = 0;
 
-    bool decodePayload(cyrex::network::io::BinaryReader& in) override
+    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
     {
         status = in.readU32BE();
         return true;
     }
 
-    bool encodePayload(cyrex::network::io::BinaryWriter& out) const override
+    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
     {
         out.writeU32BE(status);
         return true;
     }
 
-    bool handle(cyrex::network::session::NetworkSession& /*session*/) override
+    bool handle(cyrex::nw::session::NetworkSession& /*session*/) override
     {
         return true;
     }
 };
-} // namespace cyrex::network::mcbe::protocol
+} // namespace cyrex::nw::protocol

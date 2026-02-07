@@ -16,7 +16,7 @@
 #include <cassert>
 #include <cstdint>
 
-namespace cyrex::network::mcbe::encryption
+namespace cyrex::nw::protocol
 {
 
 
@@ -110,4 +110,4 @@ struct AesEncryptor
 };
 
 
-} // namespace cyrex::network::mcbe::encryption
+} // namespace cyrex::nw::protocol

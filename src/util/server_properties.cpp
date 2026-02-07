@@ -1,5 +1,7 @@
 #include "util/server_properties.hpp"
 
+#include "network/mcbe/protocol/types/GameMode.hpp"
+
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -12,7 +14,7 @@ namespace
 
 ServerProperties defaults()
 {
-    return {19132, 19133, 100, "CyrexMC", "Cyrex MCBE Software", mcpe::protocol::types::GameMode::SURVIVAL};
+    return {19132, 19133, 100, "CyrexMC", "Cyrex MCBE Software", cyrex::nw::protocol::GameMode::SURVIVAL};
 }
 
 void writeDefaults(const std::string& path, const ServerProperties& cfg)
@@ -26,7 +28,7 @@ void writeDefaults(const std::string& path, const ServerProperties& cfg)
     out << "max-players=" << cfg.maxPlayers << "\n";
     out << "server-name=" << cfg.serverName << "\n";
     out << "motd=" << cfg.motd << "\n";
-    out << "gamemode=" << mcpe::protocol::types::toString(cfg.defaultGameMode) << "\n";
+    out << "gamemode=" << cyrex::nw::protocol::toString(cfg.defaultGameMode) << "\n";
 }
 
 } // anonymous namespace
@@ -70,7 +72,8 @@ ServerProperties ServerProperties::load(const std::string& path)
         else if (key == "motd")
             cfg.motd = val;
         else if (key == "gamemode")
-            cfg.defaultGameMode = mcpe::protocol::types::fromString(val);
+            // protocol::fromString is confusing, we need to  change it soon
+            cfg.defaultGameMode = cyrex::nw::protocol::fromString(val);
     }
 
     return cfg;

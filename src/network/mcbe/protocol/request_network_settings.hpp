@@ -3,31 +3,39 @@
 #include "log/logging.hpp"
 #include "network/session/network_session.hpp"
 
-namespace cyrex::network::mcbe::protocol
+#include <RakNet/RakNetTypes.h>
+#include <iostream>
+
+#include <cstdint>
+
+namespace cyrex::nw::protocol
 {
 
 class RequestNetworkSettingsPacket final :
-    public PacketImpl<RequestNetworkSettingsPacket, ProtocolInfo::requestNetworkSettingsPacket, PacketDirection::Serverbound, true>
+    public cyrex::nw::protocol::PacketImpl<RequestNetworkSettingsPacket,
+                                           ProtocolInfo::requestNetworkSettingsPacket,
+                                           cyrex::nw::protocol::PacketDirection::Serverbound,
+                                           true>
 {
 public:
     uint32_t protocolVersion = 0;
 
-    bool decodePayload(io::BinaryReader& in) override
+    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
     {
         protocolVersion = in.readU32BE();
         cyrex::logging::info(LOG_MCBE, "Received Protocol Version (RequestNetworkSettingsPacket): {}", protocolVersion);
         return true;
     }
 
-    bool encodePayload(io::BinaryWriter&) const override
+    bool encodePayload(cyrex::nw::io::BinaryWriter&) const override
     {
         // NOOP
         return false;
     }
 
-    bool handle(session::NetworkSession& session) override
+    bool handle(cyrex::nw::session::NetworkSession& session) override
     {
         return session.handleRequestNetworkSettings(protocolVersion);
     }
 };
-} // namespace cyrex::network::mcbe::protocol
+} // namespace cyrex::nw::protocol

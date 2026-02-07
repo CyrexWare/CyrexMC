@@ -6,10 +6,10 @@
 #include "protocol/request_network_settings.hpp"
 
 
-void cyrex::network::mcbe::PacketFactory::registerAll()
+void cyrex::nw::protocol::PacketFactory::registerAll()
 {
-    add<protocol::RequestNetworkSettingsPacket>();
-    add<protocol::NetworkSettingsPacket>();
-    add<protocol::LoginPacket>();
-    add<protocol::PlayStatusPacket>();
+    add<RequestNetworkSettingsPacket>();
+    add<NetworkSettingsPacket>();
+    add<LoginPacket>();
+    add<PlayStatusPacket>();
 }
