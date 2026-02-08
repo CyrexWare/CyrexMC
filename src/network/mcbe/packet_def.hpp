@@ -7,9 +7,9 @@
 
 #include <cstdint>
 
-    namespace cyrex::nw::session
+namespace cyrex::nw::session
 {
-    class NetworkSession;
+class NetworkSession;
 }
 
 namespace cyrex::nw::protocol
