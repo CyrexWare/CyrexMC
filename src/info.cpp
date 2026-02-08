@@ -15,27 +15,27 @@ const cyrex::Info::BuildType kBuildType = cyrex::Info::BuildType::Development;
 namespace cyrex
 {
 
-[[nodiscard]] const std::string& Info::name() noexcept
+const std::string& Info::name() noexcept
 {
     return kName;
 }
 
-[[nodiscard]] const std::string& Info::description() noexcept
+const std::string& Info::description() noexcept
 {
     return kDescription;
 }
 
-[[nodiscard]] Info::Version Info::version() noexcept
+Info::Version Info::version() noexcept
 {
     return kVersion;
 }
 
-[[nodiscard]] Info::BuildType Info::buildType() noexcept
+Info::BuildType Info::buildType() noexcept
 {
     return kBuildType;
 }
 
-[[nodiscard]] std::string Info::buildTypeString()
+std::string Info::buildTypeString()
 {
     switch (buildType())
     {
