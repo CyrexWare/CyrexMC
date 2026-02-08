@@ -1,18 +1,16 @@
 #pragma once
 
-#include "math/vector2.hpp"
-#include "math/vector3.hpp"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
 
 #include <bit>
-#include <math.h>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 #include <cstdint>
-#include <cstring>
 
-namespace cyrex::network::io
+namespace cyrex::nw::io
 {
 
 class BinaryReader
@@ -20,7 +18,7 @@ class BinaryReader
 public:
     BinaryReader() = default;
 
-    BinaryReader(const uint8_t* data, size_t len) : buffer(data, data + len)
+    BinaryReader(const uint8_t* data, const size_t len) : buffer(data, data + len)
     {
     }
 
@@ -40,7 +38,7 @@ public:
     uint8_t readU8()
     {
         ensureReadable(1);
-        return buffer[offset++];
+        return buffer.at(offset++);
     }
 
     int8_t readI8()
@@ -51,7 +49,7 @@ public:
     uint16_t readU16LE()
     {
         ensureReadable(2);
-        const uint16_t v = buffer[offset] | (buffer[offset + 1] << 8);
+        const uint16_t v = buffer.at(offset) | (buffer.at(offset + 1) << 8);
         offset += 2;
         return v;
     }
@@ -59,7 +57,7 @@ public:
     uint16_t readU16BE()
     {
         ensureReadable(2);
-        const uint16_t v = (buffer[offset] << 8) | buffer[offset + 1];
+        const uint16_t v = (buffer.at(offset) << 8) | buffer.at(offset + 1);
         offset += 2;
         return v;
     }
@@ -87,8 +85,8 @@ public:
     uint32_t readU32LE()
     {
         ensureReadable(4);
-        const uint32_t v = buffer[offset] | (buffer[offset + 1] << 8) | (buffer[offset + 2] << 16) |
-                           (buffer[offset + 3] << 24);
+        const uint32_t v = buffer.at(offset) | (buffer.at(offset + 1) << 8) | (buffer.at(offset + 2) << 16) |
+                           (buffer.at(offset + 3) << 24);
         offset += 4;
         return v;
     }
@@ -96,8 +94,8 @@ public:
     uint32_t readU32BE()
     {
         ensureReadable(4);
-        const uint32_t v = (buffer[offset] << 24) | (buffer[offset + 1] << 16) | (buffer[offset + 2] << 8) |
-                           buffer[offset + 3];
+        const uint32_t v = (buffer.at(offset) << 24) | (buffer.at(offset + 1) << 16) | (buffer.at(offset + 2) << 8) |
+                           buffer.at(offset + 3);
         offset += 4;
         return v;
     }
@@ -107,7 +105,7 @@ public:
         ensureReadable(8);
         uint64_t v = 0;
         for (int i = 0; i < 8; ++i)
-            v |= static_cast<uint64_t>(buffer[offset + i]) << (i * 8);
+            v |= static_cast<uint64_t>(buffer.at(offset + i)) << (i * 8);
         offset += 8;
         return v;
     }
@@ -117,7 +115,7 @@ public:
         ensureReadable(8);
         uint64_t v = 0;
         for (int i = 0; i < 8; ++i)
-            v = (v << 8) | buffer[offset + i];
+            v = (v << 8) | buffer.at(offset + i);
         offset += 8;
         return v;
     }
@@ -187,35 +185,35 @@ public:
     {
         const uint32_t len = readVarUInt();
         ensureReadable(len);
-        std::string s(reinterpret_cast<char*>(&buffer[offset]), len);
+        std::string s(reinterpret_cast<char*>(&buffer.at(offset)), len);
         offset += len;
         return s;
     }
 
-    cyrex::math::Vector2 readVector2()
+    glm::vec2 readVector2()
     {
         return {readFloatLE(), readFloatLE()};
     }
 
-    cyrex::math::Vector3 readVector3()
+    glm::vec3 readVector3()
     {
         return {readFloatLE(), readFloatLE(), readFloatLE()};
     }
 
-    std::string readBytes(size_t len)
+    std::string readBytes(const size_t len)
     {
         ensureReadable(len);
-        std::string s(reinterpret_cast<char*>(&buffer[offset]), len);
+        std::string s(reinterpret_cast<char*>(&buffer.at(offset)), len);
         offset += len;
         return s;
     }
 
 private:
-    void ensureReadable(size_t n) const
+    void ensureReadable(const size_t n) const
     {
         if (offset + n > buffer.size())
             throw std::runtime_error("BinaryReader overflow");
     }
 };
 
-} // namespace cyrex::network::io
+} // namespace cyrex::nw::io

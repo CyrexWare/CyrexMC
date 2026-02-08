@@ -6,22 +6,22 @@
 
 #include <iostream>
 
-std::string cyrex::command::types::PerformanceCommand::name() const
+std::string cyrex::command::PerformanceCommand::name() const
 {
     return "performance";
 }
 
-std::string cyrex::command::types::PerformanceCommand::description() const
+std::string cyrex::command::PerformanceCommand::description() const
 {
     return "Shows server performance stats";
 }
 
-cyrex::command::Permission cyrex::command::types::PerformanceCommand::permission() const
+cyrex::command::Permission cyrex::command::PerformanceCommand::permission() const
 {
     return {"server.performance", PermissionLevel::OP};
 }
 
-void cyrex::command::types::PerformanceCommand::execute(CommandContext&)
+void cyrex::command::PerformanceCommand::execute(CommandContext&)
 {
     cyrex::util::logServerStatus();
 }

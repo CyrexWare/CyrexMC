@@ -6,12 +6,12 @@
 #include "packet_def.hpp"
 #include "packet_direction.hpp"
 
-namespace cyrex::network::session
+namespace cyrex::nw::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::network::mcbe
+namespace cyrex::nw::protocol
 {
 
 class PacketDef;
@@ -21,20 +21,21 @@ class Packet
 public:
     virtual ~Packet() = default;
     Packet() = default;
+    uint8_t subClientId : 3 = 0;
 
     [[nodiscard]] virtual const PacketDef& getDef() const = 0;
 
-    bool decode(cyrex::network::io::BinaryReader& in)
+    bool decode(io::BinaryReader& in)
     {
         return decodePayload(in);
     }
 
-    bool encode(cyrex::network::io::BinaryWriter& out) const;
+    bool encode(io::BinaryWriter& out) const;
 
-    virtual bool decodePayload(cyrex::network::io::BinaryReader& in) = 0;
-    virtual bool encodePayload(cyrex::network::io::BinaryWriter& out) const = 0;
+    virtual bool decodePayload(io::BinaryReader& in) = 0;
+    virtual bool encodePayload(io::BinaryWriter& out) const = 0;
 
-    virtual bool handle(cyrex::network::session::NetworkSession& session) = 0;
+    virtual bool handle(session::NetworkSession& session) = 0;
 };
 
 template <typename PacketType, uint32_t networkId, PacketDirection direction, bool allowBeforeLogin>
@@ -63,4 +64,4 @@ public:
 private:
     PacketImpl() = default;
 };
-} // namespace cyrex::network::mcbe
+} // namespace cyrex::nw::protocol

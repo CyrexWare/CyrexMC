@@ -50,4 +50,9 @@ build.ninja
 
 # Visual Studio
 .vs
+
+# Clion
+.idea
 enc_temp_folder/
+_deps/
+

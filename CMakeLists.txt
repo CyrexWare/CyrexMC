@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.15)
+﻿cmake_minimum_required(VERSION 3.24)
 
 project(CyrexMC VERSION 1.0 LANGUAGES CXX)
 
@@ -50,6 +50,55 @@ FetchContent_Declare(libdeflate
 )
 FetchContent_MakeAvailable(libdeflate)
 
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.3
+)
+set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
+set(GLM_ENABLE_CXX_17 ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(glm)
+
+FetchContent_Declare(
+    wolfssl
+    GIT_REPOSITORY https://github.com/wolfSSL/wolfssl
+    GIT_TAG v5.8.4-stable
+    OVERRIDE_FIND_PACKAGE
+)
+set(WOLFSSL_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(WOLFSSL_AESGCM ON CACHE BOOL "" FORCE)
+set(WOLFSSL_AESCTR ON CACHE BOOL "" FORCE)
+set(WOLFSSL_AES_CTR ON CACHE BOOL "" FORCE)
+set(WOLFSSL_AES_DIRECT ON CACHE BOOL "" FORCE)
+set(WOLFSSL_BASE64_ENCODE ON CACHE BOOL "" FORCE)
+set(WOLFSSL_OPENSSLEXTRA ON CACHE BOOL "" FORCE)
+set(WOLFSSL_CRYPT_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(wolfssl)
+
+SET(JWT_SSL_LIBRARY "wolfSSL" CACHE STRING "doc" FORCE)
+FetchContent_Declare(
+  jwt-cpp
+  GIT_REPOSITORY https://github.com/CyrexWare/jwt-cpp
+  GIT_TAG eaebed9c588993d8dc9c791f38ac43c7220c2103
+)
+set(JWT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(JWT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(jwt-cpp)
+
+# force -isystem for wolfssl
+get_target_property(wolfssl_IID wolfssl INTERFACE_INCLUDE_DIRECTORIES)
+set_target_properties(wolfssl PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${wolfssl_IID}")
+
+FetchContent_Declare(
+    snappy
+    GIT_REPOSITORY https://github.com/google/snappy
+    GIT_TAG 1.2.2
+)
+set(BENCHMARK_ENABLE_EXCEPTIONS ON CACHE BOOL "" FORCE)
+set(SNAPPY_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(snappy)
+
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/src/**.cpp"
     "${PROJECT_SOURCE_DIR}/src/**.hpp"
@@ -60,6 +109,13 @@ add_executable(CyrexMC
     ${ENGINE_SOURCES}
 )
 
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 target_compile_features(CyrexMC PRIVATE cxx_std_23)
 
 target_include_directories(CyrexMC PRIVATE
@@ -67,10 +123,21 @@ target_include_directories(CyrexMC PRIVATE
     "${PROJECT_SOURCE_DIR}/server"
 )
 
+target_compile_definitions(CyrexMC PRIVATE
+    WOLFSSL_AESGCM_STREAM
+    WOLFSSL_AES_COUNTER
+    WOLFSSL_AES_DIRECT
+)
+
 target_link_libraries(CyrexMC PRIVATE
     raknet
     magic_enum::magic_enum
     libdeflate_static
+    wolfssl::wolfssl
+    snappy
+    nlohmann_json::nlohmann_json
+    jwt-cpp
+    glm::glm-header-only
 )
 
 CyrexMC_set_option(
@@ -103,4 +170,6 @@ target_link_libraries(RunTests PUBLIC
 )
 
 include(GoogleTest)
+
 gtest_discover_tests(RunTests)
+

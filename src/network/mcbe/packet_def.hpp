@@ -1,19 +1,18 @@
 #pragma once
 
 #include "network/io/binary_reader.hpp"
-#include "network/io/binary_writer.hpp"
 #include "packet_direction.hpp"
 
 #include <memory>
 
 #include <cstdint>
 
-namespace cyrex::network::session
+namespace cyrex::nw::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::network::mcbe
+namespace cyrex::nw::protocol
 {
 class Packet;
 
@@ -27,7 +26,10 @@ public:
     const bool allowBeforeLogin;
     const CreateFunc create;
 
-    constexpr PacketDef(uint32_t networkId, PacketDirection direction, bool allowBeforeLogin, CreateFunc create) :
+    constexpr PacketDef(const uint32_t networkId,
+                        const PacketDirection direction,
+                        const bool allowBeforeLogin,
+                        const CreateFunc create) :
         networkId{networkId},
         direction{direction},
         allowBeforeLogin{allowBeforeLogin},
@@ -35,7 +37,7 @@ public:
     {
     }
 
-    std::unique_ptr<Packet> decode(cyrex::network::io::BinaryReader& in) const;
+    std::unique_ptr<Packet> decode(cyrex::nw::io::BinaryReader& in) const;
 };
 
-} // namespace cyrex::network::mcbe
+} // namespace cyrex::nw::protocol
