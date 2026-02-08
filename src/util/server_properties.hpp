@@ -8,15 +8,16 @@
 
 namespace cyrex::util
 {
+namespace proto = nw::protocol;
 
 struct ServerProperties
 {
-    std::uint16_t port;
-    std::uint16_t portIpv6;
-    std::uint32_t maxPlayers;
+    std::uint16_t port{};
+    std::uint16_t portIpv6{};
+    std::uint32_t maxPlayers{};
     std::string serverName;
     std::string motd;
-    nw::protocol::GameMode defaultGameMode;
+    proto::GameMode defaultGameMode{};
 
     static ServerProperties load(const std::string& path);
 };

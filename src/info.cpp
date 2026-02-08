@@ -15,27 +15,27 @@ const cyrex::Info::BuildType kBuildType = cyrex::Info::BuildType::Development;
 namespace cyrex
 {
 
-const std::string& Info::name() noexcept
+[[nodiscard]] const std::string& Info::name() noexcept
 {
     return kName;
 }
 
-const std::string& Info::description() noexcept
+[[nodiscard]] const std::string& Info::description() noexcept
 {
     return kDescription;
 }
 
-Info::Version Info::version() noexcept
+[[nodiscard]] Info::Version Info::version() noexcept
 {
     return kVersion;
 }
 
-Info::BuildType Info::buildType() noexcept
+[[nodiscard]] Info::BuildType Info::buildType() noexcept
 {
     return kBuildType;
 }
 
-std::string Info::buildTypeString()
+[[nodiscard]] std::string Info::buildTypeString()
 {
     switch (buildType())
     {
@@ -50,8 +50,7 @@ std::string Info::buildTypeString()
     return "Unknown";
 }
 
-// basically this returns an string version of Info::version()
-std::string Info::Version::toString() const
+[[nodiscard]] std::string Info::Version::toString() const
 {
     return std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
 }

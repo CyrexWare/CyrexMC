@@ -1,20 +1,24 @@
-#include "mcbe_packet_router.hpp"
+﻿#include "mcbe_packet_router.hpp"
 
 #include "log/logging.hpp"
 #include "network/mcbe/compression/compressors.hpp"
 #include "network/session/network_session.hpp"
 
-#include <iostream>
 #include <utility>
+#include <vector>
 
-using namespace cyrex::nw::session;
-
-void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::nw::raknet::RaknetConnections& connections)
+namespace cyrex::nw::raknet
 {
-    cyrex::nw::session::NetworkSession* session = connections.get(p->guid);
+namespace ses = cyrex::nw::session;
+namespace proto = cyrex::nw::protocol;
+
+void McbePacketRouter::route(RakNet::Packet* p, RaknetConnections& connections)
+{
+    ses::NetworkSession* session = connections.get(p->guid);
     if (!session)
         return;
-    //SKIP 0xFE
+
+    // Skip 0xFE
     const std::uint8_t* data = p->data + 1;
     const std::size_t len = p->length - 1;
 
@@ -22,6 +26,7 @@ void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::nw::ra
         return;
 
     std::vector<std::uint8_t> payload;
+
     if (session->encryptionEnabled)
     {
         if (auto payloadOpt = session->getEncryptor().decrypt({data, len}))
@@ -45,13 +50,17 @@ void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::nw::ra
     }
     else
     {
-        const auto compressionMethod = static_cast<protocol::CompressionAlgorithm>(payload.front());
+        const auto compressionMethod = static_cast<proto::CompressionAlgorithm>(payload.front());
+
         cyrex::logging::info(LOG_MCBE, "compression method = 0x{:02X}", std::to_underlying(compressionMethod));
-        if (const auto* compressor = protocol::getCompressor(compressionMethod))
+
+        if (const auto* compressor = proto::getCompressor(compressionMethod))
         {
             const std::vector old(payload);
+
             cyrex::logging::info(LOG_MCBE, "decompressing...");
             payload = *compressor->decompress({old.data() + 1, old.size() - 1});
+
             cyrex::logging::info(LOG_MCBE, "decompressed size = {}", payload.size());
         }
         else
@@ -64,3 +73,5 @@ void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::nw::ra
 
     session->onRaw(*p, payload.data(), payload.size());
 }
+
+} // namespace cyrex::nw::raknet

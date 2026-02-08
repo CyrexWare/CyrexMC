@@ -10,35 +10,39 @@
 #include <thread>
 #include <utility>
 
-cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::ServerProperties& p)
-{
-    return {p.port, p.portIpv6, p.maxPlayers, p.serverName, p.motd, p.defaultGameMode};
-}
+using namespace cyrex::nw::protocol;
+namespace util = cyrex::util;
+namespace rak = cyrex::nw::raknet;
+namespace cmd = cyrex::command;
 
 namespace
 {
 std::uint64_t generateServerId()
 {
-    std::random_device rd;
-    std::mt19937_64 gen(rd());
-    std::uniform_int_distribution<std::uint64_t> dist;
+    static std::random_device rd;
+    static std::mt19937_64 gen(rd());
+    static std::uniform_int_distribution<std::uint64_t> dist;
     return dist(gen);
 }
 } // namespace
+
+cyrex::Server::Config cyrex::Server::Config::fromProperties(const util::ServerProperties& p)
+{
+    return {p.port, p.portIpv6, p.maxPlayers, p.serverName, p.motd, p.defaultGameMode};
+}
 
 cyrex::Server::Server(Config config) :
     m_config(std::move(config)),
     m_serverUniqueId(generateServerId()),
     m_running(true)
 {
-    m_raknet = std::make_unique<cyrex::nw::raknet::RaknetHandler>(*this);
-    m_commands = std::make_unique<cyrex::command::CommandManager>(*this);
+    m_raknet = std::make_unique<rak::RaknetHandler>(*this);
+    m_commands = std::make_unique<cmd::CommandManager>(*this);
     m_commands->registerDefaults();
 }
 
 cyrex::Server::~Server()
 {
-    // more better cleanup, and we need cleanup function for sessions, etc
     m_running = false;
     m_players.clear();
 }
@@ -73,36 +77,19 @@ const std::string& cyrex::Server::getMotd() const
     return m_config.motd;
 }
 
-cyrex::nw::protocol::GameMode cyrex::Server::getDefaultGameMode() const
+GameMode cyrex::Server::getDefaultGameMode() const
 {
     return m_config.defaultGameMode;
 }
 
-void cyrex::Server::setDefaultGameMode(cyrex::nw::protocol::GameMode mode)
+void cyrex::Server::setDefaultGameMode(GameMode mode)
 {
     m_config.defaultGameMode = mode;
 }
 
 void cyrex::Server::setDefaultGameModeFromString(std::string_view mode)
 {
-    m_config.defaultGameMode = cyrex::nw::protocol::fromString(mode);
-}
-
-void cyrex::Server::addPlayer(const RakNet::RakNetGUID& guid)
-{
-    if (!hasPlayer(guid))
-        m_players.push_back(guid);
-}
-
-void cyrex::Server::removePlayer(const RakNet::RakNetGUID& guid)
-{
-    auto it = std::remove(m_players.begin(), m_players.end(), guid);
-    m_players.erase(it, m_players.end());
-}
-
-bool cyrex::Server::hasPlayer(const RakNet::RakNetGUID& guid) const
-{
-    return std::find(m_players.begin(), m_players.end(), guid) != m_players.end();
+    m_config.defaultGameMode = fromString(mode);
 }
 
 std::size_t cyrex::Server::getPlayerCount() const
@@ -113,6 +100,22 @@ std::size_t cyrex::Server::getPlayerCount() const
 const std::vector<RakNet::RakNetGUID>& cyrex::Server::getAllPlayers() const
 {
     return m_players;
+}
+
+void cyrex::Server::addPlayer(const RakNet::RakNetGUID& guid)
+{
+    if (!hasPlayer(guid))
+        m_players.push_back(guid);
+}
+
+void cyrex::Server::removePlayer(const RakNet::RakNetGUID& guid)
+{
+    std::erase_if(m_players, [&](const auto& g) { return g == guid; });
+}
+
+bool cyrex::Server::hasPlayer(const RakNet::RakNetGUID& guid) const
+{
+    return std::find(m_players.begin(), m_players.end(), guid) != m_players.end();
 }
 
 void cyrex::Server::stop()
@@ -129,13 +132,16 @@ void cyrex::Server::commandLoop()
         if (!std::getline(std::cin, line))
             break;
 
+        if (line.empty())
+            continue;
+
         m_commands->executeConsole(line);
     }
 }
 
 void cyrex::Server::run()
 {
-    std::thread commandThread(&cyrex::Server::commandLoop, this);
+    [[maybe_unused]] std::thread commandThread(&Server::commandLoop, this);
 
     while (m_running)
     {

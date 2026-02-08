@@ -13,6 +13,7 @@ class Server;
 
 namespace cyrex::nw::raknet
 {
+namespace proto = cyrex::nw::protocol;
 
 class RaknetHandler
 {
@@ -21,7 +22,7 @@ public:
     ~RaknetHandler();
 
     void poll();
-    cyrex::nw::protocol::Transport* transport() const;
+    proto::Transport* transport() const;
 
 private:
     void handlePacket(RakNet::Packet* packet);
@@ -29,7 +30,7 @@ private:
     cyrex::Server& m_server;
     std::unique_ptr<RaknetPeer> m_peer;
     RaknetConnections m_connections;
-    std::unique_ptr<cyrex::nw::protocol::Transport> m_transportImpl;
+    std::unique_ptr<proto::Transport> m_transportImpl;
 };
 
 } // namespace cyrex::nw::raknet

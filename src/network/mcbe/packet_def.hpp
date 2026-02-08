@@ -7,13 +7,15 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::session
+    namespace cyrex::nw::session
 {
-class NetworkSession;
+    class NetworkSession;
 }
 
 namespace cyrex::nw::protocol
 {
+namespace io = cyrex::nw::io;
+
 class Packet;
 
 class PacketDef
@@ -26,10 +28,7 @@ public:
     const bool allowBeforeLogin;
     const CreateFunc create;
 
-    constexpr PacketDef(const uint32_t networkId,
-                        const PacketDirection direction,
-                        const bool allowBeforeLogin,
-                        const CreateFunc create) :
+    constexpr PacketDef(uint32_t networkId, PacketDirection direction, bool allowBeforeLogin, CreateFunc create) :
         networkId{networkId},
         direction{direction},
         allowBeforeLogin{allowBeforeLogin},
@@ -37,7 +36,7 @@ public:
     {
     }
 
-    std::unique_ptr<Packet> decode(cyrex::nw::io::BinaryReader& in) const;
+    std::unique_ptr<Packet> decode(io::BinaryReader& in) const;
 };
 
 } // namespace cyrex::nw::protocol

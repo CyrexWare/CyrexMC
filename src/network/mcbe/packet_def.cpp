@@ -2,7 +2,11 @@
 
 #include "packet.hpp"
 
-std::unique_ptr<cyrex::nw::protocol::Packet> cyrex::nw::protocol::PacketDef::decode(cyrex::nw::io::BinaryReader& in) const
+namespace cyrex::nw::protocol
+{
+namespace io = cyrex::nw::io;
+
+std::unique_ptr<Packet> PacketDef::decode(io::BinaryReader& in) const
 {
     auto packet = create();
     if (!packet)
@@ -17,3 +21,5 @@ std::unique_ptr<cyrex::nw::protocol::Packet> cyrex::nw::protocol::PacketDef::dec
 
     return packet;
 }
+
+} // namespace cyrex::nw::protocol

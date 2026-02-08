@@ -8,13 +8,14 @@
 
 namespace cyrex::util
 {
+namespace proto = cyrex::nw::protocol;
 
 namespace
 {
 
 ServerProperties defaults()
 {
-    return {19132, 19133, 100, "CyrexMC", "Cyrex MCBE Software", cyrex::nw::protocol::GameMode::SURVIVAL};
+    return {19132, 19133, 100, "CyrexMC", "Cyrex MCBE Software", proto::GameMode::SURVIVAL};
 }
 
 void writeDefaults(const std::string& path, const ServerProperties& cfg)
@@ -23,12 +24,12 @@ void writeDefaults(const std::string& path, const ServerProperties& cfg)
     if (!out.is_open())
         return;
 
-    out << "server-port=" << cfg.port << "\n";
-    out << "server-portv6=" << cfg.portIpv6 << "\n";
-    out << "max-players=" << cfg.maxPlayers << "\n";
-    out << "server-name=" << cfg.serverName << "\n";
-    out << "motd=" << cfg.motd << "\n";
-    out << "gamemode=" << cyrex::nw::protocol::toString(cfg.defaultGameMode) << "\n";
+    out << "server-port=" << cfg.port << "\n"
+        << "server-portv6=" << cfg.portIpv6 << "\n"
+        << "max-players=" << cfg.maxPlayers << "\n"
+        << "server-name=" << cfg.serverName << "\n"
+        << "motd=" << cfg.motd << "\n"
+        << "gamemode=" << proto::toString(cfg.defaultGameMode) << "\n";
 }
 
 } // anonymous namespace
@@ -44,7 +45,6 @@ ServerProperties ServerProperties::load(const std::string& path)
 
     auto cfg = defaults();
     std::ifstream in(path);
-
     if (!in.is_open())
         return cfg;
 
@@ -72,8 +72,7 @@ ServerProperties ServerProperties::load(const std::string& path)
         else if (key == "motd")
             cfg.motd = val;
         else if (key == "gamemode")
-            // protocol::fromString is confusing, we need to  change it soon
-            cfg.defaultGameMode = cyrex::nw::protocol::fromString(val);
+            cfg.defaultGameMode = proto::fromString(val); // TODO: maybe rename fromString to something clearer
     }
 
     return cfg;

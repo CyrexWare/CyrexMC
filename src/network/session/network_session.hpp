@@ -11,9 +11,13 @@
 #include <RakNet/RakNetTypes.h>
 #include <functional>
 #include <memory>
+#include <optional>
+#include <vector>
 
 namespace cyrex::nw::session
 {
+namespace proto = cyrex::nw::protocol;
+namespace io = cyrex::nw::io;
 
 enum class Phase
 {
@@ -24,7 +28,7 @@ enum class Phase
 class NetworkSession
 {
 public:
-    NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, protocol::Transport* transport) :
+    NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, proto::Transport* transport) :
         m_guid(guid),
         m_address(address),
         m_transport(transport)
@@ -33,26 +37,25 @@ public:
     }
 
     bool compressionEnabled = false;
-    cyrex::nw::protocol::CompressionAlgorithm compressor;
+    proto::CompressionAlgorithm compressor;
 
     bool encryptionEnabled = false;
     Phase phase = Phase::HANDSHAKE;
     bool markedForDisconnect = false;
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
-    void send(std::unique_ptr<protocol::Packet> packet, bool immediately = false);
-    void sendBatch(std::vector<std::unique_ptr<protocol::Packet>> packets, bool immediately = false);
+    void send(std::unique_ptr<proto::Packet> packet, bool immediately = false);
+    void sendBatch(std::vector<std::unique_ptr<proto::Packet>> packets, bool immediately = false);
     void flush();
-    bool disconnectUserForIncompatibleProtocol(uint32_t);
+    bool disconnectUserForIncompatibleProtocol(uint32_t version);
     bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
     bool handleRequestNetworkSettings(uint32_t version);
     void tick();
 
-    void setProtocolId(const std::uint32_t protocolId)
+    void setProtocolId(std::uint32_t protocolId)
     {
         m_protocolId = protocolId;
     }
-
     [[nodiscard]] std::uint32_t protocolId() const
     {
         return m_protocolId;
@@ -62,28 +65,29 @@ public:
     {
         return m_guid;
     }
-
     [[nodiscard]] RakNet::SystemAddress address() const
     {
         return m_address;
     }
 
-    [[nodiscard]] protocol::AesEncryptor& getEncryptor()
+    [[nodiscard]] proto::AesEncryptor& getEncryptor()
     {
         return *m_cipher;
     }
 
 private:
     void sendInternal(const io::BinaryWriter& payload);
-    std::vector<std::unique_ptr<protocol::Packet>> m_sendQueue;
+
+    std::vector<std::unique_ptr<proto::Packet>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
     RakNet::SystemAddress m_address;
-    protocol::Transport* m_transport;
+    proto::Transport* m_transport;
 
     std::uint32_t m_protocolId{0};
-    std::optional<protocol::AesEncryptor> m_cipher;
+    std::optional<proto::AesEncryptor> m_cipher;
 
-    protocol::PacketFactory m_packetFactory;
+    proto::PacketFactory m_packetFactory;
 };
+
 } // namespace cyrex::nw::session

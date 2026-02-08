@@ -12,6 +12,8 @@
 
 namespace cyrex::nw::raknet
 {
+namespace ses = cyrex::nw::session;
+namespace proto = cyrex::nw::protocol;
 
 RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
 {
@@ -41,7 +43,7 @@ RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
 
 RaknetHandler::~RaknetHandler() = default;
 
-cyrex::nw::protocol::Transport* RaknetHandler::transport() const
+proto::Transport* RaknetHandler::transport() const
 {
     return m_transportImpl.get();
 }
