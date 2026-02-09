@@ -25,7 +25,7 @@ public:
     void executeConsole(const std::string& line);
 
 private:
-    [[nodiscard]] bool hasPermission(PermissionLevel source, const cyrex::command::Permission& required) const;
+    [[nodiscard]] bool hasPermission(PermissionLevel source, const Permission& required) const;
 
     cyrex::Server& m_server;
     CommandRegistry m_registry;

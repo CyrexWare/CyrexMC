@@ -28,9 +28,7 @@ void RaknetPeer::setMaximumIncomingConnections(std::uint16_t maxIncomingConnecti
 
 Packet* RaknetPeer::receive()
 {
-    if (!m_peer)
-        return nullptr;
-    return m_peer->Receive();
+    return m_peer ? m_peer->Receive() : nullptr;
 }
 
 std::uint32_t RaknetPeer::send(const char* data, std::uint32_t length, SendInfo sendInfo)

@@ -5,23 +5,21 @@
 #include "network/raknet/handler/raknet_handler.hpp"
 #include "network/session/network_session.hpp"
 
-#include <iostream>
 #include <ranges>
 
-using namespace cyrex::util;
-
-void cyrex::nw::raknet::RaknetConnections::onConnect(const RakNet::RakNetGUID& guid,
-                                                     RakNet::SystemAddress address,
-                                                     cyrex::nw::raknet::RaknetHandler* handler)
+namespace cyrex::nw::raknet
 {
-    auto session = std::make_unique<cyrex::nw::session::NetworkSession>(guid, address, handler->transport());
+namespace ses = cyrex::nw::session;
 
+void RaknetConnections::onConnect(const RakNet::RakNetGUID& guid, RakNet::SystemAddress address, RaknetHandler* handler)
+{
+    auto session = std::make_unique<ses::NetworkSession>(guid, address, handler->transport());
     m_sessions.emplace(guid, std::move(session));
 
     cyrex::logging::log(LOG_RAKNET, "New incoming connection");
 }
 
-void cyrex::nw::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
+void RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
 {
     auto it = m_sessions.find(guid);
     if (it == m_sessions.end())
@@ -31,7 +29,7 @@ void cyrex::nw::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID
     cyrex::logging::log(LOG_RAKNET, "Client disconnected");
 }
 
-void cyrex::nw::raknet::RaknetConnections::tick()
+void RaknetConnections::tick()
 {
     for (const auto& session : m_sessions | std::views::values)
     {
@@ -39,7 +37,7 @@ void cyrex::nw::raknet::RaknetConnections::tick()
     }
 }
 
-void cyrex::nw::raknet::RaknetConnections::cleanup()
+void RaknetConnections::cleanup()
 {
     for (auto it = m_sessions.begin(); it != m_sessions.end();)
     {
@@ -50,8 +48,7 @@ void cyrex::nw::raknet::RaknetConnections::cleanup()
     }
 }
 
-
-cyrex::nw::session::NetworkSession* cyrex::nw::raknet::RaknetConnections::get(const RakNet::RakNetGUID& guid)
+ses::NetworkSession* RaknetConnections::get(const RakNet::RakNetGUID& guid)
 {
     auto it = m_sessions.find(guid);
     if (it == m_sessions.end())
@@ -59,3 +56,5 @@ cyrex::nw::session::NetworkSession* cyrex::nw::raknet::RaknetConnections::get(co
 
     return it->second.get();
 }
+
+} // namespace cyrex::nw::raknet

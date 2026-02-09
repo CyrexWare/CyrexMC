@@ -50,8 +50,7 @@ std::string Info::buildTypeString()
     return "Unknown";
 }
 
-// basically this returns an string version of Info::version()
-std::string Info::Version::toString() const
+[[nodiscard]] std::string Info::Version::toString() const
 {
     return std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
 }

@@ -12,10 +12,9 @@ namespace cyrex::nw::raknet
 class RaknetPeer : public cyrex::nw::INetworkPeer
 {
 public:
-    explicit RaknetPeer() = default;
+    RaknetPeer() = default;
     RaknetPeer(const RaknetPeer&) = delete;
     RaknetPeer& operator=(const RaknetPeer&) = delete;
-
     ~RaknetPeer() override;
 
     [[nodiscard]] StartupResult startup(StartupInfo startupInfo) override;

@@ -16,9 +16,9 @@ cyrex::command::CommandManager::CommandManager(cyrex::Server& server) : m_server
 
 void cyrex::command::CommandManager::registerDefaults()
 {
-    registerCommand(std::make_unique<cyrex::command::StopCommand>());
-    registerCommand(std::make_unique<cyrex::command::PerformanceCommand>());
-    registerCommand(std::make_unique<cyrex::command::ServerInfoCommand>());
+    registerCommand(std::make_unique<StopCommand>());
+    registerCommand(std::make_unique<PerformanceCommand>());
+    registerCommand(std::make_unique<ServerInfoCommand>());
 }
 
 void cyrex::command::CommandManager::registerCommand(std::unique_ptr<CommandBase> command)

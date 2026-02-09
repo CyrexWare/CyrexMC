@@ -17,9 +17,9 @@ public:
 
     struct Version
     {
-        int major;
-        int minor;
-        int patch;
+        int major{};
+        int minor{};
+        int patch{};
 
         [[nodiscard]] std::string toString() const;
     };

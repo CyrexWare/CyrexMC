@@ -21,14 +21,14 @@ class Server
 public:
     struct Config
     {
-        std::uint16_t port;
-        std::uint16_t portIpv6;
-        std::uint32_t maxPlayers;
+        std::uint16_t port{};
+        std::uint16_t portIpv6{};
+        std::uint32_t maxPlayers{};
         std::string serverName;
         std::string motd;
-        cyrex::nw::protocol::GameMode defaultGameMode;
+        nw::protocol::GameMode defaultGameMode{nw::protocol::GameMode::SURVIVAL};
 
-        static Config fromProperties(const cyrex::util::ServerProperties& props);
+        [[nodiscard]] static Config fromProperties(const util::ServerProperties& props);
     };
 
     explicit Server(Config config);
@@ -41,8 +41,8 @@ public:
     [[nodiscard]] const std::string& getServerName() const;
     [[nodiscard]] const std::string& getMotd() const;
 
-    [[nodiscard]] cyrex::nw::protocol::GameMode getDefaultGameMode() const;
-    void setDefaultGameMode(cyrex::nw::protocol::GameMode mode);
+    [[nodiscard]] nw::protocol::GameMode getDefaultGameMode() const;
+    void setDefaultGameMode(nw::protocol::GameMode mode);
     void setDefaultGameModeFromString(std::string_view mode);
 
     void addPlayer(const RakNet::RakNetGUID& guid);
@@ -58,10 +58,11 @@ private:
     void commandLoop();
 
     Config m_config;
-    std::unique_ptr<cyrex::nw::raknet::RaknetHandler> m_raknet;
+    std::unique_ptr<nw::raknet::RaknetHandler> m_raknet;
     std::vector<RakNet::RakNetGUID> m_players;
-    std::uint64_t m_serverUniqueId;
-    std::atomic<bool> m_running;
-    std::unique_ptr<cyrex::command::CommandManager> m_commands;
+    std::uint64_t m_serverUniqueId{};
+    std::atomic<bool> m_running{false};
+    std::unique_ptr<command::CommandManager> m_commands;
 };
+
 } // namespace cyrex

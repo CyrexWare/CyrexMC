@@ -16,8 +16,6 @@
 #include <utility>
 #include <vector>
 
-using namespace cyrex::nw::io;
-
 namespace
 {
 std::string hexDump(const uint8_t* data, size_t len)
@@ -38,6 +36,8 @@ std::string hexDump(const uint8_t* data, size_t len)
 
 namespace cyrex::nw::session
 {
+namespace io = cyrex::nw::io;
+namespace proto = cyrex::nw::protocol;
 
 // eh, we could just call flush directly, but we might expand this function
 void NetworkSession::tick()
@@ -47,15 +47,18 @@ void NetworkSession::tick()
 
 void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data, size_t len)
 {
-    BinaryReader in(data, len);
+    io::BinaryReader in(data, len);
+
     do
     {
         const std::uint32_t packetLength = in.readVarUInt();
 
-        BinaryReader packetBuffer(data + in.offset, len);
+        io::BinaryReader packetBuffer(data + in.offset, len);
         in.offset += packetLength;
+
         const std::uint32_t packetHeader = packetBuffer.readVarUInt();
         const std::uint32_t packetId = packetHeader & 0x3FF;
+
         cyrex::logging::info(LOG_MCBE, "packet length = {}", packetLength);
         cyrex::logging::info(LOG_MCBE, "packet id = {}0x{:02X}", cyrex::logging::Color::GOLD, packetId);
 
@@ -72,61 +75,57 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
             cyrex::logging::error(LOG_MCBE, "error decoding packet");
             return;
         }
-        packet->subClientId = packetHeader >> 10 & 0x03;
+
+        packet->subClientId = (packetHeader >> 10) & 0x03;
+
         if (!packet->handle(*this))
         {
             cyrex::logging::error(LOG_MCBE, "error handling packet");
             return;
         }
+
     } while (in.remaining() > 0);
 }
 
 bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion)
 {
-    auto packet = std::make_unique<protocol::PlayStatusPacket>();
-    packet->status = protocolVersion < protocol::ProtocolInfo::currentProtocol
-                         ? protocol::PlayStatusPacket::loginFailedClient
-                         : protocol::PlayStatusPacket::loginFailedServer;
+    auto packet = std::make_unique<proto::PlayStatusPacket>();
+    packet->status = protocolVersion < proto::ProtocolInfo::currentProtocol
+                         ? proto::PlayStatus::LoginFailedClient
+                         : proto::PlayStatus::LoginFailedServer;
 
     send(std::move(packet), true);
     return true;
 }
 
-void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool immediately)
+void NetworkSession::send(std::unique_ptr<proto::Packet> packet, const bool immediately)
 {
     if (immediately)
     {
-        BinaryWriter packetBuffer;
-
+        io::BinaryWriter packetBuffer;
         packet->encode(packetBuffer);
-
         sendInternal(packetBuffer);
         return;
     }
+
     m_sendQueue.push_back(std::move(packet));
 }
 
-void NetworkSession::sendBatch(std::vector<std::unique_ptr<protocol::Packet>> packets, const bool immediately)
+void NetworkSession::sendBatch(std::vector<std::unique_ptr<proto::Packet>> packets, const bool immediately)
 {
     if (immediately)
     {
-        BinaryWriter packetBuffer;
-
+        io::BinaryWriter packetBuffer;
         for (const auto& packet : packets)
-        {
             packet->encode(packetBuffer);
-        }
 
         sendInternal(packetBuffer);
         return;
     }
 
     m_sendQueue.reserve(m_sendQueue.size() + packets.size());
-
     for (auto& packet : packets)
-    {
         m_sendQueue.push_back(std::move(packet));
-    }
 }
 
 void NetworkSession::flush()
@@ -134,21 +133,19 @@ void NetworkSession::flush()
     if (m_sendQueue.empty())
         return;
 
-    BinaryWriter packetBuffer;
-
+    io::BinaryWriter packetBuffer;
     for (const auto& packet : m_sendQueue)
-    {
         packet->encode(packetBuffer);
-    }
 
     sendInternal(packetBuffer);
     m_sendQueue.clear();
 }
 
-void NetworkSession::sendInternal(const BinaryWriter& payload)
+void NetworkSession::sendInternal(const io::BinaryWriter& payload)
 {
     const std::string buffer = hexDump(payload.data(), payload.length());
     logging::info("raw packet payload = {}", buffer);
+
     std::vector<uint8_t> out;
 
     if (!compressionEnabled)
@@ -157,19 +154,17 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     }
     else
     {
-        const auto* comp = protocol::getCompressor(compressor);
+        const auto* comp = proto::getCompressor(compressor);
         if (comp && comp->shouldCompress(payload.length()))
         {
             std::vector<uint8_t> compressed = *comp->compress(payload.buffer);
-
-            out.push_back(std::to_underlying(compressor));
+            out.push_back(static_cast<uint8_t>(std::to_underlying(compressor)));
             logging::info("compression success");
-
             out.insert(out.end(), compressed.begin(), compressed.end());
         }
         else
         {
-            out.push_back(std::to_underlying(protocol::CompressionAlgorithm::NONE));
+            out.push_back(static_cast<uint8_t>(std::to_underlying(proto::CompressionAlgorithm::NONE)));
             out.insert(out.end(), payload.data(), payload.data() + payload.length());
         }
     }
@@ -178,19 +173,16 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     {
         const std::vector old(out);
         if (auto data = getEncryptor().encrypt(old))
-        {
             out = std::move(*data);
-        }
         else
         {
             logging::error("encryption failed");
             return;
         }
     }
+
     out.insert(out.begin(), 0xFE);
-
     const std::string dump = hexDump(out.data(), out.size());
-
     logging::info("send payload = {}", dump);
 
     m_transport->send(m_guid, out.data(), out.size());
@@ -198,34 +190,35 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
 
 bool NetworkSession::handleLogin(const uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt)
 {
-    if (!protocol::isSupportedProtocol(version))
+    if (!proto::isSupportedProtocol(version))
     {
         disconnectUserForIncompatibleProtocol(version);
         return false;
     }
+
     auto authData = nlohmann::json::parse(authInfoJson);
     return true;
 }
 
 bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
 {
-    if (!protocol::isSupportedProtocol(version))
+    if (!proto::isSupportedProtocol(version))
     {
         disconnectUserForIncompatibleProtocol(version);
         return false;
     }
 
-    compressor = protocol::CompressionAlgorithm::ZLIB;
+    // we should NOT enforce compression. but for the sake of simplicity, we will just keep it this for now. we can add a config option for it later
+    compressor = proto::CompressionAlgorithm::ZLIB;
 
-    // this packet needs to be properly handled, and we should call session's compressor networkId, right now this is just hardcoded
-    auto packet = std::make_unique<protocol::NetworkSettingsPacket>();
-    packet->compressionThreshold = protocol::NetworkSettingsPacket::compressEverything;
-    packet->compressionAlgorithm = std::to_underlying(compressor);
+    auto packet = std::make_unique<proto::NetworkSettingsPacket>();
+    packet->compressionThreshold = proto::NetworkSettingsPacket::compressEverything;
+    packet->compressionAlgorithm = static_cast<uint8_t>(std::to_underlying(compressor));
     packet->enableClientThrottling = false;
     packet->clientThrottleThreshold = 0;
     packet->clientThrottleScalar = 0.0f;
-    send(std::move(packet), true);
 
+    send(std::move(packet), true);
     compressionEnabled = true;
 
     return true;
