@@ -22,6 +22,7 @@ public:
 
     void poll();
     cyrex::nw::protocol::Transport* transport() const;
+    cyrex::Server& getServer() const;
 
 private:
     void handlePacket(RakNet::Packet* packet);

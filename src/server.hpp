@@ -2,8 +2,9 @@
 
 #include "command/command_manager.hpp"
 #include "network/mcbe/protocol/types/GameMode.hpp"
-#include "network/raknet/handler/raknet_handler.hpp"
 #include "util/server_properties.hpp"
+#include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
+#include "network/mcbe/resourcepacks/loader/resource_pack_loader_def.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <atomic>
@@ -13,8 +14,13 @@
 
 #include <cstdint>
 
-namespace cyrex
+namespace cyrex::nw::raknet
 {
+class RaknetHandler;
+}
+
+namespace cyrex
+{ 
 
 class Server
 {
@@ -27,6 +33,7 @@ public:
         std::string serverName;
         std::string motd;
         cyrex::nw::protocol::GameMode defaultGameMode;
+        bool forceResources;
 
         static Config fromProperties(const cyrex::util::ServerProperties& props);
     };
@@ -54,11 +61,16 @@ public:
     void stop();
     void run();
 
+    [[nodiscard]] cyrex::nw::resourcepacks::ResourcePackFactory& getResourcePackFactory();
+    [[nodiscard]] const cyrex::nw::resourcepacks::ResourcePackFactory& getResourcePackFactory() const;
+    [[nodiscard]] bool shouldForceResources() const;
+
 private:
     void commandLoop();
 
     Config m_config;
     std::unique_ptr<cyrex::nw::raknet::RaknetHandler> m_raknet;
+    std::unique_ptr<cyrex::nw::resourcepacks::ResourcePackFactory> m_resourcePackFactory;
     std::vector<RakNet::RakNetGUID> m_players;
     std::uint64_t m_serverUniqueId;
     std::atomic<bool> m_running;

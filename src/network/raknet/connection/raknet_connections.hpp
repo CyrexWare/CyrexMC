@@ -1,6 +1,7 @@
 #pragma once
 
 #include "network/raknet/util/raknet_guid_hash.hpp"
+#include "server.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <memory>
@@ -18,7 +19,7 @@ class RaknetHandler;
 class RaknetConnections
 {
 public:
-    void onConnect(const RakNet::RakNetGUID& guid, RakNet::SystemAddress address, RaknetHandler* handler);
+    void onConnect(const RakNet::RakNetGUID& guid, RakNet::SystemAddress address, RaknetHandler* handler, cyrex::Server& server);
 
     void onDisconnect(const RakNet::RakNetGUID& guid);
     void cleanup();

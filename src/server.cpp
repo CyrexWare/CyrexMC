@@ -3,16 +3,23 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/raknet/handler/raknet_handler.hpp"
 
+#include "network/mcbe/resourcepacks/loader/resource_pack_loader_def.hpp"
+#include "network/mcbe/resourcepacks/loader/zipped_resource_pack_loader.hpp"
+#include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
+
 #include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>
 #include <thread>
 #include <utility>
+#include <filesystem>
+#include <memory>
+#include <unordered_set>
 
 cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::ServerProperties& p)
 {
-    return {p.port, p.portIpv6, p.maxPlayers, p.serverName, p.motd, p.defaultGameMode};
+    return {p.port, p.portIpv6, p.maxPlayers, p.serverName, p.motd, p.defaultGameMode, p.forceResources};
 }
 
 namespace
@@ -32,6 +39,17 @@ cyrex::Server::Server(Config config) :
     m_running(true)
 {
     m_raknet = std::make_unique<cyrex::nw::raknet::RaknetHandler>(*this);
+
+    using namespace cyrex::nw::resourcepacks;
+
+    std::unordered_set<std::shared_ptr<ResourcePackLoaderDef>> loaders;
+
+    // use registerLoader instead?
+    loaders.insert(
+        std::make_shared<cyrex::nw::resourcepacks::ZippedResourcePackLoader>(std::filesystem::path("resource_packs")));
+
+    m_resourcePackFactory = std::make_unique<ResourcePackFactory>(std::move(loaders));
+
     m_commands = std::make_unique<cyrex::command::CommandManager>(*this);
     m_commands->registerDefaults();
 }
@@ -113,6 +131,21 @@ std::size_t cyrex::Server::getPlayerCount() const
 const std::vector<RakNet::RakNetGUID>& cyrex::Server::getAllPlayers() const
 {
     return m_players;
+}
+
+cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory()
+{
+    return *m_resourcePackFactory;
+}
+
+const cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory() const
+{
+    return *m_resourcePackFactory;
+}
+
+bool cyrex::Server::shouldForceResources() const
+{
+    return m_config.forceResources;
 }
 
 void cyrex::Server::stop()

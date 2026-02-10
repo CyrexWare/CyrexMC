@@ -46,6 +46,11 @@ cyrex::nw::protocol::Transport* RaknetHandler::transport() const
     return m_transportImpl.get();
 }
 
+cyrex::Server& RaknetHandler::getServer() const
+{
+    return m_server;
+}
+
 void RaknetHandler::poll()
 {
     INetworkPeer* peer = m_peer.get();
@@ -67,7 +72,7 @@ void RaknetHandler::handlePacket(Packet* packet)
     switch (packet->data[0])
     {
         case ID_NEW_INCOMING_CONNECTION:
-            m_connections.onConnect(packet->guid, packet->systemAddress, this);
+            m_connections.onConnect(packet->guid, packet->systemAddress, this, getServer());
             break;
 
         case ID_CONNECTION_LOST:

@@ -5,8 +5,12 @@
 #include "network/mcbe/packet.hpp"
 #include "network/mcbe/packet_def.hpp"
 #include "network/mcbe/packet_factory.hpp"
+#include "network/mcbe/protocol/resource_pack_chunk_request.hpp"
+#include "network/mcbe/protocol/resource_pack_client_response.hpp"
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackClientResponseStatus.hpp"
 #include "network/mcbe/transport.hpp"
+#include "server.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <functional>
@@ -15,19 +19,29 @@
 namespace cyrex::nw::session
 {
 
+// need getter/setter commands for this and proper usage
 enum class Phase
 {
-    HANDSHAKE,
-    PLAY
+    PRELOGIN,
+    LOGIN,
+    ENCRYPTION, // also handshake
+    RESOURCE_PACKS,
+    PRE_SPAWN,
+    IN_GAME,
+    DEAD
 };
 
 class NetworkSession
 {
 public:
-    NetworkSession(const RakNet::RakNetGUID& guid, const RakNet::SystemAddress& address, protocol::Transport* transport) :
+    NetworkSession(const RakNet::RakNetGUID& guid,
+                   const RakNet::SystemAddress& address,
+                   protocol::Transport* transport,
+                   cyrex::Server& server) :
         m_guid(guid),
         m_address(address),
-        m_transport(transport)
+        m_transport(transport),
+        m_server(server)
     {
         m_packetFactory.registerAll();
     }
@@ -36,7 +50,7 @@ public:
     cyrex::nw::protocol::CompressionAlgorithm compressor;
 
     bool encryptionEnabled = false;
-    Phase phase = Phase::HANDSHAKE;
+    Phase phase = Phase::PRELOGIN;
     bool markedForDisconnect = false;
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
@@ -45,7 +59,10 @@ public:
     void flush();
     bool disconnectUserForIncompatibleProtocol(uint32_t);
     bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
+    void doLoginSuccess();
     bool handleRequestNetworkSettings(uint32_t version);
+    bool handleResourcePackClientResponse(const cyrex::nw::protocol::ResourcePackClientResponsePacket& pk);
+    bool handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& pk);
     void tick();
 
     void setProtocolId(const std::uint32_t protocolId)
@@ -80,6 +97,8 @@ private:
     RakNet::RakNetGUID m_guid;
     RakNet::SystemAddress m_address;
     protocol::Transport* m_transport;
+
+    cyrex::Server& m_server;
 
     std::uint32_t m_protocolId{0};
     std::optional<protocol::AesEncryptor> m_cipher;

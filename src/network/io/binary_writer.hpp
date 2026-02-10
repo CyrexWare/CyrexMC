@@ -3,7 +3,14 @@
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 
+#include "log/logging.hpp"
+
+#include <algorithm>
+#include <array>
 #include <bit>
+#include <functional>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -12,6 +19,8 @@
 
 namespace cyrex::nw::io
 {
+
+using UUID = std::array<uint8_t, 16>;
 
 class BinaryWriter
 {
@@ -38,6 +47,26 @@ public:
     {
         writeU8(v >> 8);
         writeU8(v);
+    }
+
+    void writeI32LE(int32_t v)
+    {
+        writeU32LE(static_cast<uint32_t>(v));
+    }
+
+    void writeI32BE(int32_t v)
+    {
+        writeU32BE(static_cast<uint32_t>(v));
+    }
+
+    void writeI64LE(int64_t v)
+    {
+        writeU64LE(static_cast<uint64_t>(v));
+    }
+
+    void writeI64BE(int64_t v)
+    {
+        writeU64BE(static_cast<uint64_t>(v));
     }
 
     void writeI16LE(const int16_t v)
@@ -80,6 +109,18 @@ public:
     {
         writeU32BE(v & 0xFFFFFFFF);
         writeU32BE(v >> 32);
+    }
+
+    void writeU64BE(uint64_t v)
+    {
+        writeU8((v >> 56) & 0xFF);
+        writeU8((v >> 48) & 0xFF);
+        writeU8((v >> 40) & 0xFF);
+        writeU8((v >> 32) & 0xFF);
+        writeU8((v >> 24) & 0xFF);
+        writeU8((v >> 16) & 0xFF);
+        writeU8((v >> 8) & 0xFF);
+        writeU8(v & 0xFF);
     }
 
     void writeBool(const bool v)
@@ -193,6 +234,37 @@ public:
     {
         writeVarUInt(static_cast<uint32_t>(s.size()));
         buffer.insert(buffer.end(), s.begin(), s.end());
+    }
+
+    void writeUUID(const UUID& uuid)
+    {
+        for (size_t i = 0; i < 8; ++i)
+        {
+            writeU8(uuid[7 - i]);
+        }
+        for (size_t i = 0; i < 8; ++i)
+        {
+            writeU8(uuid[15 - i]);
+        }
+    }
+
+    void writeBytes(const std::vector<uint8_t>& data)
+    {
+        buffer.insert(buffer.end(), data.begin(), data.end());
+    }
+
+    template <typename T>
+    void writeOptional(const std::optional<T>& value, const std::function<void(const T&)>& writer)
+    {
+        if (value.has_value())
+        {
+            writeBool(true);
+            writer(value.value());
+        }
+        else
+        {
+            writeBool(false);
+        }
     }
 
     [[nodiscard]] const uint8_t* data() const

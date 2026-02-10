@@ -51,6 +51,13 @@ FetchContent_Declare(libdeflate
 FetchContent_MakeAvailable(libdeflate)
 
 FetchContent_Declare(
+    miniz
+    GIT_REPOSITORY https://github.com/richgel999/miniz.git
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(miniz)
+
+FetchContent_Declare(
     glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
     GIT_TAG 1.0.3
@@ -138,6 +145,7 @@ target_link_libraries(CyrexMC PRIVATE
     nlohmann_json::nlohmann_json
     jwt-cpp
     glm::glm-header-only
+    miniz  
 )
 
 CyrexMC_set_option(

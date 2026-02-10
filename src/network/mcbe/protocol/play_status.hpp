@@ -1,12 +1,14 @@
 #pragma once
 
 #include "network/session/network_session.hpp"
+#include "network/mcbe/packetids.hpp"
+#include "log/logging.hpp"
 
 namespace cyrex::nw::protocol
 {
 class PlayStatusPacket final :
     public cyrex::nw::protocol::
-        PacketImpl<PlayStatusPacket, ProtocolInfo::playStatusPacket, cyrex::nw::protocol::PacketDirection::Clientbound, true>
+        PacketImpl<PlayStatusPacket, static_cast<uint32_t>(PacketId::PlayStatus), cyrex::nw::protocol::PacketDirection::Clientbound, true>
 {
 public:
     // Maybe make this separately?
@@ -32,6 +34,7 @@ public:
     bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
     {
         out.writeU32BE(status);
+        logging::info("PlayStatusPacket: status = {}", status);
         return true;
     }
 

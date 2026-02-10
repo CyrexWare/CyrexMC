@@ -3,7 +3,11 @@
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 
+#include <algorithm>
+#include <array>
 #include <bit>
+#include <functional>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -12,6 +16,8 @@
 
 namespace cyrex::nw::io
 {
+
+using UUID = std::array<uint8_t, 16>;
 
 class BinaryReader
 {
@@ -70,6 +76,26 @@ public:
     int16_t readI16BE()
     {
         return static_cast<int16_t>(readU16BE());
+    }
+
+    int32_t readI32LE()
+    {
+        return static_cast<int32_t>(readU32LE());
+    }
+
+    int32_t readI32BE()
+    {
+        return static_cast<int32_t>(readU32BE());
+    }
+
+    int64_t readI64LE()
+    {
+        return static_cast<int64_t>(readU64LE());
+    }
+
+    int64_t readI64BE()
+    {
+        return static_cast<int64_t>(readU64BE());
     }
 
     int16_t readShort()
@@ -206,6 +232,40 @@ public:
         std::string s(reinterpret_cast<char*>(&buffer.at(offset)), len);
         offset += len;
         return s;
+    }
+
+    std::vector<uint8_t> readBytesVector(const size_t len)
+    {
+        ensureReadable(len);
+        std::vector<uint8_t> data(buffer.begin() + offset, buffer.begin() + offset + len);
+        offset += len;
+        return data;
+    }
+
+    UUID readUUID()
+    {
+        ensureReadable(16);
+        UUID uuid{};
+        for (size_t i = 0; i < 8; ++i)
+        {
+            uuid[7 - i] = buffer.at(offset + i);
+        }
+        for (size_t i = 0; i < 8; ++i)
+        {
+            uuid[15 - i] = buffer.at(offset + 8 + i);
+        }
+        offset += 16;
+        return uuid;
+    }
+
+    template <typename T>
+    std::optional<T> readOptional(const std::function<T()>& reader)
+    {
+        if (readBool())
+        {
+            return reader();
+        }
+        return std::nullopt;
     }
 
 private:

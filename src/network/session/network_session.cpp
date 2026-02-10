@@ -4,17 +4,31 @@
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/compression/compressors.hpp"
+#include "network/mcbe/packetids.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
+#include "network/mcbe/protocol/resource_pack_chunk_request.hpp"
+#include "network/mcbe/protocol/resource_pack_client_response.hpp"
+#include "network/mcbe/protocol/resource_pack_data_info.hpp"
+#include "network/mcbe/protocol/resource_pack_stack.hpp"
+#include "network/mcbe/protocol/resource_packs_info.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackClientResponseStatus.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackEntry.hpp"
+#include "network/mcbe/resourcepacks/resource_pack_def.hpp"
+#include "network/raknet/handler/raknet_handler.hpp"
 
+#include <array>
 #include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <random>
 #include <sstream>
 #include <utility>
 #include <vector>
+
+#include <cstdint>
 
 using namespace cyrex::nw::io;
 
@@ -34,6 +48,25 @@ std::string hexDump(const uint8_t* data, size_t len)
 
     return oss.str();
 }
+
+cyrex::nw::io::UUID randomUUID()
+{
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+
+    std::uniform_int_distribution<unsigned int> dist(0, 255);
+
+    cyrex::nw::io::UUID uuid{};
+
+    for (auto& b : uuid)
+        b = static_cast<uint8_t>(dist(gen));
+
+    uuid[6] = (uuid[6] & 0x0F) | 0x40;
+    uuid[8] = (uuid[8] & 0x3F) | 0x80;
+
+    return uuid;
+}
+
 } // namespace
 
 namespace cyrex::nw::session
@@ -57,7 +90,11 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
         const std::uint32_t packetHeader = packetBuffer.readVarUInt();
         const std::uint32_t packetId = packetHeader & 0x3FF;
         cyrex::logging::info(LOG_MCBE, "packet length = {}", packetLength);
-        cyrex::logging::info(LOG_MCBE, "packet id = {}0x{:02X}", cyrex::logging::Color::GOLD, packetId);
+        cyrex::logging::info(LOG_MCBE,
+                             "packet id = {}0x{:02X} ({})",
+                             cyrex::logging::Color::GOLD,
+                             packetId,
+                             cyrex::nw::protocol::toSimpleName(cyrex::nw::protocol::fromInt(packetId)));
 
         const auto* packetDef = m_packetFactory.find(packetId);
         if (!packetDef)
@@ -94,6 +131,10 @@ bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protoc
 
 void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool immediately)
 {
+    cyrex::logging::info("queueing packet with id = {}0x{:02X} ({})",
+                         cyrex::logging::Color::GOLD,
+                         packet->getDef().networkId,
+                         cyrex::nw::protocol::toSimpleName(cyrex::nw::protocol::fromInt(packet->getDef().networkId)));
     if (immediately)
     {
         BinaryWriter packetBuffer;
@@ -204,7 +245,27 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
         return false;
     }
     auto authData = nlohmann::json::parse(authInfoJson);
+
+    doLoginSuccess();
     return true;
+}
+
+void NetworkSession::doLoginSuccess()
+{
+    auto packet = std::make_unique<protocol::PlayStatusPacket>();
+    packet->status = protocol::PlayStatusPacket::loginSuccess;
+    send(std::move(packet));
+    // Encryption below (for ency)
+
+    // Initial resource pack setup
+    auto infoPkt = std::make_unique<protocol::ResourcePacksInfoPacket>();
+    infoPkt->resourcePackEntries = m_server.getResourcePackFactory().getResourceStack();
+    infoPkt->mustAccept = m_server.shouldForceResources();
+    // future making this configurable
+    infoPkt->disableVibrantVisuals = false;
+    infoPkt->worldTemplateId = randomUUID();
+    infoPkt->worldTemplateVersion = "";
+    send(std::move(infoPkt));
 }
 
 bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
@@ -228,6 +289,86 @@ bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
 
     compressionEnabled = true;
 
+    return true;
+}
+
+bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol::ResourcePackClientResponsePacket& pk)
+{
+    using cyrex::nw::protocol::ResourcePackClientResponseStatus;
+
+    switch (pk.responseStatus)
+    {
+        case ResourcePackClientResponseStatus::Refused:
+            logging::warn("client refused resource packs");
+            if (m_server.shouldForceResources())
+            {
+                logging::info("disconnecting client for refusing required resource packs");
+                markedForDisconnect = true;
+            }
+            break;
+
+        case ResourcePackClientResponseStatus::SendPacks:
+            logging::info("client is downloading resource packs");
+            for (const auto& entry : pk.packEntries)
+            {
+                auto resourcePack = m_server.getResourcePackFactory().getPackById(entry.uuid);
+                if (!resourcePack)
+                {
+                    logging::warn("client requested unknown resource pack, disconnecting");
+                    markedForDisconnect = true;
+                    return true;
+                }
+
+                int maxChunkSize = m_server.getResourcePackFactory().getMaxChunkSize();
+                int chunkCount = static_cast<int>(
+                    std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
+
+                // packs[resourcePack->getPackId()] = std::make_shared<PackMeta>(resourcePack->getPackId(),
+                //                                                               resourcePack,
+                //                                                               maxChunkSize,
+                //                                                               chunkCount);
+
+                auto dataInfoPkt = std::make_unique<protocol::ResourcePackDataInfoPacket>();
+                dataInfoPkt->packId = resourcePack->getPackId();
+                dataInfoPkt->packVersion = resourcePack->getPackVersion();
+                dataInfoPkt->maxChunkSize = maxChunkSize;
+                dataInfoPkt->chunkCount = chunkCount;
+                dataInfoPkt->compressedPackSize = resourcePack->getPackSize();
+                dataInfoPkt->sha256 = resourcePack->getSha256();
+                send(std::move(dataInfoPkt));
+            }
+            break;
+
+        case ResourcePackClientResponseStatus::HaveAllPacks:
+            logging::info("client has all required resource packs");
+
+            {
+                auto stackPkt = std::make_unique<protocol::ResourcePackStackPacket>();
+                stackPkt->mustAccept = m_server.shouldForceResources();
+                auto packs = m_server.getResourcePackFactory().getResourceStack();
+                stackPkt->resourcePackStack.clear();
+
+                for (auto& packDefPtr : packs)
+                {
+                    if (packDefPtr)
+                        stackPkt->resourcePackStack.emplace_back(*packDefPtr);
+                }
+
+
+                send(std::move(stackPkt));
+            }
+            break;
+
+        case ResourcePackClientResponseStatus::Completed:
+            logging::info("client has completed resource pack processing");
+            break;
+    }
+
+    return true;
+}
+
+bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& pk)
+{
     return true;
 }
 

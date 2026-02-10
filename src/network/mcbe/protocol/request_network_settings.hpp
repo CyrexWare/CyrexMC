@@ -2,6 +2,7 @@
 
 #include "log/logging.hpp"
 #include "network/session/network_session.hpp"
+#include "network/mcbe/packetids.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <iostream>
@@ -13,7 +14,7 @@ namespace cyrex::nw::protocol
 
 class RequestNetworkSettingsPacket final :
     public cyrex::nw::protocol::PacketImpl<RequestNetworkSettingsPacket,
-                                           ProtocolInfo::requestNetworkSettingsPacket,
+                                           static_cast<uint32_t>(PacketId::RequestNetworkSettings),
                                            cyrex::nw::protocol::PacketDirection::Serverbound,
                                            true>
 {
