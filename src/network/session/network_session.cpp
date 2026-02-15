@@ -349,11 +349,11 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
                 int chunkCount = static_cast<int>(
                     std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
 
-                auto data = std::make_shared<
-                    protocol::ResourcePackData>(resourcePack->getPackId(),
-                                                           std::static_pointer_cast<resourcepacks::ResourcePack>(resourcePack),
-                                                           maxChunkSize,
-                                                           chunkCount);
+                auto data = std::make_shared<protocol::ResourcePackData>(resourcePack->getPackId(),
+                                                                         std::static_pointer_cast<resourcepacks::ResourcePack>(
+                                                                             resourcePack),
+                                                                         maxChunkSize,
+                                                                         chunkCount);
 
                 loadedPacks.emplace(data->packId, data);
                 packQueue.push_back(data->packId);
@@ -423,10 +423,9 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
         int totalChunks = static_cast<int>((totalBytes + maxSize - 1) / maxSize);
 
         packInfo = std::make_shared<protocol::ResourcePackData>(rawPack->getPackId(),
-                                                                           std::static_pointer_cast<resourcepacks::ResourcePack>(
-                                                                               rawPack),
-                                                                           maxSize,
-                                                                           totalChunks);
+                                                                std::static_pointer_cast<resourcepacks::ResourcePack>(rawPack),
+                                                                maxSize,
+                                                                totalChunks);
 
         loadedPacks.emplace(packInfo->packId, packInfo);
     }

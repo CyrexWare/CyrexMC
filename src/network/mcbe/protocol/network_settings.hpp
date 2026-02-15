@@ -8,10 +8,7 @@
 namespace cyrex::nw::protocol
 {
 class NetworkSettingsPacket final :
-    public PacketImpl<NetworkSettingsPacket,
-                                           static_cast<uint32_t>(PacketId::NetworkSettings),
-                                           PacketDirection::Clientbound,
-                                           true>
+    public PacketImpl<NetworkSettingsPacket, static_cast<uint32_t>(PacketId::NetworkSettings), PacketDirection::Clientbound, true>
 {
 public:
     static constexpr uint16_t compressNothing = 0;

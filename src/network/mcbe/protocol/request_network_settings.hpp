@@ -10,10 +10,7 @@ namespace cyrex::nw::protocol
 {
 
 class RequestNetworkSettingsPacket final :
-    public PacketImpl<RequestNetworkSettingsPacket,
-                                           static_cast<uint32_t>(PacketId::RequestNetworkSettings),
-                                           PacketDirection::Serverbound,
-                                           true>
+    public PacketImpl<RequestNetworkSettingsPacket, static_cast<uint32_t>(PacketId::RequestNetworkSettings), PacketDirection::Serverbound, true>
 {
 public:
     uint32_t protocolVersion = 0;

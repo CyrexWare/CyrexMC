@@ -233,8 +233,7 @@ public:
         {
             len++;
             v >>= 7;
-        }
-        while (v != 0);
+        } while (v != 0);
         return len;
     }
 
@@ -245,8 +244,7 @@ public:
         {
             len++;
             v >>= 7;
-        }
-        while (v != 0);
+        } while (v != 0);
         return len;
     }
 
