@@ -2,7 +2,7 @@
 
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
-#include "uuid_helper.hpp"
+#include "util/uuid.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -255,9 +255,9 @@ public:
         buffer.insert(buffer.end(), str.begin(), str.end());
     }
 
-    inline void writeUUID(const UUID& uuid)
+    inline void writeUUID(const util::UUID& uuid)
     {
-        auto bytes = uuidToBytes(uuid);
+        auto bytes = util::uuidToBytes(uuid);
         std::reverse(bytes.begin(), bytes.begin() + 8);
         std::reverse(bytes.begin() + 8, bytes.end());
         writeBytes(std::vector<uint8_t>(bytes.begin(), bytes.end()));

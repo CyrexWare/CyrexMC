@@ -3,7 +3,6 @@
 #include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
-#include "network/io/uuid_helper.hpp"
 #include "network/mcbe/compression/compressors.hpp"
 #include "network/mcbe/packetids.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
@@ -21,6 +20,7 @@
 #include "network/mcbe/protocol/types/packs/ResourcePackStackEntry.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 #include "network/raknet/handler/raknet_handler.hpp"
+#include "util/uuid.hpp"
 
 #include <array>
 #include <iomanip>
@@ -57,7 +57,8 @@ std::string hexDump(const uint8_t* data, size_t len)
     return oss.str();
 }
 
-cyrex::nw::io::UUID randomUUID()
+// seperate this mb in the future to uuid util
+cyrex::util::UUID randomUUID()
 {
     std::random_device rd;
     std::mt19937_64 gen(rd());
@@ -69,7 +70,7 @@ cyrex::nw::io::UUID randomUUID()
     bytes[6] = (bytes[6] & 0x0F) | 0x40;
     bytes[8] = (bytes[8] & 0x3F) | 0x80;
 
-    cyrex::nw::io::UUID uuid{};
+    cyrex::util::UUID uuid{};
     std::memcpy(&uuid, bytes.data(), 16);
 
     return uuid;
@@ -79,7 +80,6 @@ cyrex::nw::io::UUID randomUUID()
 namespace cyrex::nw::session
 {
 
-// eh, we could just call flush directly, but we might expand this function
 void NetworkSession::tick()
 {
     flush();
@@ -103,7 +103,6 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
                              packetId,
                              cyrex::nw::protocol::toSimpleName(cyrex::nw::protocol::fromInt(packetId)));
 
-        // login packets payload is too huge to be debugged, so we skip itq
         if (packetId != 0x01)
         {
             std::stringstream ss;
@@ -141,8 +140,8 @@ bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protoc
 {
     auto packet = std::make_unique<protocol::PlayStatusPacket>();
     packet->status = protocolVersion < protocol::ProtocolInfo::currentProtocol
-                         ? protocol::PlayStatusPacket::loginFailedClient
-                         : protocol::PlayStatusPacket::loginFailedServer;
+                         ? protocol::PlayStatus::LoginFailedClient
+                         : protocol::PlayStatus::LoginFailedServer;
 
     send(std::move(packet), true);
     return true;
@@ -272,9 +271,9 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
 void NetworkSession::doLoginSuccess()
 {
     auto packet = std::make_unique<protocol::PlayStatusPacket>();
-    packet->status = protocol::PlayStatusPacket::loginSuccess;
+    packet->status = protocol::PlayStatus::LoginSuccess;
     send(std::move(packet));
-    // Encryption below (for ency) (handshake)
+    // Encryption below (handshake)
 
     // Initial resource pack setup
     auto infoPkt = std::make_unique<protocol::ResourcePacksInfoPacket>();
@@ -287,7 +286,6 @@ void NetworkSession::doLoginSuccess()
 
         protocol::ResourcePackInfoEntry entry;
 
-
         int chunkCount = static_cast<int>(
             std::ceil(static_cast<double>(def.getPackSize()) / m_server.getResourcePackFactory().getMaxChunkSize()));
 
@@ -299,7 +297,7 @@ void NetworkSession::doLoginSuccess()
         entry.encryptionKey = def.getEncryptionKey();
         entry.subPackName = "";
 
-        entry.contentIdentity = io::uuidToString(entry.packId);
+        entry.contentIdentity = util::uuidToString(entry.packId);
 
         entry.scripting = def.usesScript();
         entry.addonPack = def.isAddonPack();
@@ -404,7 +402,7 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
             for (const auto& def : defStack)
             {
                 cyrex::nw::protocol::ResourcePackStackEntry entry;
-                entry.packId = io::uuidToString(def->getPackId());
+                entry.packId = util::uuidToString(def->getPackId());
                 entry.packVersion = def->getPackVersion();
                 entry.subPackName = def->getSubPackName();
                 stackPkt->resourcePackStack.push_back(std::move(entry));
@@ -463,7 +461,7 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
         pendingChunks.emplace_back(packInfo->packId, request.chunkIndex);
     }
 
-    if (currentPack == io::UUID{})
+    if (currentPack == util::UUID{})
     {
         currentPack = packInfo->packId;
         if (std::find(packQueue.begin(), packQueue.end(), packInfo->packId) == packQueue.end())
@@ -554,11 +552,11 @@ void NetworkSession::nextPack()
         else
             packQueue.erase(std::remove(packQueue.begin(), packQueue.end(), currentPack), packQueue.end());
 
-        currentPack = packQueue.empty() ? io::UUID{} : packQueue.front();
+        currentPack = packQueue.empty() ? util::UUID{} : packQueue.front();
     }
     else
     {
-        currentPack = io::UUID{};
+        currentPack = util::UUID{};
     }
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "network/io/uuid_helper.hpp"
+#include "util/uuid.hpp"
 #include "network/mcbe/compression/compressor.hpp"
 #include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/packet.hpp"
@@ -117,11 +117,11 @@ private:
 
     protocol::PacketFactory m_packetFactory;
 
-    std::map<io::UUID, std::shared_ptr<cyrex::nw::protocol::ResourcePackData>> loadedPacks;
-    std::deque<io::UUID> packQueue;
-    std::deque<std::pair<io::UUID, int>> pendingChunks;
+    std::map<util::UUID, std::shared_ptr<cyrex::nw::protocol::ResourcePackData>> loadedPacks;
+    std::deque<util::UUID> packQueue;
+    std::deque<std::pair<util::UUID, int>> pendingChunks;
 
-    io::UUID currentPack{};
+    util::UUID currentPack{};
     bool queueProcessing = false;
 };
 } // namespace cyrex::nw::session

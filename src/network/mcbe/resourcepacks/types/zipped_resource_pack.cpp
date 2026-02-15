@@ -150,7 +150,7 @@ std::string ZippedResourcePack::getPackName() const
     return manifest["header"]["name"].get<std::string>();
 }
 
-cyrex::nw::io::UUID ZippedResourcePack::getPackId() const
+cyrex::util::UUID ZippedResourcePack::getPackId() const
 {
     const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&id);
     bool isEmpty = true;

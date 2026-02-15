@@ -2,7 +2,6 @@
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packetids.hpp"
-#include "resource_pack_packet_impl.hpp"
 
 #include <string>
 #include <vector>
@@ -21,8 +20,7 @@ class ResourcePackChunkDataPacket final :
 public:
     using PacketImpl<ResourcePackChunkDataPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkData), PacketDirection::Clientbound, true>::getDefStatic;
 
-    io::UUID packId{};
-    // no usage unless we dont provide it in the ResourcePackDataInfoPacket (idk why it works like this hahah, but testing proves it)
+    util::UUID packId{};
     std::string packVersion;
     int chunkIndex = 0;
     uint64_t progress = 0;
@@ -30,7 +28,7 @@ public:
 
     bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
     {
-        out.writeString(io::uuidToString(packId));
+        out.writeString(util::uuidToString(packId));
         out.writeU32LE(chunkIndex);
         out.writeU64LE(progress);
         out.writeString(data);
@@ -46,7 +44,6 @@ public:
     bool handle(cyrex::nw::session::NetworkSession& session) override
     {
         return true;
-        //return session.handleResourcePackChunkData(*this);
     }
 };
 

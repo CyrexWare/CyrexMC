@@ -6,7 +6,6 @@
 #include "network/mcbe/resourcepacks/resource_pack.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 #include "network/session/network_session.hpp"
-#include "resource_pack_packet_impl.hpp"
 
 #include <string>
 #include <vector>
@@ -24,7 +23,7 @@ public:
                                       true>;
     using PacketImplType::getDefStatic;
 
-    io::UUID packId{};
+    util::UUID packId{};
     std::string packVersion;
     int maxChunkSize = 0;
     int chunkCount = 0;
@@ -35,7 +34,7 @@ public:
 
     bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
     {
-        out.writeString(io::uuidToString(packId));
+        out.writeString(util::uuidToString(packId));
         out.writeI32LE(maxChunkSize);
         out.writeI32LE(chunkCount);
         out.writeU64LE(compressedPackSize);

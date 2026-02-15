@@ -1,9 +1,9 @@
 ﻿#pragma once
+#include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
-#include "resource_pack_packet_impl.hpp"
 
 namespace cyrex::nw::protocol
 {
@@ -17,7 +17,7 @@ public:
                      PacketDirection::Serverbound,
                      true>::getDefStatic;
 
-    io::UUID packId{};
+    util::UUID packId{};
     std::string packVersion;
     int chunkIndex = 0;
 
@@ -34,15 +34,10 @@ public:
         const auto sepPos = packInfo.find('_');
         const std::string uuidStr = packInfo.substr(0, sepPos);
 
-        packId = io::stringToUUID(uuidStr);
+        packId = util::stringToUUID(uuidStr);
         packVersion = packInfo.substr(sepPos + 1);
 
         chunkIndex = in.readI16LE();
-
-        logging::log("Decoded ResourcePackChunkRequestPacket: packId={}, packVersion={}, chunkIndex={}",
-                     io::uuidToString(packId),
-                     packVersion,
-                     chunkIndex);
         return true;
     }
 

@@ -33,7 +33,7 @@ std::vector<std::shared_ptr<ResourcePackDef>> ResourcePackFactory::getResourceSt
     return {packs.begin(), packs.end()};
 }
 
-std::shared_ptr<ResourcePackDef> ResourcePackFactory::getPackById(const io::UUID& id) const
+std::shared_ptr<ResourcePackDef> ResourcePackFactory::getPackById(const util::UUID& id) const
 {
     auto it = packsById.find(id);
     return it != packsById.end() ? it->second : nullptr;

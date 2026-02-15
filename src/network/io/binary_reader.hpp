@@ -2,7 +2,7 @@
 
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
-#include "uuid_helper.hpp"
+#include "util/uuid.hpp"
 
 #include <array>
 #include <bit>
@@ -262,7 +262,7 @@ public:
         return out;
     }
 
-    inline UUID readUUID()
+    inline util::UUID readUUID()
     {
         ensureReadable(16);
 
@@ -278,7 +278,7 @@ public:
 
         offset += 8;
 
-        return UUID{bytes.begin(), bytes.end()};
+        return util::UUID{bytes.begin(), bytes.end()};
     }
 
     template <typename T, typename F>

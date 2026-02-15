@@ -28,11 +28,11 @@ public:
 
     struct Entry
     {
-        io::UUID uuid{};
+        util::UUID uuid{};
         std::string version;
 
         Entry() = default;
-        Entry(const io::UUID& id, const std::string& ver) : uuid(id), version(ver)
+        Entry(const util::UUID& id, const std::string& ver) : uuid(id), version(ver)
         {
         }
     };
@@ -58,7 +58,7 @@ public:
             auto pos = s.find('_');
             if (pos != std::string::npos)
             {
-                io::UUID id = stringToUUID(s.substr(0, pos));
+                util::UUID id = stringToUUID(s.substr(0, pos));
                 std::string ver = s.substr(pos + 1);
                 packEntries[i] = Entry{id, ver};
             }
@@ -69,7 +69,7 @@ public:
     bool handle(cyrex::nw::session::NetworkSession& session) override;
 
 private:
-    static io::UUID stringToUUID(const std::string& str)
+    static util::UUID stringToUUID(const std::string& str)
     {
         if (str.size() != 32 && str.size() != 36)
             return {};
@@ -84,7 +84,7 @@ private:
         for (size_t i = 0; i < 16; ++i)
             bytes[i] = static_cast<uint8_t>(std::stoi(cleanStr.substr(i * 2, 2), nullptr, 16));
 
-        return io::UUID(bytes);
+        return util::UUID(bytes);
     }
 };
 } // namespace cyrex::nw::protocol

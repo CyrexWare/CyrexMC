@@ -1,6 +1,6 @@
 #pragma once
 
-#include "network/io/uuid_helper.hpp"
+#include "util/uuid.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 
 #include <bitset>
@@ -17,7 +17,7 @@ namespace cyrex::nw::protocol
 class ResourcePackData
 {
 public:
-    io::UUID packId;
+    util::UUID packId;
     std::shared_ptr<resourcepacks::ResourcePackDef> pack;
     int maxChunkSize;
     int chunkCount;
@@ -25,7 +25,7 @@ public:
     std::vector<bool> sent;
     int nextToSend = 0;
 
-    ResourcePackData(const io::UUID& id, const std::shared_ptr<resourcepacks::ResourcePackDef>& p, int maxChunk, int chunks) :
+    ResourcePackData(const util::UUID& id, const std::shared_ptr<resourcepacks::ResourcePackDef>& p, int maxChunk, int chunks) :
         packId(id),
         pack(p),
         maxChunkSize(maxChunk),

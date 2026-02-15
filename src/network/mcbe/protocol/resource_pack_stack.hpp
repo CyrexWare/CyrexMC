@@ -3,7 +3,6 @@
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackStackEntry.hpp"
 #include "network/session/network_session.hpp"
-#include "resource_pack_packet_impl.hpp"
 #include "types/Experiments.hpp"
 
 #include <string>

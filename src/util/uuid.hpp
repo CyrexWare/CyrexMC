@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 #include <uuid.h>
-namespace cyrex::nw::io
+namespace cyrex::util
 {
 using UUID = uuids::uuid;
 
@@ -33,4 +33,4 @@ inline std::array<uint8_t, 16> uuidToBytes(const UUID& uuid)
     std::memcpy(out.data(), &uuid, 16);
     return out;
 }
-} // namespace cyrex::nw::io
+} // namespace cyrex::util

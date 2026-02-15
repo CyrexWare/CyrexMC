@@ -11,7 +11,7 @@ class ResourcePack : public ResourcePackDef
 {
 protected:
     nlohmann::json manifest;
-    mutable io::UUID id{};
+    mutable util::UUID id{};
 
     bool verifyManifest() const
     {
@@ -30,7 +30,7 @@ public:
         return manifest["header"]["name"].get<std::string>();
     }
 
-    io::UUID getPackId() const override
+    util::UUID getPackId() const override
     {
         const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&id);
         bool isEmpty = true;
@@ -75,7 +75,7 @@ public:
 
     std::size_t hashCode() const
     {
-        io::UUID uuid = getPackId();
+        util::UUID uuid = getPackId();
         const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&uuid);
 
         std::size_t h = 0;

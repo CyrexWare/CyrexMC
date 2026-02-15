@@ -24,7 +24,7 @@ public:
 
     bool disableVibrantVisuals = false;
 
-    io::UUID worldTemplateId{};
+    util::UUID worldTemplateId{};
     std::string worldTemplateVersion;
 
     std::vector<ResourcePackInfoEntry> resourcePackEntries;
