@@ -75,7 +75,7 @@ std::vector<uint8_t> ZippedResourcePack::computeSha256FromFile() const
     if (!file)
         throw std::runtime_error("Failed to open file for SHA256 computation");
 
-    constexpr size_t bufferSize = 64 * 1024; 
+    constexpr size_t bufferSize = 64 * 1024;
     std::vector<uint8_t> buffer(bufferSize);
 
     while (file)
