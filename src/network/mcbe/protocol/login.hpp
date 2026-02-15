@@ -1,14 +1,15 @@
 #pragma once
 
-#include "network/session/network_session.hpp"
 #include "network/mcbe/packetids.hpp"
+#include "network/session/network_session.hpp"
 
 #include <iostream>
 
 namespace cyrex::nw::protocol
 {
 class LoginPacket final :
-    public cyrex::nw::protocol::PacketImpl<LoginPacket, static_cast<uint32_t>(PacketId::Login), cyrex::nw::protocol::PacketDirection::Serverbound, false>
+    public cyrex::nw::protocol::
+        PacketImpl<LoginPacket, static_cast<uint32_t>(PacketId::Login), cyrex::nw::protocol::PacketDirection::Serverbound, false>
 {
 public:
     std::uint32_t protocol = 0;

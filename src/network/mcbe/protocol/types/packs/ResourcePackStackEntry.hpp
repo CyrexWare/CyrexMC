@@ -1,8 +1,8 @@
 #pragma once
+#include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 
-#include "log/logging.hpp"
 #include <string>
 
 namespace cyrex::nw::protocol

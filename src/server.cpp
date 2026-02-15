@@ -1,21 +1,20 @@
 #include "server.hpp"
 
 #include "network/mcbe/protocol/protocol_info.hpp"
-#include "network/raknet/handler/raknet_handler.hpp"
-
 #include "network/mcbe/resourcepacks/loader/resource_pack_loader_def.hpp"
 #include "network/mcbe/resourcepacks/loader/zipped_resource_pack_loader.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
+#include "network/raknet/handler/raknet_handler.hpp"
 
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <iostream>
+#include <memory>
 #include <random>
 #include <thread>
-#include <utility>
-#include <filesystem>
-#include <memory>
 #include <unordered_set>
+#include <utility>
 
 cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::ServerProperties& p)
 {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "log/logging.hpp"
-#include "network/session/network_session.hpp"
 #include "network/mcbe/packetids.hpp"
+#include "network/session/network_session.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <iostream>

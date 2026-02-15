@@ -1,10 +1,10 @@
 #pragma once
+#include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packetids.hpp"
-#include "network/session/network_session.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_def.hpp"
-#include "log/logging.hpp"
+#include "network/session/network_session.hpp"
 
 #include <array>
 #include <sstream>
@@ -13,7 +13,7 @@
 namespace cyrex::nw::protocol
 {
 
-class ResourcePackDataPacket 
+class ResourcePackDataPacket
 {
 public:
     virtual ~ResourcePackDataPacket() = default;
@@ -38,7 +38,7 @@ protected:
             setPackId(io::stringToUUID(idPart));
         } catch (...)
         {
-            setPackId(io::UUID{}); 
+            setPackId(io::UUID{});
         }
 
         setPackVersionStr(versionPart);

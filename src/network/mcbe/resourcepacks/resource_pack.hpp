@@ -75,7 +75,7 @@ public:
 
     std::size_t hashCode() const
     {
-        io::UUID uuid = getPackId(); 
+        io::UUID uuid = getPackId();
         const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&uuid);
 
         std::size_t h = 0;

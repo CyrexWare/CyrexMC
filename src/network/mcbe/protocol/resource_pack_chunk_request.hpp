@@ -12,8 +12,11 @@ class ResourcePackChunkRequestPacket final :
     public PacketImpl<ResourcePackChunkRequestPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkRequest), PacketDirection::Serverbound, true>
 {
 public:
-    using PacketImpl<ResourcePackChunkRequestPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkRequest), PacketDirection::Serverbound, true>::getDefStatic;
-    
+    using PacketImpl<ResourcePackChunkRequestPacket,
+                     static_cast<uint32_t>(PacketId::ResourcePackChunkRequest),
+                     PacketDirection::Serverbound,
+                     true>::getDefStatic;
+
     io::UUID packId{};
     std::string packVersion;
     int chunkIndex = 0;

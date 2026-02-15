@@ -2,9 +2,9 @@
 
 #include "command/command_manager.hpp"
 #include "network/mcbe/protocol/types/GameMode.hpp"
-#include "util/server_properties.hpp"
-#include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
 #include "network/mcbe/resourcepacks/loader/resource_pack_loader_def.hpp"
+#include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
+#include "util/server_properties.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <atomic>
@@ -20,7 +20,7 @@ class RaknetHandler;
 }
 
 namespace cyrex
-{ 
+{
 
 class Server
 {

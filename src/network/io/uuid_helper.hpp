@@ -23,14 +23,14 @@ inline UUID stringToUUID(const std::string& str)
 inline UUID bytesToUUID(const std::array<uint8_t, 16>& bytes)
 {
     UUID result;
-    std::memcpy(&result, bytes.data(), 16); 
+    std::memcpy(&result, bytes.data(), 16);
     return result;
 }
 
 inline std::array<uint8_t, 16> uuidToBytes(const UUID& uuid)
 {
     std::array<uint8_t, 16> out{};
-    std::memcpy(out.data(), &uuid, 16); 
+    std::memcpy(out.data(), &uuid, 16);
     return out;
 }
 } // namespace cyrex::nw::io

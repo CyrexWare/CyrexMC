@@ -49,7 +49,7 @@ public:
     {
         io::UUID a = getPackId();
         io::UUID b = other.getPackId();
-        return a == b; 
+        return a == b;
     }
 };
 

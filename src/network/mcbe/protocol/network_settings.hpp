@@ -1,7 +1,8 @@
 #pragma once
 
-#include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/packetids.hpp"
+#include "network/mcbe/protocol/protocol_info.hpp"
+
 #include <cstdint>
 
 using namespace cyrex::nw::io;
@@ -10,8 +11,10 @@ using namespace cyrex::nw::session;
 namespace cyrex::nw::protocol
 {
 class NetworkSettingsPacket final :
-    public cyrex::nw::protocol::
-        PacketImpl<NetworkSettingsPacket, static_cast<uint32_t>(PacketId::NetworkSettings), cyrex::nw::protocol::PacketDirection::Clientbound, true>
+    public cyrex::nw::protocol::PacketImpl<NetworkSettingsPacket,
+                                           static_cast<uint32_t>(PacketId::NetworkSettings),
+                                           cyrex::nw::protocol::PacketDirection::Clientbound,
+                                           true>
 {
 public:
     static constexpr uint16_t compressNothing = 0;

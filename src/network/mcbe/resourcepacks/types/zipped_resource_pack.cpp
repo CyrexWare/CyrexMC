@@ -1,7 +1,7 @@
 #include "zipped_resource_pack.hpp"
 
-#include "miniz.h"
 #include "log/logging.hpp"
+#include "miniz.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -75,7 +75,7 @@ std::vector<uint8_t> ZippedResourcePack::computeSha256FromFile() const
     if (!file)
         throw std::runtime_error("Failed to open file for SHA256 computation");
 
-    constexpr size_t bufferSize = 64 * 1024; // 64 KB buffer
+    constexpr size_t bufferSize = 64 * 1024; 
     std::vector<uint8_t> buffer(bufferSize);
 
     while (file)
@@ -139,7 +139,7 @@ std::string ZippedResourcePack::getPackChunkString(std::streamoff start, std::si
 
     if (fileStream.gcount() != static_cast<std::streamsize>(length))
     {
-        buffer.resize(fileStream.gcount()); // adjust if we hit EOF
+        buffer.resize(fileStream.gcount());
     }
 
     return buffer;
@@ -203,7 +203,6 @@ std::vector<uint8_t> ZippedResourcePack::getSha256() const
 {
     if (sha256Hash.empty())
         sha256Hash = computeSha256FromFile();
-    logging::log("sha={}", sha256Hash);
     return sha256Hash;
 }
 

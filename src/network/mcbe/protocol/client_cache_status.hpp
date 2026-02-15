@@ -2,8 +2,8 @@
 
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
-#include "network/mcbe/packetids.hpp"
 #include "network/mcbe/packet_direction.hpp"
+#include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
 
 namespace cyrex::nw::protocol

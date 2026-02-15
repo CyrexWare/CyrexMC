@@ -1,8 +1,8 @@
 #include "resource_pack_factory.hpp"
 
 #include <algorithm>
-#include <uuid.h>
 #include <stdexcept>
+#include <uuid.h>
 
 namespace cyrex::nw::resourcepacks
 {

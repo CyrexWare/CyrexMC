@@ -21,6 +21,11 @@
 #include <memory>
 #include <uuid.h>
 
+namespace cyrex::nw::protocol
+{
+class ResourcePackChunkRequestPacket;
+}
+
 namespace cyrex::nw::session
 {
 

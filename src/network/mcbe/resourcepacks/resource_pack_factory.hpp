@@ -1,6 +1,6 @@
 #pragma once
-#include "network/io/uuid_helper.hpp"
 #include "loader/resource_pack_loader_def.hpp"
+#include "network/io/uuid_helper.hpp"
 #include "resource_pack_def.hpp"
 
 #include <memory>

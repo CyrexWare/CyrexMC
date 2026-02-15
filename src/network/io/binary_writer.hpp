@@ -4,10 +4,10 @@
 #include "glm/vec3.hpp"
 #include "uuid_helper.hpp"
 
+#include <algorithm>
 #include <bit>
 #include <optional>
 #include <span>
-#include <algorithm>
 #include <string_view>
 #include <type_traits>
 #include <vector>
