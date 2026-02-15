@@ -24,7 +24,7 @@ endif()
 FetchContent_Declare(RakNet
     SYSTEM
     GIT_REPOSITORY https://github.com/CyrexWare/RakNet
-    GIT_TAG 700207323fe306ec6154371b866360cbbf058afe
+    GIT_TAG 644eb2623a7ebdab28efd311124835778fe01f1e
 )
 FetchContent_MakeAvailable(RakNet)
 
@@ -49,6 +49,20 @@ FetchContent_Declare(libdeflate
     GIT_TAG v1.19
 )
 FetchContent_MakeAvailable(libdeflate)
+
+FetchContent_Declare(
+    stduuid
+    GIT_REPOSITORY https://github.com/mariusbancila/stduuid.git
+    GIT_TAG v1.2.3
+)
+FetchContent_MakeAvailable(stduuid)
+
+FetchContent_Declare(
+    miniz
+    GIT_REPOSITORY https://github.com/richgel999/miniz.git
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(miniz)
 
 FetchContent_Declare(
     glm
@@ -140,6 +154,8 @@ target_link_libraries(CyrexMC PRIVATE
     nlohmann_json::nlohmann_json
     jwt-cpp
     glm::glm-header-only
+    miniz  
+    stduuid
 )
 
 CyrexMC_set_option(

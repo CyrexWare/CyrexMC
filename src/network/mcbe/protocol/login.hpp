@@ -1,5 +1,6 @@
 #pragma once
 
+#include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
 
 #include <iostream>
@@ -7,7 +8,8 @@
 namespace cyrex::nw::protocol
 {
 class LoginPacket final :
-    public cyrex::nw::protocol::PacketImpl<LoginPacket, ProtocolInfo::loginPacket, cyrex::nw::protocol::PacketDirection::Serverbound, false>
+    public cyrex::nw::protocol::
+        PacketImpl<LoginPacket, static_cast<uint32_t>(PacketId::Login), cyrex::nw::protocol::PacketDirection::Serverbound, false>
 {
 public:
     std::uint32_t protocol = 0;
@@ -36,26 +38,26 @@ public:
 private:
     void tryDecodeRequestForConnection(const std::string& binary)
     {
-        cyrex::nw::io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
+        io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
 
         const uint32_t authLen = cr.readU32LE();
-        authInfoJson = cr.readBytes(authLen);
+        authInfoJson = std::string(reinterpret_cast<const char*>(cr.readBytesVector(authLen).data()), authLen);
 
         const uint32_t clientLen = cr.readU32LE();
-        clientDataJwt = cr.readBytes(clientLen);
+        clientDataJwt = std::string(reinterpret_cast<const char*>(cr.readBytesVector(clientLen).data()), clientLen);
     }
 
     [[nodiscard]] std::string tryEncodeRequestForConnection() const
     {
-        cyrex::nw::io::BinaryWriter cr{};
+        io::BinaryWriter cr{};
 
         cr.writeU32LE(static_cast<uint32_t>(authInfoJson.size()));
-        cr.writeBuffer(reinterpret_cast<const uint8_t*>(authInfoJson.data()), authInfoJson.size());
+        cr.writeBytes(reinterpret_cast<const uint8_t*>(authInfoJson.data()), authInfoJson.size());
 
         cr.writeU32LE(static_cast<uint32_t>(clientDataJwt.size()));
-        cr.writeBuffer(reinterpret_cast<const uint8_t*>(clientDataJwt.data()), clientDataJwt.size());
+        cr.writeBytes(reinterpret_cast<const uint8_t*>(clientDataJwt.data()), clientDataJwt.size());
 
-        return {reinterpret_cast<const char*>(cr.data()), cr.length()};
+        return {reinterpret_cast<const char*>(cr.data()), cr.size()};
     }
 };
 

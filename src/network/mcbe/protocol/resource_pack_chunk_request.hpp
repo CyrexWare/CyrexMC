@@ -1,0 +1,47 @@
+﻿#pragma once
+#include "log/logging.hpp"
+#include "network/io/binary_reader.hpp"
+#include "network/io/binary_writer.hpp"
+#include "network/mcbe/packetids.hpp"
+#include "network/session/network_session.hpp"
+
+namespace cyrex::nw::protocol
+{
+
+class ResourcePackChunkRequestPacket final :
+    public PacketImpl<ResourcePackChunkRequestPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkRequest), PacketDirection::Serverbound, true>
+{
+public:
+    using PacketImpl<ResourcePackChunkRequestPacket,
+                     static_cast<uint32_t>(PacketId::ResourcePackChunkRequest),
+                     PacketDirection::Serverbound,
+                     true>::getDefStatic;
+
+    util::UUID packId{};
+    std::string packVersion;
+    int chunkIndex = 0;
+
+    bool encodePayload(io::BinaryWriter& out) const override
+    {
+        //NOOP
+        return true;
+    }
+
+    bool decodePayload(io::BinaryReader& in) override
+    {
+        std::string packInfo = in.readString();
+
+        const auto sepPos = packInfo.find('_');
+        const std::string uuidStr = packInfo.substr(0, sepPos);
+
+        packId = util::stringToUUID(uuidStr);
+        packVersion = packInfo.substr(sepPos + 1);
+
+        chunkIndex = in.readI16LE();
+        return true;
+    }
+
+    bool handle(session::NetworkSession& session);
+};
+
+} // namespace cyrex::nw::protocol

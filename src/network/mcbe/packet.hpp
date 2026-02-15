@@ -51,7 +51,8 @@ public:
                                    allowBeforeLogin,
                                    +[]() -> std::unique_ptr<Packet>
                                    {
-                                       return std::unique_ptr<Packet>(std::make_unique<PacketType>());
+                                       PacketType* raw = new PacketType();
+                                       return std::unique_ptr<Packet>(dynamic_cast<Packet*>(raw));
                                    }};
         return def;
     }

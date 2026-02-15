@@ -48,7 +48,6 @@ void cyrex::command::CommandManager::executeConsole(const std::string& line)
     auto* cmd = m_registry.find(name);
     if (!cmd)
     {
-        // TODO: check if its console or player
         cyrex::logging::error("The command you have entered does not exist.");
         return;
     }
@@ -57,7 +56,6 @@ void cyrex::command::CommandManager::executeConsole(const std::string& line)
 
     if (!hasPermission(sourceLevel, cmd->permission()))
     {
-        // TODO: check if its console or player
         cyrex::logging::error("The command you have entered does not exist.");
         return;
     }
