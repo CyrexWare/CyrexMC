@@ -29,12 +29,12 @@ class BinaryReader
     }
 
     template <typename T>
-        requires(std::is_trivially_copyable_v<T>)
+        requires std::is_trivially_copyable_v<T>
     inline T readRawLE()
     {
         ensureReadable(sizeof(T));
-        std::array<uint8_t, sizeof(T)> bytes;
-        std::memcpy(bytes.data(), dataPtr + offset, sizeof(T));
+        std::array<uint8_t, sizeof(T)> bytes{};
+        std::copy_n(dataPtr + offset, sizeof(T), bytes.begin());
         offset += sizeof(T);
 
         if constexpr (std::endian::native == std::endian::big)
@@ -44,12 +44,12 @@ class BinaryReader
     }
 
     template <typename T>
-        requires(std::is_trivially_copyable_v<T>)
+        requires std::is_trivially_copyable_v<T>
     inline T readRawBE()
     {
         ensureReadable(sizeof(T));
-        std::array<uint8_t, sizeof(T)> bytes;
-        std::memcpy(bytes.data(), dataPtr + offset, sizeof(T));
+        std::array<uint8_t, sizeof(T)> bytes{};
+        std::copy_n(dataPtr + offset, sizeof(T), bytes.begin());
         offset += sizeof(T);
 
         if constexpr (std::endian::native == std::endian::little)

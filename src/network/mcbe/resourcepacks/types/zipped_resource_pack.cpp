@@ -152,36 +152,24 @@ std::string ZippedResourcePack::getPackName() const
 
 cyrex::util::UUID ZippedResourcePack::getPackId() const
 {
-    const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&id);
-    bool isEmpty = true;
-    for (size_t i = 0; i < 16; ++i)
-    {
-        if (bytes[i] != 0)
-        {
-            isEmpty = false;
-            break;
-        }
-    }
+    const auto* bytes = reinterpret_cast<const uint8_t*>(&id);
+    bool isEmpty = std::all_of(bytes, bytes + 16, [](uint8_t b) { return b == 0; });
 
     if (isEmpty)
     {
         std::string uuidStr = manifest["header"]["uuid"].get<std::string>();
-
         std::string cleanStr;
         cleanStr.reserve(32);
+
         for (char c : uuidStr)
-        {
             if (c != '-')
                 cleanStr += c;
-        }
 
-        uint8_t tmp[16]{};
+        std::array<uint8_t, 16> tmp{};
         for (size_t i = 0; i < 16; ++i)
-        {
             tmp[i] = static_cast<uint8_t>(std::stoi(cleanStr.substr(i * 2, 2), nullptr, 16));
-        }
 
-        std::memcpy(&id, tmp, 16);
+        id = std::bit_cast<cyrex::util::UUID>(tmp);
     }
 
     return id;
