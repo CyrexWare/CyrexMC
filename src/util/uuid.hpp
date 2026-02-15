@@ -31,4 +31,11 @@ inline std::array<uint8_t, 16> uuidToBytes(const UUID& uuid) noexcept
 {
     return std::bit_cast<std::array<uint8_t, 16>>(uuid);
 }
+
+inline UUID random()
+{
+    static std::mt19937 engine{std::random_device{}()};
+    static uuids::uuid_random_generator gen{engine};
+    return gen();
+}
 } // namespace cyrex::util
