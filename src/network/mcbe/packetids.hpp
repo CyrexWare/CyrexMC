@@ -226,6 +226,13 @@ enum class PacketId : std::uint32_t
     ClientboundDataStore = 0x14a,
     GraphicsOverrideParameter = 0x14b,
     ServerboundDataStore = 0x14c,
+    ClientBoundDataDrivenUIShowScreen = 0x14d,
+    ClientBoundDataDrivenUICloseAllScreens = 0x14e,
+    ClientBoundDataDrivenUIReload = 0x14f,
+    ClientBoundTextureShiftPacket = 0x150,
+    VoxelShapes = 0x151,
+    CameraSpline = 0x152,
+    CameraAimAssistActorPriority = 0x153,
 
     MaxValue = 0xffff
 };

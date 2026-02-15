@@ -1,5 +1,6 @@
 #pragma once
 
+#include "network/io/uuid_helper.hpp"
 #include "network/mcbe/compression/compressor.hpp"
 #include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/packet.hpp"
@@ -9,12 +10,16 @@
 #include "network/mcbe/protocol/resource_pack_client_response.hpp"
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackClientResponseStatus.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackData.hpp"
 #include "network/mcbe/transport.hpp"
 #include "server.hpp"
 
 #include <RakNet/RakNetTypes.h>
+#include <deque>
 #include <functional>
+#include <map>
 #include <memory>
+#include <uuid.h>
 
 namespace cyrex::nw::session
 {
@@ -63,6 +68,8 @@ public:
     bool handleRequestNetworkSettings(uint32_t version);
     bool handleResourcePackClientResponse(const cyrex::nw::protocol::ResourcePackClientResponsePacket& pk);
     bool handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& pk);
+    void nextPack();
+    void processChunkQueue();
     void tick();
 
     void setProtocolId(const std::uint32_t protocolId)
@@ -104,5 +111,12 @@ private:
     std::optional<protocol::AesEncryptor> m_cipher;
 
     protocol::PacketFactory m_packetFactory;
+
+    std::map<io::UUID, std::shared_ptr<cyrex::nw::protocol::ResourcePackData>> loadedPacks;
+    std::deque<io::UUID> packQueue;
+    std::deque<std::pair<io::UUID, int>> pendingChunks;
+
+    io::UUID currentPack{};
+    bool queueProcessing = false;
 };
 } // namespace cyrex::nw::session

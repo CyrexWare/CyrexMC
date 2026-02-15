@@ -1,14 +1,14 @@
 #pragma once
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
-#include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 
 #include <string>
+#include <vector>
 
 namespace cyrex::nw::protocol
 {
 
-struct ResourcePackEntry
+struct ResourcePackInfoEntry
 {
     io::UUID packId{};
     std::string packVersion;
@@ -21,27 +21,11 @@ struct ResourcePackEntry
     bool raytracingCapable = false;
     std::string cdnUrl;
 
-    ResourcePackEntry() = default;
-
-    explicit ResourcePackEntry(const resourcepacks::ResourcePackDef& pack)
-    {
-        packId = pack.getPackId();
-        packVersion = pack.getPackVersion();
-        packSize = pack.getPackSize();
-        encryptionKey = pack.getEncryptionKey();
-        subPackName = pack.getSubPackName();
-        contentIdentity = !encryptionKey.empty() ? uuidToString(packId) : "";
-        scripting = pack.usesScript();
-        addonPack = pack.isAddonPack();
-        raytracingCapable = pack.isRaytracingCapable();
-        cdnUrl = pack.cdnUrl();
-    }
-
     void encode(cyrex::nw::io::BinaryWriter& out) const
     {
         out.writeUUID(packId);
         out.writeString(packVersion);
-        out.writeI16LE(packSize);
+        out.writeU64LE(static_cast<uint64_t>(packSize));
         out.writeString(encryptionKey);
         out.writeString(subPackName);
         out.writeString(contentIdentity);
@@ -55,7 +39,7 @@ struct ResourcePackEntry
     {
         packId = in.readUUID();
         packVersion = in.readString();
-        packSize = in.readI16LE();
+        packSize = static_cast<int64_t>(in.readU64LE());
         encryptionKey = in.readString();
         subPackName = in.readString();
         contentIdentity = in.readString();
@@ -63,19 +47,6 @@ struct ResourcePackEntry
         addonPack = in.readBool();
         raytracingCapable = in.readBool();
         cdnUrl = in.readString();
-    }
-
-private:
-    static std::string uuidToString(const io::UUID& u)
-    {
-        std::string str;
-        char buf[3]{};
-        for (auto b : u)
-        {
-            std::snprintf(buf, sizeof(buf), "%02x", b);
-            str += buf;
-        }
-        return str;
     }
 };
 

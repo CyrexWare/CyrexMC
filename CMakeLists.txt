@@ -51,6 +51,13 @@ FetchContent_Declare(libdeflate
 FetchContent_MakeAvailable(libdeflate)
 
 FetchContent_Declare(
+    stduuid
+    GIT_REPOSITORY https://github.com/mariusbancila/stduuid.git
+    GIT_TAG v1.2.3
+)
+FetchContent_MakeAvailable(stduuid)
+
+FetchContent_Declare(
     miniz
     GIT_REPOSITORY https://github.com/richgel999/miniz.git
     GIT_TAG master
@@ -148,6 +155,7 @@ target_link_libraries(CyrexMC PRIVATE
     jwt-cpp
     glm::glm-header-only
     miniz  
+    stduuid
 )
 
 CyrexMC_set_option(

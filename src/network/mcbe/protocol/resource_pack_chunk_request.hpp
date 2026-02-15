@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packetids.hpp"
@@ -9,11 +9,10 @@ namespace cyrex::nw::protocol
 {
 
 class ResourcePackChunkRequestPacket final :
-    public PacketImpl<ResourcePackChunkRequestPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkRequest), PacketDirection::Clientbound, true>,
-    public ResourcePackDataPacket
+    public PacketImpl<ResourcePackChunkRequestPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkRequest), PacketDirection::Serverbound, true>
 {
 public:
-    using PacketImpl<ResourcePackChunkRequestPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkRequest), PacketDirection::Clientbound, true>::getDefStatic;
+    using PacketImpl<ResourcePackChunkRequestPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkRequest), PacketDirection::Serverbound, true>::getDefStatic;
     
     io::UUID packId{};
     std::string packVersion;
@@ -21,41 +20,30 @@ public:
 
     bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
     {
-        encodePackInfo(out);
-        out.writeI16LE(chunkIndex);
+        //NOOP
         return true;
     }
 
     bool decodePayload(cyrex::nw::io::BinaryReader& in) override
     {
-        decodePackInfo(in);
+        std::string packInfo = in.readString();
+
+        const auto sepPos = packInfo.find('_');
+        const std::string uuidStr = packInfo.substr(0, sepPos);
+
+        packId = io::stringToUUID(uuidStr);
+        packVersion = packInfo.substr(sepPos + 1);
+
         chunkIndex = in.readI16LE();
+
+        logging::log("Decoded ResourcePackChunkRequestPacket: packId={}, packVersion={}, chunkIndex={}",
+                     io::uuidToString(packId),
+                     packVersion,
+                     chunkIndex);
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override
-    {
-        return true;
-        //return session.handleResourcePackChunkRequest(*this);
-    }
-
-    std::string getPackVersionStr() const override
-    {
-        return packVersion;
-    }
-    void setPackVersionStr(const std::string& version) override
-    {
-        packVersion = version;
-    }
-
-    io::UUID getPackId() const override
-    {
-        return packId;
-    }
-    void setPackId(const io::UUID& id) override
-    {
-        packId = id;
-    }
+    bool handle(cyrex::nw::session::NetworkSession& session);
 };
 
 } // namespace cyrex::nw::protocol

@@ -20,7 +20,6 @@ RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
     INetworkPeer::StartupInfo info{};
     info.port = static_cast<std::uint16_t>(m_server.getPort());
     info.maxConnections = static_cast<std::uint32_t>(m_server.getMaxPlayers());
-    // What todo with the returned value?
     m_peer->startup(info);
 
     m_peer->setMaximumIncomingConnections(static_cast<std::uint16_t>(m_server.getMaxPlayers()));

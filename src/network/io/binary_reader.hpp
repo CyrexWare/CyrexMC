@@ -2,12 +2,12 @@
 
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
+#include "uuid_helper.hpp"
 
-#include <algorithm>
 #include <array>
 #include <bit>
-#include <functional>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -17,262 +17,277 @@
 namespace cyrex::nw::io
 {
 
-using UUID = std::array<uint8_t, 16>;
-
 class BinaryReader
 {
+    const uint8_t* dataPtr = nullptr;
+    size_t dataSize = 0;
+
+    inline void ensureReadable(size_t n) const
+    {
+        if (offset + n > dataSize)
+            throw std::runtime_error("BinaryReader overflow");
+    }
+
+    template <typename T>
+        requires(std::is_trivially_copyable_v<T>)
+    inline T readRawLE()
+    {
+        ensureReadable(sizeof(T));
+        std::array<uint8_t, sizeof(T)> bytes;
+        std::memcpy(bytes.data(), dataPtr + offset, sizeof(T));
+        offset += sizeof(T);
+
+        if constexpr (std::endian::native == std::endian::big)
+            std::reverse(bytes.begin(), bytes.end());
+
+        return std::bit_cast<T>(bytes);
+    }
+
+    template <typename T>
+        requires(std::is_trivially_copyable_v<T>)
+    inline T readRawBE()
+    {
+        ensureReadable(sizeof(T));
+        std::array<uint8_t, sizeof(T)> bytes;
+        std::memcpy(bytes.data(), dataPtr + offset, sizeof(T));
+        offset += sizeof(T);
+
+        if constexpr (std::endian::native == std::endian::little)
+            std::reverse(bytes.begin(), bytes.end());
+
+        return std::bit_cast<T>(bytes);
+    }
+
 public:
     BinaryReader() = default;
-
-    BinaryReader(const uint8_t* data, const size_t len) : buffer(data, data + len)
-    {
-    }
-
-    std::vector<uint8_t> buffer;
     size_t offset = 0;
 
-    [[nodiscard]] size_t remaining() const
+    BinaryReader(const uint8_t* data, size_t len) : dataPtr(data), dataSize(len), offset(0)
     {
-        return buffer.size() - offset;
     }
 
-    void reset()
+    BinaryReader(std::span<const uint8_t> span) : dataPtr(span.data()), dataSize(span.size()), offset(0)
+    {
+    }
+
+    inline void reset()
     {
         offset = 0;
     }
 
-    uint8_t readU8()
+    inline size_t remaining() const
     {
-        ensureReadable(1);
-        return buffer.at(offset++);
+        return dataSize - offset;
     }
 
-    int8_t readI8()
+    inline size_t position() const
+    {
+        return offset;
+    }
+
+    inline const uint8_t* currentPtr() const
+    {
+        return dataPtr + offset;
+    }
+
+    inline uint8_t readU8()
+    {
+        ensureReadable(1);
+        return dataPtr[offset++];
+    }
+
+    inline int8_t readI8()
     {
         return static_cast<int8_t>(readU8());
     }
 
-    uint16_t readU16LE()
-    {
-        ensureReadable(2);
-        const uint16_t v = buffer.at(offset) | (buffer.at(offset + 1) << 8);
-        offset += 2;
-        return v;
-    }
-
-    uint16_t readU16BE()
-    {
-        ensureReadable(2);
-        const uint16_t v = (buffer.at(offset) << 8) | buffer.at(offset + 1);
-        offset += 2;
-        return v;
-    }
-
-    int16_t readI16LE()
-    {
-        return static_cast<int16_t>(readU16LE());
-    }
-
-    int16_t readI16BE()
-    {
-        return static_cast<int16_t>(readU16BE());
-    }
-
-    int32_t readI32LE()
-    {
-        return static_cast<int32_t>(readU32LE());
-    }
-
-    int32_t readI32BE()
-    {
-        return static_cast<int32_t>(readU32BE());
-    }
-
-    int64_t readI64LE()
-    {
-        return static_cast<int64_t>(readU64LE());
-    }
-
-    int64_t readI64BE()
-    {
-        return static_cast<int64_t>(readU64BE());
-    }
-
-    int16_t readShort()
-    {
-        return readI16BE();
-    }
-
-    uint16_t readUShort()
-    {
-        return readU16BE();
-    }
-
-    uint32_t readU32LE()
-    {
-        ensureReadable(4);
-        const uint32_t v = buffer.at(offset) | (buffer.at(offset + 1) << 8) | (buffer.at(offset + 2) << 16) |
-                           (buffer.at(offset + 3) << 24);
-        offset += 4;
-        return v;
-    }
-
-    uint32_t readU32BE()
-    {
-        ensureReadable(4);
-        const uint32_t v = (buffer.at(offset) << 24) | (buffer.at(offset + 1) << 16) | (buffer.at(offset + 2) << 8) |
-                           buffer.at(offset + 3);
-        offset += 4;
-        return v;
-    }
-
-    uint64_t readU64LE()
-    {
-        ensureReadable(8);
-        uint64_t v = 0;
-        for (int i = 0; i < 8; ++i)
-            v |= static_cast<uint64_t>(buffer.at(offset + i)) << (i * 8);
-        offset += 8;
-        return v;
-    }
-
-    uint64_t readU64BE()
-    {
-        ensureReadable(8);
-        uint64_t v = 0;
-        for (int i = 0; i < 8; ++i)
-            v = (v << 8) | buffer.at(offset + i);
-        offset += 8;
-        return v;
-    }
-
-    bool readBool()
+    inline bool readBool()
     {
         return readU8() != 0;
     }
 
-    float readFloatLE()
+    inline uint16_t readU16LE()
+    {
+        return readRawLE<uint16_t>();
+    }
+    inline uint16_t readU16BE()
+    {
+        return readRawBE<uint16_t>();
+    }
+    inline int16_t readI16LE()
+    {
+        return readRawLE<int16_t>();
+    }
+    inline int16_t readI16BE()
+    {
+        return readRawBE<int16_t>();
+    }
+
+    inline uint32_t readU32LE()
+    {
+        return readRawLE<uint32_t>();
+    }
+    inline uint32_t readU32BE()
+    {
+        return readRawBE<uint32_t>();
+    }
+    inline int32_t readI32LE()
+    {
+        return readRawLE<int32_t>();
+    }
+    inline int32_t readI32BE()
+    {
+        return readRawBE<int32_t>();
+    }
+
+    inline uint64_t readU64LE()
+    {
+        return readRawLE<uint64_t>();
+    }
+    inline uint64_t readU64BE()
+    {
+        return readRawBE<uint64_t>();
+    }
+    inline int64_t readI64LE()
+    {
+        return readRawLE<int64_t>();
+    }
+    inline int64_t readI64BE()
+    {
+        return readRawBE<int64_t>();
+    }
+
+    inline int16_t readShort()
+    {
+        return readI16BE();
+    }
+    inline uint16_t readUShort()
+    {
+        return readU16BE();
+    }
+
+    inline float readFloatLE()
     {
         return std::bit_cast<float>(readU32LE());
     }
 
-    double readDoubleLE()
+    inline double readDoubleLE()
     {
         return std::bit_cast<double>(readU64LE());
     }
 
-    uint32_t readVarUInt()
+    inline glm::vec2 readVector2()
+    {
+        return {readFloatLE(), readFloatLE()};
+    }
+
+    inline glm::vec3 readVector3()
+    {
+        return {readFloatLE(), readFloatLE(), readFloatLE()};
+    }
+
+    inline uint32_t readVarUInt()
     {
         uint32_t value = 0;
-        int shift = 0;
+        uint32_t shift = 0;
 
-        for (int i = 0; i < 5; ++i)
+        for (uint32_t i = 0; i < 5; ++i)
         {
-            const uint8_t b = readU8();
-            value |= static_cast<uint32_t>(b & 0x7F) << shift;
+            uint8_t b = readU8();
+            value |= (static_cast<uint32_t>(b & 0x7F) << shift);
+
             if ((b & 0x80) == 0)
                 return value;
+
             shift += 7;
         }
 
         throw std::runtime_error("VarUInt overflow");
     }
 
-    int32_t readVarInt()
+    inline int32_t readVarInt()
     {
-        const uint32_t v = readVarUInt();
-        return static_cast<int32_t>(v >> 1 ^ -1 * (v & 1));
+        uint32_t v = readVarUInt();
+        return static_cast<int32_t>((v >> 1) ^ (~(v & 1) + 1));
     }
 
-    uint64_t readVarULong()
+    inline uint64_t readVarULong()
     {
         uint64_t value = 0;
-        int shift = 0;
+        uint32_t shift = 0;
 
-        for (int i = 0; i < 10; ++i)
+        for (uint32_t i = 0; i < 10; ++i)
         {
-            const uint8_t b = readU8();
-            value |= static_cast<uint64_t>(b & 0x7F) << shift;
+            uint8_t b = readU8();
+            value |= (static_cast<uint64_t>(b & 0x7F) << shift);
+
             if ((b & 0x80) == 0)
                 return value;
+
             shift += 7;
         }
 
         throw std::runtime_error("VarULong overflow");
     }
 
-    int64_t readVarLong()
+    inline int64_t readVarLong()
     {
-        const uint64_t v = readVarULong();
-        return static_cast<int64_t>(v >> 1 ^ -1 * (v & 1));
+        uint64_t v = readVarULong();
+        return static_cast<int64_t>((v >> 1) ^ (~(v & 1) + 1));
     }
 
-    std::string readString()
+    inline std::string readString()
     {
-        const uint32_t len = readVarUInt();
+        uint32_t len = readVarUInt();
         ensureReadable(len);
-        std::string s(reinterpret_cast<char*>(&buffer.at(offset)), len);
+
+        std::string out(reinterpret_cast<const char*>(dataPtr + offset), len);
         offset += len;
-        return s;
+        return out;
     }
 
-    glm::vec2 readVector2()
-    {
-        return {readFloatLE(), readFloatLE()};
-    }
-
-    glm::vec3 readVector3()
-    {
-        return {readFloatLE(), readFloatLE(), readFloatLE()};
-    }
-
-    std::string readBytes(const size_t len)
+    inline std::span<const uint8_t> readBytes(size_t len)
     {
         ensureReadable(len);
-        std::string s(reinterpret_cast<char*>(&buffer.at(offset)), len);
+        auto span = std::span<const uint8_t>(dataPtr + offset, len);
         offset += len;
-        return s;
+        return span;
     }
 
-    std::vector<uint8_t> readBytesVector(const size_t len)
+    inline std::vector<uint8_t> readBytesVector(size_t len)
     {
         ensureReadable(len);
-        std::vector<uint8_t> data(buffer.begin() + offset, buffer.begin() + offset + len);
+        std::vector<uint8_t> out(dataPtr + offset, dataPtr + offset + len);
         offset += len;
-        return data;
+        return out;
     }
 
-    UUID readUUID()
+    inline UUID readUUID()
     {
         ensureReadable(16);
-        UUID uuid{};
+
+        std::array<uint8_t, 16> bytes;
+
         for (size_t i = 0; i < 8; ++i)
-        {
-            uuid[7 - i] = buffer.at(offset + i);
-        }
+            bytes[i] = dataPtr[offset + 7 - i];
+
+        offset += 8;
+
         for (size_t i = 0; i < 8; ++i)
-        {
-            uuid[15 - i] = buffer.at(offset + 8 + i);
-        }
-        offset += 16;
-        return uuid;
+            bytes[8 + i] = dataPtr[offset + 7 - i];
+
+        offset += 8;
+
+        return UUID{bytes.begin(), bytes.end()};
     }
 
-    template <typename T>
-    std::optional<T> readOptional(const std::function<T()>& reader)
+    template <typename T, typename F>
+    inline std::optional<T> readOptional(F&& reader)
     {
         if (readBool())
-        {
             return reader();
-        }
-        return std::nullopt;
-    }
 
-private:
-    void ensureReadable(const size_t n) const
-    {
-        if (offset + n > buffer.size())
-            throw std::runtime_error("BinaryReader overflow");
+        return std::nullopt;
     }
 };
 

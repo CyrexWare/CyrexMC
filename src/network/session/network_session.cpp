@@ -3,18 +3,22 @@
 #include "log/logging.hpp"
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
+#include "network/io/uuid_helper.hpp"
 #include "network/mcbe/compression/compressors.hpp"
 #include "network/mcbe/packetids.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
+#include "network/mcbe/protocol/resource_pack_chunk_data.hpp"
 #include "network/mcbe/protocol/resource_pack_chunk_request.hpp"
 #include "network/mcbe/protocol/resource_pack_client_response.hpp"
 #include "network/mcbe/protocol/resource_pack_data_info.hpp"
 #include "network/mcbe/protocol/resource_pack_stack.hpp"
 #include "network/mcbe/protocol/resource_packs_info.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackClientResponseStatus.hpp"
-#include "network/mcbe/protocol/types/packs/ResourcePackEntry.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackData.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackInfoEntry.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackStackEntry.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 #include "network/raknet/handler/raknet_handler.hpp"
 
@@ -53,20 +57,42 @@ cyrex::nw::io::UUID randomUUID()
 {
     std::random_device rd;
     std::mt19937_64 gen(rd());
-
     std::uniform_int_distribution<unsigned int> dist(0, 255);
+    std::array<uint8_t, 16> bytes{};
+    for (size_t i = 0; i < 16; ++i)
+        bytes[i] = static_cast<uint8_t>(dist(gen));
+
+    bytes[6] = (bytes[6] & 0x0F) | 0x40;
+    bytes[8] = (bytes[8] & 0x3F) | 0x80;
 
     cyrex::nw::io::UUID uuid{};
-
-    for (auto& b : uuid)
-        b = static_cast<uint8_t>(dist(gen));
-
-    uuid[6] = (uuid[6] & 0x0F) | 0x40;
-    uuid[8] = (uuid[8] & 0x3F) | 0x80;
+    std::memcpy(&uuid, bytes.data(), 16);
 
     return uuid;
 }
 
+std::string uuidToStringx(const UUID& u)
+{
+    std::array<uint8_t, 16> bytes{};
+    auto span = u.as_bytes();
+    for (size_t i = 0; i < 16; ++i)
+        bytes[i] = static_cast<uint8_t>(span[i]);
+
+    std::swap(bytes[0], bytes[3]);
+    std::swap(bytes[1], bytes[2]);
+    std::swap(bytes[4], bytes[5]);
+    std::swap(bytes[6], bytes[7]);
+
+    std::string str;
+    char buf[3]{};
+    for (auto b : bytes)
+    {
+        std::snprintf(buf, sizeof(buf), "%02x", b);
+        str += buf;
+    }
+
+    return str;
+}
 } // namespace
 
 namespace cyrex::nw::session
@@ -95,6 +121,18 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
                              cyrex::logging::Color::GOLD,
                              packetId,
                              cyrex::nw::protocol::toSimpleName(cyrex::nw::protocol::fromInt(packetId)));
+
+        // login packets payload is too huge to be debugged, so we skip itq
+        if (packetId != 0x01)
+        {
+            std::stringstream ss;
+            const auto* payload = data + in.offset - packetLength + packetBuffer.offset;
+            size_t payloadSize = packetLength - (packetBuffer.offset);
+            ss << "raw payload (" << payloadSize << " bytes): ";
+            for (size_t i = 0; i < payloadSize; ++i)
+                ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(payload[i]) << " ";
+            cyrex::logging::info(LOG_MCBE, "{}", ss.str());
+        }
 
         const auto* packetDef = m_packetFactory.find(packetId);
         if (!packetDef)
@@ -188,20 +226,20 @@ void NetworkSession::flush()
 
 void NetworkSession::sendInternal(const BinaryWriter& payload)
 {
-    const std::string buffer = hexDump(payload.data(), payload.length());
-    logging::info("raw packet payload = {}", buffer);
+    //const std::string buffer = hexDump(payload.data(), payload.length());
+    //logging::info("raw packet payload = {}", buffer);
     std::vector<uint8_t> out;
 
     if (!compressionEnabled)
     {
-        out = payload.buffer;
+        out = payload.getBuffer();
     }
     else
     {
         const auto* comp = protocol::getCompressor(compressor);
-        if (comp && comp->shouldCompress(payload.length()))
+        if (comp && comp->shouldCompress(payload.size()))
         {
-            std::vector<uint8_t> compressed = *comp->compress(payload.buffer);
+            std::vector<uint8_t> compressed = *comp->compress(payload.getBuffer());
 
             out.push_back(std::to_underlying(compressor));
             logging::info("compression success");
@@ -211,7 +249,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
         else
         {
             out.push_back(std::to_underlying(protocol::CompressionAlgorithm::NONE));
-            out.insert(out.end(), payload.data(), payload.data() + payload.length());
+            out.insert(out.end(), payload.data(), payload.data() + payload.size());
         }
     }
 
@@ -230,9 +268,9 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     }
     out.insert(out.begin(), 0xFE);
 
-    const std::string dump = hexDump(out.data(), out.size());
+    //const std::string dump = hexDump(out.data(), out.size());
 
-    logging::info("send payload = {}", dump);
+    //logging::info("send payload = {}", dump);
 
     m_transport->send(m_guid, out.data(), out.size());
 }
@@ -255,16 +293,47 @@ void NetworkSession::doLoginSuccess()
     auto packet = std::make_unique<protocol::PlayStatusPacket>();
     packet->status = protocol::PlayStatusPacket::loginSuccess;
     send(std::move(packet));
-    // Encryption below (for ency)
+    // Encryption below (for ency) (handshake)
 
     // Initial resource pack setup
     auto infoPkt = std::make_unique<protocol::ResourcePacksInfoPacket>();
-    infoPkt->resourcePackEntries = m_server.getResourcePackFactory().getResourceStack();
+    const auto& defs = m_server.getResourcePackFactory().getResourceStack();
+    infoPkt->resourcePackEntries.reserve(defs.size());
+
+    for (const auto& defPtr : defs)
+    {
+        const auto& def = *defPtr;
+
+        protocol::ResourcePackInfoEntry entry;
+
+
+        int chunkCount = static_cast<int>(
+            std::ceil(static_cast<double>(def.getPackSize()) / m_server.getResourcePackFactory().getMaxChunkSize()));
+
+        logging::log("chunk={}", chunkCount);
+
+        entry.packId = def.getPackId();
+        entry.packVersion = def.getPackVersion();
+        entry.packSize = static_cast<int64_t>(def.getPackSize());
+        entry.encryptionKey = def.getEncryptionKey();
+        entry.subPackName = "";
+
+        entry.contentIdentity = io::uuidToString(entry.packId);
+
+        entry.scripting = def.usesScript();
+        entry.addonPack = def.isAddonPack();
+        entry.raytracingCapable = def.isRaytracingCapable();
+        entry.cdnUrl = def.cdnUrl();
+
+        infoPkt->resourcePackEntries.emplace_back(std::move(entry));
+    }
+
     infoPkt->mustAccept = m_server.shouldForceResources();
-    // future making this configurable
     infoPkt->disableVibrantVisuals = false;
+
     infoPkt->worldTemplateId = randomUUID();
     infoPkt->worldTemplateVersion = "";
+
     send(std::move(infoPkt));
 }
 
@@ -299,22 +368,20 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
     switch (pk.responseStatus)
     {
         case ResourcePackClientResponseStatus::Refused:
+        {
             logging::warn("client refused resource packs");
             if (m_server.shouldForceResources())
-            {
-                logging::info("disconnecting client for refusing required resource packs");
                 markedForDisconnect = true;
-            }
             break;
+        }
 
         case ResourcePackClientResponseStatus::SendPacks:
-            logging::info("client is downloading resource packs");
+        {
             for (const auto& entry : pk.packEntries)
             {
                 auto resourcePack = m_server.getResourcePackFactory().getPackById(entry.uuid);
                 if (!resourcePack)
                 {
-                    logging::warn("client requested unknown resource pack, disconnecting");
                     markedForDisconnect = true;
                     return true;
                 }
@@ -323,10 +390,14 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
                 int chunkCount = static_cast<int>(
                     std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
 
-                // packs[resourcePack->getPackId()] = std::make_shared<PackMeta>(resourcePack->getPackId(),
-                //                                                               resourcePack,
-                //                                                               maxChunkSize,
-                //                                                               chunkCount);
+                auto data = std::make_shared<
+                    cyrex::nw::protocol::ResourcePackData>(resourcePack->getPackId(),
+                                                           std::static_pointer_cast<resourcepacks::ResourcePack>(resourcePack),
+                                                           maxChunkSize,
+                                                           chunkCount);
+
+                loadedPacks.emplace(data->packId, data);
+                packQueue.push_back(data->packId);
 
                 auto dataInfoPkt = std::make_unique<protocol::ResourcePackDataInfoPacket>();
                 dataInfoPkt->packId = resourcePack->getPackId();
@@ -335,41 +406,179 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
                 dataInfoPkt->chunkCount = chunkCount;
                 dataInfoPkt->compressedPackSize = resourcePack->getPackSize();
                 dataInfoPkt->sha256 = resourcePack->getSha256();
-                send(std::move(dataInfoPkt));
+                send(std::move(dataInfoPkt), true);
             }
+
             break;
+        }
 
         case ResourcePackClientResponseStatus::HaveAllPacks:
-            logging::info("client has all required resource packs");
+        {
+            auto stackPkt = std::make_unique<cyrex::nw::protocol::ResourcePackStackPacket>();
+            stackPkt->mustAccept = m_server.shouldForceResources();
 
+            const auto& defStack = m_server.getResourcePackFactory().getResourceStack();
+            stackPkt->resourcePackStack.reserve(defStack.size());
+
+            for (const auto& def : defStack)
             {
-                auto stackPkt = std::make_unique<protocol::ResourcePackStackPacket>();
-                stackPkt->mustAccept = m_server.shouldForceResources();
-                auto packs = m_server.getResourcePackFactory().getResourceStack();
-                stackPkt->resourcePackStack.clear();
-
-                for (auto& packDefPtr : packs)
-                {
-                    if (packDefPtr)
-                        stackPkt->resourcePackStack.emplace_back(*packDefPtr);
-                }
-
-
-                send(std::move(stackPkt));
+                cyrex::nw::protocol::ResourcePackStackEntry entry;
+                entry.packId = io::uuidToString(def->getPackId());
+                entry.packVersion = def->getPackVersion();
+                entry.subPackName = def->getSubPackName();
+                stackPkt->resourcePackStack.push_back(std::move(entry));
             }
+
+            stackPkt->baseGameVersion = protocol::ProtocolInfo::minecraftVersionNetwork;
+            stackPkt->experiments = {};
+            send(std::move(stackPkt), true);
             break;
+        }
 
         case ResourcePackClientResponseStatus::Completed:
-            logging::info("client has completed resource pack processing");
+        {
+            logging::log("client has completed process");
             break;
+        }
     }
 
     return true;
 }
 
-bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& pk)
+bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& request)
 {
+    auto packFinder = loadedPacks.find(request.packId);
+    std::shared_ptr<cyrex::nw::protocol::ResourcePackData> packInfo;
+
+    if (packFinder == loadedPacks.end())
+    {
+        auto rawPack = m_server.getResourcePackFactory().getPackById(request.packId);
+        if (!rawPack)
+        {
+            markedForDisconnect = true;
+            return true;
+        }
+
+        int maxSize = m_server.getResourcePackFactory().getMaxChunkSize();
+        size_t totalBytes = rawPack->getPackSize();
+        int totalChunks = static_cast<int>((totalBytes + maxSize - 1) / maxSize);
+
+        packInfo = std::make_shared<cyrex::nw::protocol::ResourcePackData>(rawPack->getPackId(),
+                                                                           std::static_pointer_cast<resourcepacks::ResourcePack>(
+                                                                               rawPack),
+                                                                           maxSize,
+                                                                           totalChunks);
+
+        loadedPacks.emplace(packInfo->packId, packInfo);
+    }
+    else
+    {
+        packInfo = packFinder->second;
+    }
+
+    if (request.chunkIndex >= 0 && request.chunkIndex < packInfo->chunkCount)
+    {
+        packInfo->want[static_cast<size_t>(request.chunkIndex)] = true;
+        pendingChunks.emplace_back(packInfo->packId, request.chunkIndex);
+    }
+
+    if (currentPack == io::UUID{})
+    {
+        currentPack = packInfo->packId;
+        if (std::find(packQueue.begin(), packQueue.end(), packInfo->packId) == packQueue.end())
+            packQueue.push_back(packInfo->packId);
+    }
+    else if (std::find(packQueue.begin(), packQueue.end(), packInfo->packId) == packQueue.end())
+    {
+        packQueue.push_back(packInfo->packId);
+    }
+
+    processChunkQueue();
     return true;
+}
+
+
+void NetworkSession::processChunkQueue()
+{
+    if (queueProcessing)
+        return;
+
+    queueProcessing = true;
+
+    try
+    {
+        while (!pendingChunks.empty())
+        {
+            auto [packId, idx] = pendingChunks.front();
+            pendingChunks.pop_front();
+
+            auto packIter = loadedPacks.find(packId);
+            if (packIter == loadedPacks.end())
+                continue;
+
+            auto& pack = packIter->second;
+            if (idx < 0 || idx >= pack->chunkCount)
+            {
+                markedForDisconnect = true;
+                queueProcessing = false;
+                return;
+            }
+
+            if (pack->sent[static_cast<size_t>(idx)])
+                continue;
+
+            size_t startOffset = static_cast<size_t>(idx) * pack->maxChunkSize;
+            size_t chunkSize = std::min(static_cast<size_t>(pack->maxChunkSize), pack->pack->getPackSize() - startOffset);
+
+            std::string chunk = pack->pack->getPackChunkString(startOffset, chunkSize);
+            if (chunk.empty())
+            {
+                markedForDisconnect = true;
+                queueProcessing = false;
+                return;
+            }
+
+            auto pkt = std::make_unique<cyrex::nw::protocol::ResourcePackChunkDataPacket>();
+            pkt->packId = pack->packId;
+            pkt->packVersion = pack->pack->getPackVersion();
+            pkt->chunkIndex = idx;
+            pkt->progress = startOffset;
+            pkt->data = std::move(chunk);
+
+            send(std::move(pkt), true);
+
+            pack->sent[static_cast<size_t>(idx)] = true;
+
+            while (pack->nextToSend < pack->chunkCount && pack->sent[static_cast<size_t>(pack->nextToSend)])
+                pack->nextToSend++;
+
+            if (pack->nextToSend >= pack->chunkCount)
+                nextPack();
+        }
+    } catch (...)
+    {
+        queueProcessing = false;
+        throw;
+    }
+
+    queueProcessing = false;
+}
+
+void NetworkSession::nextPack()
+{
+    if (!packQueue.empty())
+    {
+        if (packQueue.front() == currentPack)
+            packQueue.pop_front();
+        else
+            packQueue.erase(std::remove(packQueue.begin(), packQueue.end(), currentPack), packQueue.end());
+
+        currentPack = packQueue.empty() ? io::UUID{} : packQueue.front();
+    }
+    else
+    {
+        currentPack = io::UUID{};
+    }
 }
 
 } // namespace cyrex::nw::session

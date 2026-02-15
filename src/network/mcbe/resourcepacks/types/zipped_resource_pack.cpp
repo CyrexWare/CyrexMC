@@ -1,55 +1,40 @@
 #include "zipped_resource_pack.hpp"
 
 #include "miniz.h"
+#include "log/logging.hpp"
 
-#include <fstream>
+#include <algorithm>
+#include <filesystem>
+#include <stdexcept>
 #include <wolfssl/options.h>
 #include <wolfssl/wolfcrypt/sha256.h>
-#include <stdexcept>
-#include <algorithm>
-#include <vector>
-#include <cstdint>
 
 #ifdef min
 #undef min
 #endif
-
-namespace
-{
-std::vector<uint8_t> computeSha256(const std::vector<uint8_t>& data)
-{
-    wc_Sha256 ctx;
-    std::vector<uint8_t> hash(SHA256_DIGEST_SIZE);
-
-    if (wc_InitSha256(&ctx) != 0)
-        throw std::runtime_error("Failed to initialize SHA256 context");
-
-    if (wc_Sha256Update(&ctx, data.data(), static_cast<uint32_t>(data.size())) != 0)
-        throw std::runtime_error("SHA256 update failed");
-
-    if (wc_Sha256Final(&ctx, hash.data()) != 0)
-        throw std::runtime_error("SHA256 final failed");
-
-    return hash;
-}
-} // namespace
 
 namespace cyrex::nw::resourcepacks
 {
 
 ZippedResourcePack::ZippedResourcePack(const std::string& path) : filePath(path)
 {
-    std::ifstream file(path, std::ios::binary);
-    if (!file)
+    if (!std::filesystem::exists(path))
         throw std::invalid_argument("File not found: " + path);
-
-    buffer = std::vector<uint8_t>((std::istreambuf_iterator<char>(file)), {});
-    sha256Hash = computeSha256(buffer);
 
     loadZip(path);
 
     if (!verifyManifest())
         throw std::runtime_error("Invalid resource pack manifest");
+
+    fileStream.open(path, std::ios::binary);
+    if (!fileStream)
+        throw std::runtime_error("Failed to open file stream for chunk reading");
+}
+
+ZippedResourcePack::~ZippedResourcePack()
+{
+    if (fileStream.is_open())
+        fileStream.close();
 }
 
 void ZippedResourcePack::loadZip(const std::string& path)
@@ -78,12 +63,86 @@ void ZippedResourcePack::loadZip(const std::string& path)
     mz_zip_reader_end(&zip);
 }
 
-std::vector<uint8_t> ZippedResourcePack::getPackChunk(int off, int len)
+std::vector<uint8_t> ZippedResourcePack::computeSha256FromFile() const
 {
-    if (off < 0 || off >= buffer.size())
-        return {};
-    int chunkLen = std::min(len, static_cast<int>(buffer.size()) - off);
-    return std::vector<uint8_t>(buffer.begin() + off, buffer.begin() + off + chunkLen);
+    wc_Sha256 ctx;
+    std::vector<uint8_t> hash(SHA256_DIGEST_SIZE);
+
+    if (wc_InitSha256(&ctx) != 0)
+        throw std::runtime_error("Failed to initialize SHA256 context");
+
+    std::ifstream file(filePath, std::ios::binary);
+    if (!file)
+        throw std::runtime_error("Failed to open file for SHA256 computation");
+
+    constexpr size_t bufferSize = 64 * 1024; // 64 KB buffer
+    std::vector<uint8_t> buffer(bufferSize);
+
+    while (file)
+    {
+        file.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
+        std::streamsize bytesRead = file.gcount();
+        if (bytesRead > 0)
+        {
+            if (wc_Sha256Update(&ctx, buffer.data(), static_cast<uint32_t>(bytesRead)) != 0)
+                throw std::runtime_error("SHA256 update failed");
+        }
+    }
+
+    if (wc_Sha256Final(&ctx, hash.data()) != 0)
+        throw std::runtime_error("SHA256 final failed");
+
+    return hash;
+}
+
+std::vector<uint8_t> ZippedResourcePack::getPackChunk(uint64_t off, uint64_t len)
+{
+    if (len == 0)
+        throw std::invalid_argument("Chunk length must be positive");
+
+    if (!fileStream.is_open())
+        throw std::runtime_error("File stream is not open");
+
+    uint64_t fileSize = getPackSize();
+
+    if (off >= fileSize)
+        throw std::out_of_range("Offset is out of file bounds");
+
+    uint64_t chunkLen = std::min(len, fileSize - off);
+
+    std::vector<uint8_t> chunk(static_cast<size_t>(chunkLen));
+
+    fileStream.seekg(static_cast<std::streamoff>(off), std::ios::beg);
+    fileStream.read(reinterpret_cast<char*>(chunk.data()), static_cast<std::streamsize>(chunkLen));
+
+    if (static_cast<uint64_t>(fileStream.gcount()) != chunkLen)
+        throw std::runtime_error("Failed to read full chunk from file");
+
+    return chunk;
+}
+
+std::string ZippedResourcePack::getPackChunkString(std::streamoff start, std::size_t length) const
+{
+    if (length < 1)
+    {
+        throw std::invalid_argument("Pack length must be positive");
+    }
+
+    fileStream.seekg(start, std::ios::beg);
+    if (!fileStream)
+    {
+        throw std::invalid_argument("Requested a resource pack chunk with invalid start offset");
+    }
+
+    std::string buffer(length, '\0');
+    fileStream.read(buffer.data(), length);
+
+    if (fileStream.gcount() != static_cast<std::streamsize>(length))
+    {
+        buffer.resize(fileStream.gcount()); // adjust if we hit EOF
+    }
+
+    return buffer;
 }
 
 std::string ZippedResourcePack::getPackName() const
@@ -93,12 +152,38 @@ std::string ZippedResourcePack::getPackName() const
 
 cyrex::nw::io::UUID ZippedResourcePack::getPackId() const
 {
-    if (id == io::UUID{})
+    const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&id);
+    bool isEmpty = true;
+    for (size_t i = 0; i < 16; ++i)
     {
-        std::string uuidStr = manifest["header"]["uuid"];
-        for (int i = 0; i < 16; ++i)
-            id[i] = static_cast<uint8_t>(std::stoi(uuidStr.substr(i * 2, 2), nullptr, 16));
+        if (bytes[i] != 0)
+        {
+            isEmpty = false;
+            break;
+        }
     }
+
+    if (isEmpty)
+    {
+        std::string uuidStr = manifest["header"]["uuid"].get<std::string>();
+
+        std::string cleanStr;
+        cleanStr.reserve(32);
+        for (char c : uuidStr)
+        {
+            if (c != '-')
+                cleanStr += c;
+        }
+
+        uint8_t tmp[16]{};
+        for (size_t i = 0; i < 16; ++i)
+        {
+            tmp[i] = static_cast<uint8_t>(std::stoi(cleanStr.substr(i * 2, 2), nullptr, 16));
+        }
+
+        std::memcpy(&id, tmp, 16);
+    }
+
     return id;
 }
 
@@ -109,13 +194,16 @@ std::string ZippedResourcePack::getPackVersion() const
            std::to_string(versionArray[2].get<int>());
 }
 
-int ZippedResourcePack::getPackSize() const
+uint64_t ZippedResourcePack::getPackSize() const
 {
-    return static_cast<int>(buffer.size());
+    return static_cast<uint64_t>(std::filesystem::file_size(filePath));
 }
 
 std::vector<uint8_t> ZippedResourcePack::getSha256() const
 {
+    if (sha256Hash.empty())
+        sha256Hash = computeSha256FromFile();
+    logging::log("sha={}", sha256Hash);
     return sha256Hash;
 }
 

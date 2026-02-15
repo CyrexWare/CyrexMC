@@ -19,9 +19,10 @@ public:
     }
     virtual io::UUID getPackId() const = 0;
     virtual std::string getPackVersion() const = 0;
-    virtual int getPackSize() const = 0;
+    virtual uint64_t getPackSize() const = 0;
     virtual std::vector<uint8_t> getSha256() const = 0;
-    virtual std::vector<uint8_t> getPackChunk(int offset, int len) = 0;
+    virtual std::vector<uint8_t> getPackChunk(uint64_t off, uint64_t len) = 0;
+    virtual std::string getPackChunkString(std::streamoff start, std::size_t length) const = 0;
 
     virtual bool isAddonPack() const
     {

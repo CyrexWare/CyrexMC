@@ -1,10 +1,12 @@
 #pragma once
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackStackEntry.hpp"
 #include "network/session/network_session.hpp"
 #include "resource_pack_packet_impl.hpp"
-#include "network/mcbe/protocol/types/packs/ResourcePackEntry.hpp"
+#include "types/Experiments.hpp"
 
+#include <string>
 #include <vector>
 
 namespace cyrex::nw::protocol
@@ -14,41 +16,33 @@ class ResourcePackStackPacket final :
     public PacketImpl<ResourcePackStackPacket, static_cast<uint32_t>(PacketId::ResourcePackStack), PacketDirection::Clientbound, true>
 {
 public:
-    using PacketImpl<ResourcePackStackPacket, static_cast<uint32_t>(PacketId::ResourcePackStack), PacketDirection::Clientbound, true>::getDefStatic;
-    std::vector<ResourcePackEntry> resourcePackStack;
     bool mustAccept = false;
+    std::vector<ResourcePackStackEntry> resourcePackStack;
+    std::string baseGameVersion;
+    Experiments experiments;
+    bool includeEditorPacks = false;
 
     bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
     {
         out.writeBool(mustAccept);
-        out.writeU16LE(static_cast<uint16_t>(resourcePackStack.size()));
-
+        out.writeVarUInt(static_cast<uint32_t>(resourcePackStack.size()));
         for (const auto& entry : resourcePackStack)
-        {
             entry.encode(out);
-        }
-
+        out.writeString(baseGameVersion);
+        experiments.encode(out);
+        out.writeBool(includeEditorPacks);
         return true;
     }
 
     bool decodePayload(cyrex::nw::io::BinaryReader& in) override
     {
-        mustAccept = in.readBool();
-        uint16_t len = in.readU16LE();
-        resourcePackStack.resize(len);
-
-        for (auto& entry : resourcePackStack)
-        {
-            entry.decode(in);
-        }
-
+        // NOOP
         return true;
     }
 
     bool handle(cyrex::nw::session::NetworkSession& session) override
     {
         return true;
-        //return session.handleResourcePackStack(*this);
     }
 };
 

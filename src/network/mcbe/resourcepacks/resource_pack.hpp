@@ -32,14 +32,37 @@ public:
 
     io::UUID getPackId() const override
     {
-        if (std::all_of(id.begin(), id.end(), [](auto b) { return b == 0; }))
+        const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&id);
+        bool isEmpty = true;
+        for (size_t i = 0; i < 16; ++i)
         {
-            std::string idStr = manifest["header"]["uuid"].get<std::string>();
-            for (int i = 0; i < 16; ++i)
+            if (bytes[i] != 0)
             {
-                id[i] = static_cast<uint8_t>(std::stoul(idStr.substr(i * 2, 2), nullptr, 16));
+                isEmpty = false;
+                break;
             }
         }
+
+        if (isEmpty)
+        {
+            std::string idStr = manifest["header"]["uuid"].get<std::string>();
+            std::string cleanStr;
+            cleanStr.reserve(32);
+            for (char c : idStr)
+            {
+                if (c != '-')
+                    cleanStr += c;
+            }
+
+            uint8_t tmp[16]{};
+            for (size_t i = 0; i < 16; ++i)
+            {
+                tmp[i] = static_cast<uint8_t>(std::stoul(cleanStr.substr(i * 2, 2), nullptr, 16));
+            }
+
+            std::memcpy(&id, tmp, 16);
+        }
+
         return id;
     }
 
@@ -52,9 +75,13 @@ public:
 
     std::size_t hashCode() const
     {
+        io::UUID uuid = getPackId(); 
+        const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&uuid);
+
         std::size_t h = 0;
-        for (auto b : getPackId())
-            h = h * 31 + b;
+        for (size_t i = 0; i < 16; ++i)
+            h = h * 31 + bytes[i];
+
         return h;
     }
 };

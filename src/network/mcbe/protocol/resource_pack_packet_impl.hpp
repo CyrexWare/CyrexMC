@@ -35,7 +35,7 @@ protected:
 
         try
         {
-            setPackId(stringToUUID(idPart));
+            setPackId(io::stringToUUID(idPart));
         } catch (...)
         {
             setPackId(io::UUID{}); 
@@ -47,59 +47,8 @@ protected:
     void encodePackInfo(cyrex::nw::io::BinaryWriter& out) const
     {
         auto packId = getPackId();
-        auto packVersion = getPackVersionStr();
 
-        std::string packInfo = !isUUIDEmpty(packId) ? uuidToString(packId) : uuidToString(io::UUID{});
-        if (!packVersion.empty())
-        {
-            packInfo += "_" + packVersion;
-        }
-       
-        logging::info("Encoding pack info: id={}, version={}, combined={}", uuidToString(packId), packVersion, packInfo);
-        out.writeString(packInfo);
-    }
-
-private:
-    static std::string uuidToString(const io::UUID& u)
-    {
-        std::string str;
-        char buf[3]{};
-        for (auto b : u)
-        {
-            std::snprintf(buf, sizeof(buf), "%02x", b);
-            str += buf;
-        }
-        return str;
-    }
-
-    static io::UUID stringToUUID(const std::string& str)
-    {
-        io::UUID u{};
-        if (str.size() != 32 && str.size() != 36)
-        {
-            return u;
-        }
-        std::string cleanStr;
-        for (char c : str)
-        {
-            if (c != '-')
-                cleanStr += c;
-        }
-        for (size_t i = 0; i < 16; ++i)
-        {
-            u[i] = static_cast<uint8_t>(std::stoi(cleanStr.substr(i * 2, 2), nullptr, 16));
-        }
-        return u;
-    }
-
-    static bool isUUIDEmpty(const io::UUID& u)
-    {
-        for (auto b : u)
-        {
-            if (b != 0)
-                return false;
-        }
-        return true;
+        out.writeString(io::uuidToString(packId));
     }
 };
 
