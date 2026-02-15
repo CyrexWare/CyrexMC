@@ -1,6 +1,5 @@
 #pragma once
 
-#include "util/uuid.hpp"
 #include "network/mcbe/compression/compressor.hpp"
 #include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/packet.hpp"
@@ -13,6 +12,7 @@
 #include "network/mcbe/protocol/types/packs/ResourcePackData.hpp"
 #include "network/mcbe/transport.hpp"
 #include "server.hpp"
+#include "util/uuid.hpp"
 
 #include <RakNet/RakNetTypes.h>
 #include <deque>

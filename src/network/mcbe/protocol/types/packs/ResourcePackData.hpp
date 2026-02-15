@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util/uuid.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_def.hpp"
+#include "util/uuid.hpp"
 
 #include <bitset>
 #include <memory>

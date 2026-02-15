@@ -1,7 +1,7 @@
 #pragma once
 #include "loader/resource_pack_loader_def.hpp"
-#include "util/uuid.hpp"
 #include "resource_pack_def.hpp"
+#include "util/uuid.hpp"
 
 #include <memory>
 #include <unordered_map>
