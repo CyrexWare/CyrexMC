@@ -17,7 +17,6 @@ struct ResourcePackStackEntry
     void encode(io::BinaryWriter& out) const
     {
         out.writeString(packId);
-        logging::info("packId (StackEntry): {}", packId);
         out.writeString(packVersion);
         out.writeString(subPackName);
     }

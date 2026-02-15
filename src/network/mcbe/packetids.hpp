@@ -248,7 +248,7 @@ inline PacketId fromInt(std::uint32_t value)
 
 inline std::string toSimpleName(PacketId id)
 {
-    auto name = magic_enum::enum_name(id);
+    const auto name = magic_enum::enum_name(id);
     if (name.empty())
     {
         return "UnknownPacket";

@@ -21,7 +21,7 @@ public:
     Experiments experiments;
     bool includeEditorPacks = false;
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeBool(mustAccept);
         out.writeVarUInt(static_cast<uint32_t>(resourcePackStack.size()));
@@ -33,13 +33,13 @@ public:
         return true;
     }
 
-    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader& in) override
     {
         // NOOP
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override
+    bool handle(session::NetworkSession& session) override
     {
         return true;
     }

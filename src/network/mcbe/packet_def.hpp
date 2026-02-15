@@ -37,7 +37,7 @@ public:
     {
     }
 
-    std::unique_ptr<Packet> decode(cyrex::nw::io::BinaryReader& in) const;
+    std::unique_ptr<Packet> decode(io::BinaryReader& in) const;
 };
 
 } // namespace cyrex::nw::protocol

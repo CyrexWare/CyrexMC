@@ -21,13 +21,13 @@ public:
     std::string packVersion;
     int chunkIndex = 0;
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         //NOOP
         return true;
     }
 
-    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader& in) override
     {
         std::string packInfo = in.readString();
 
@@ -41,7 +41,7 @@ public:
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session);
+    bool handle(session::NetworkSession& session);
 };
 
 } // namespace cyrex::nw::protocol

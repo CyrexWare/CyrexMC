@@ -12,7 +12,7 @@ struct ResourcePackInfoEntry
 {
     util::UUID packId{};
     std::string packVersion;
-    int64_t packSize = 0;
+    uint64_t packSize = 0;
     std::string encryptionKey;
     std::string subPackName;
     std::string contentIdentity;
@@ -21,11 +21,11 @@ struct ResourcePackInfoEntry
     bool raytracingCapable = false;
     std::string cdnUrl;
 
-    void encode(cyrex::nw::io::BinaryWriter& out) const
+    void encode(io::BinaryWriter& out) const
     {
         out.writeUUID(packId);
         out.writeString(packVersion);
-        out.writeU64LE(static_cast<uint64_t>(packSize));
+        out.writeU64LE(packSize);
         out.writeString(encryptionKey);
         out.writeString(subPackName);
         out.writeString(contentIdentity);
@@ -35,11 +35,11 @@ struct ResourcePackInfoEntry
         out.writeString(cdnUrl);
     }
 
-    void decode(cyrex::nw::io::BinaryReader& in)
+    void decode(io::BinaryReader& in)
     {
         packId = in.readUUID();
         packVersion = in.readString();
-        packSize = static_cast<int64_t>(in.readU64LE());
+        packSize = in.readU64LE();
         encryptionKey = in.readString();
         subPackName = in.readString();
         contentIdentity = in.readString();

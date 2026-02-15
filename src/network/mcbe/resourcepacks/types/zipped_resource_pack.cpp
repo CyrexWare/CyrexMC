@@ -23,7 +23,7 @@ ZippedResourcePack::ZippedResourcePack(const std::string& path) : filePath(path)
 
     loadZip(path);
 
-    if (!verifyManifest())
+    if (!ZippedResourcePack::verifyManifest())
         throw std::runtime_error("Invalid resource pack manifest");
 
     fileStream.open(path, std::ios::binary);
@@ -81,8 +81,7 @@ std::vector<uint8_t> ZippedResourcePack::computeSha256FromFile() const
     while (file)
     {
         file.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
-        std::streamsize bytesRead = file.gcount();
-        if (bytesRead > 0)
+        if (std::streamsize bytesRead = file.gcount(); bytesRead > 0)
         {
             if (wc_Sha256Update(&ctx, buffer.data(), static_cast<uint32_t>(bytesRead)) != 0)
                 throw std::runtime_error("SHA256 update failed");
@@ -95,7 +94,7 @@ std::vector<uint8_t> ZippedResourcePack::computeSha256FromFile() const
     return hash;
 }
 
-std::vector<uint8_t> ZippedResourcePack::getPackChunk(uint64_t off, uint64_t len)
+std::vector<uint8_t> ZippedResourcePack::getPackChunk(const uint64_t off, const uint64_t len)
 {
     if (len == 0)
         throw std::invalid_argument("Chunk length must be positive");
@@ -103,14 +102,14 @@ std::vector<uint8_t> ZippedResourcePack::getPackChunk(uint64_t off, uint64_t len
     if (!fileStream.is_open())
         throw std::runtime_error("File stream is not open");
 
-    uint64_t fileSize = getPackSize();
+    const uint64_t fileSize = getPackSize();
 
     if (off >= fileSize)
         throw std::out_of_range("Offset is out of file bounds");
 
-    uint64_t chunkLen = std::min(len, fileSize - off);
+    const uint64_t chunkLen = std::min(len, fileSize - off);
 
-    std::vector<uint8_t> chunk(static_cast<size_t>(chunkLen));
+    std::vector<uint8_t> chunk(chunkLen);
 
     fileStream.seekg(static_cast<std::streamoff>(off), std::ios::beg);
     fileStream.read(reinterpret_cast<char*>(chunk.data()), static_cast<std::streamsize>(chunkLen));
@@ -150,28 +149,17 @@ std::string ZippedResourcePack::getPackName() const
     return manifest["header"]["name"].get<std::string>();
 }
 
-cyrex::util::UUID ZippedResourcePack::getPackId() const
+util::UUID ZippedResourcePack::getPackId() const
 {
-    const auto* bytes = reinterpret_cast<const uint8_t*>(&id);
-    bool isEmpty = std::all_of(bytes, bytes + 16, [](uint8_t b) { return b == 0; });
+    if (!id.is_nil())
+        return id;
 
-    if (isEmpty)
-    {
-        std::string uuidStr = manifest["header"]["uuid"].get<std::string>();
-        std::string cleanStr;
-        cleanStr.reserve(32);
+    const std::string uuidStr = manifest["header"]["uuid"].get<std::string>();
 
-        for (char c : uuidStr)
-            if (c != '-')
-                cleanStr += c;
-
-        std::array<uint8_t, 16> tmp{};
-        for (size_t i = 0; i < 16; ++i)
-            tmp[i] = static_cast<uint8_t>(std::stoi(cleanStr.substr(i * 2, 2), nullptr, 16));
-
-        id = std::bit_cast<cyrex::util::UUID>(tmp);
-    }
-
+    const auto parsed = uuids::uuid::from_string(uuidStr);
+    if (!parsed.has_value())
+        throw std::invalid_argument("Invalid UUID format");
+    id = parsed.value();
     return id;
 }
 

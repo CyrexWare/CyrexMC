@@ -13,19 +13,19 @@ class ClientToServerHandshakePacket final :
     public PacketImpl<ClientToServerHandshakePacket, static_cast<uint32_t>(PacketId::ClientToServerHandshake), PacketDirection::Serverbound, true>
 {
 public:
-    bool decodePayload(cyrex::nw::io::BinaryReader&) override
+    bool decodePayload(io::BinaryReader&) override
     {
         // NOOP
         return true;
     }
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter&) const override
+    bool encodePayload(io::BinaryWriter&) const override
     {
         // NOOP
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override
+    bool handle(session::NetworkSession& session) override
     {
         // NOOP
         return true;

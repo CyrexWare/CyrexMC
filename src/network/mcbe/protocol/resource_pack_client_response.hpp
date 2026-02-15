@@ -40,25 +40,24 @@ public:
     ResourcePackClientResponseStatus responseStatus{};
     std::vector<Entry> packEntries;
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         // NOOP
         return true;
     }
 
-    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader& in) override
     {
         responseStatus = static_cast<ResourcePackClientResponseStatus>(in.readU8());
-        uint16_t len = in.readU16LE();
+        const uint16_t len = in.readU16LE();
         packEntries.resize(len);
 
         for (uint16_t i = 0; i < len; ++i)
         {
             std::string s = in.readString();
-            auto pos = s.find('_');
-            if (pos != std::string::npos)
+            if (const auto pos = s.find('_'); pos != std::string::npos)
             {
-                util::UUID id = stringToUUID(s.substr(0, pos));
+                util::UUID id = util::stringToUUID(s.substr(0, pos));
                 std::string ver = s.substr(pos + 1);
                 packEntries[i] = Entry{id, ver};
             }
@@ -66,25 +65,6 @@ public:
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override;
-
-private:
-    static util::UUID stringToUUID(const std::string& str)
-    {
-        if (str.size() != 32 && str.size() != 36)
-            return {};
-
-        std::string cleanStr;
-        cleanStr.reserve(32);
-        for (char c : str)
-            if (c != '-')
-                cleanStr += c;
-
-        std::array<uint8_t, 16> bytes{};
-        for (size_t i = 0; i < 16; ++i)
-            bytes[i] = static_cast<uint8_t>(std::stoi(cleanStr.substr(i * 2, 2), nullptr, 16));
-
-        return util::UUID(bytes);
-    }
+    bool handle(session::NetworkSession& session) override;
 };
 } // namespace cyrex::nw::protocol

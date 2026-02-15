@@ -1,7 +1,7 @@
 #pragma once
 
 #include "log/logging.hpp"
-#include "network/mcbe/packetids.hpp"
+// #include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
 
 namespace cyrex::nw::protocol
@@ -22,8 +22,7 @@ enum class PlayStatus : uint32_t
 };
 
 class PlayStatusPacket final :
-    public cyrex::nw::protocol::
-        PacketImpl<PlayStatusPacket, static_cast<uint32_t>(PacketId::PlayStatus), cyrex::nw::protocol::PacketDirection::Clientbound, true>
+    public PacketImpl<PlayStatusPacket, static_cast<uint32_t>(PacketId::PlayStatus), PacketDirection::Clientbound, true>
 {
 public:
     PlayStatus status = PlayStatus::LoginSuccess;
@@ -40,7 +39,7 @@ public:
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& /*session*/) override
+    bool handle(session::NetworkSession& /*session*/) override
     {
         return true;
     }

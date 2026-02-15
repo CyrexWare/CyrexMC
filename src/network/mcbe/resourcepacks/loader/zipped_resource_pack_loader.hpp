@@ -1,5 +1,4 @@
 #pragma once
-#include "network/mcbe/resourcepacks/types/zipped_resource_pack.hpp"
 #include "resource_pack_loader_def.hpp"
 
 #include <filesystem>

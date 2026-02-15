@@ -35,7 +35,7 @@ public:
 
     void encode(cyrex::nw::io::BinaryWriter& out) const
     {
-        uint32_t total = static_cast<uint32_t>(activeToggles.size() + alwaysOnToggles.size());
+        const uint32_t total = static_cast<uint32_t>(activeToggles.size() + alwaysOnToggles.size());
         out.writeU32LE(total);
 
         for (const auto& e : activeToggles)
@@ -49,7 +49,7 @@ public:
 
     void decode(cyrex::nw::io::BinaryReader& in)
     {
-        uint32_t total = in.readU32LE();
+        const uint32_t total = in.readU32LE();
 
         activeToggles.clear();
         alwaysOnToggles.clear();

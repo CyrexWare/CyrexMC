@@ -47,8 +47,8 @@ public:
 
     virtual bool operator==(const ResourcePackDef& other) const
     {
-        util::UUID a = getPackId();
-        util::UUID b = other.getPackId();
+        const util::UUID a = getPackId();
+        const util::UUID b = other.getPackId();
         return a == b;
     }
 };

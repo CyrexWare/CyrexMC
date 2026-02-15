@@ -14,7 +14,7 @@ class ZippedResourcePack : public ResourcePack
 {
 public:
     explicit ZippedResourcePack(const std::string& path);
-    ~ZippedResourcePack();
+    ~ZippedResourcePack() override;
 
     std::string getPackName() const override;
     util::UUID getPackId() const override;

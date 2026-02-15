@@ -4,7 +4,6 @@
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackDataTypes.hpp"
 #include "network/mcbe/resourcepacks/resource_pack.hpp"
-#include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 #include "network/session/network_session.hpp"
 
 #include <string>
@@ -32,7 +31,7 @@ public:
     bool premium = false;
     ResourcePackDataType type = ResourcePackDataType::Resource;
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeString(util::uuidToString(packId));
         out.writeI32LE(maxChunkSize);
@@ -40,20 +39,20 @@ public:
         out.writeU64LE(compressedPackSize);
 
         out.writeVarUInt(static_cast<uint32_t>(sha256.size()));
-        out.writeBytes(sha256.data(), sha256.size());
+        out.writeBytes(sha256);
 
         out.writeBool(premium);
         out.writeU8(static_cast<uint8_t>(type));
         return true;
     }
 
-    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader& in) override
     {
         // NOOP
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override
+    bool handle(session::NetworkSession& session) override
     {
         return true;
     }

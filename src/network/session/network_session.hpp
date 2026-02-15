@@ -47,7 +47,7 @@ public:
     NetworkSession(const RakNet::RakNetGUID& guid,
                    const RakNet::SystemAddress& address,
                    protocol::Transport* transport,
-                   cyrex::Server& server) :
+                   Server& server) :
         m_guid(guid),
         m_address(address),
         m_transport(transport),
@@ -71,8 +71,8 @@ public:
     bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
     void doLoginSuccess();
     bool handleRequestNetworkSettings(uint32_t version);
-    bool handleResourcePackClientResponse(const cyrex::nw::protocol::ResourcePackClientResponsePacket& pk);
-    bool handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& pk);
+    bool handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk);
+    bool handleResourcePackChunkRequest(const protocol::ResourcePackChunkRequestPacket& pk);
     void nextPack();
     void processChunkQueue();
     void tick();
@@ -110,14 +110,14 @@ private:
     RakNet::SystemAddress m_address;
     protocol::Transport* m_transport;
 
-    cyrex::Server& m_server;
+    Server& m_server;
 
     std::uint32_t m_protocolId{0};
     std::optional<protocol::AesEncryptor> m_cipher;
 
     protocol::PacketFactory m_packetFactory;
 
-    std::map<util::UUID, std::shared_ptr<cyrex::nw::protocol::ResourcePackData>> loadedPacks;
+    std::map<util::UUID, std::shared_ptr<protocol::ResourcePackData>> loadedPacks;
     std::deque<util::UUID> packQueue;
     std::deque<std::pair<util::UUID, int>> pendingChunks;
 

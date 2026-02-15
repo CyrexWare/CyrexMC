@@ -3,8 +3,6 @@
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packetids.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackInfoEntry.hpp"
-#include "network/mcbe/resourcepacks/resource_pack.hpp"
-#include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 #include "network/session/network_session.hpp"
 
 #include <memory>
@@ -29,7 +27,7 @@ public:
 
     std::vector<ResourcePackInfoEntry> resourcePackEntries;
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeBool(mustAccept);
         out.writeBool(hasAddonPacks);
@@ -43,18 +41,18 @@ public:
         return true;
     }
 
-    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader& in) override
     {
         return false;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override
+    bool handle(session::NetworkSession& session) override
     {
         return true;
     }
 
 private:
-    void encodePacks(cyrex::nw::io::BinaryWriter& out, const std::vector<ResourcePackInfoEntry>& packs) const
+    void encodePacks(io::BinaryWriter& out, const std::vector<ResourcePackInfoEntry>& packs) const
     {
         out.writeU16LE(static_cast<uint16_t>(packs.size()));
 

@@ -5,15 +5,12 @@
 
 #include <cstdint>
 
-using namespace cyrex::nw::io;
-using namespace cyrex::nw::session;
-
 namespace cyrex::nw::protocol
 {
 class NetworkSettingsPacket final :
-    public cyrex::nw::protocol::PacketImpl<NetworkSettingsPacket,
+    public PacketImpl<NetworkSettingsPacket,
                                            static_cast<uint32_t>(PacketId::NetworkSettings),
-                                           cyrex::nw::protocol::PacketDirection::Clientbound,
+                                           PacketDirection::Clientbound,
                                            true>
 {
 public:
@@ -27,13 +24,13 @@ public:
     std::int8_t clientThrottleThreshold = 0;
     float clientThrottleScalar = 0.0f;
 
-    bool decodePayload(cyrex::nw::io::BinaryReader&) override
+    bool decodePayload(io::BinaryReader&) override
     {
         // NOOP
         return false;
     }
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeI16LE(compressionThreshold);
         out.writeI16LE(compressionAlgorithm);
@@ -43,7 +40,7 @@ public:
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession&) override
+    bool handle(session::NetworkSession&) override
     {
         return true;
     }

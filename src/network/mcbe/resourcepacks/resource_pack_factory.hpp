@@ -21,7 +21,7 @@ public:
     std::shared_ptr<ResourcePackDef> getPackById(const util::UUID& id) const;
     int getMaxChunkSize() const;
     void setMaxChunkSize(int size);
-    void registerPackLoader(std::shared_ptr<ResourcePackLoaderDef> loader);
+    void registerPackLoader(const std::shared_ptr<ResourcePackLoaderDef>& loader);
 
 private:
     int maxChunkSize = 1024 * 256;

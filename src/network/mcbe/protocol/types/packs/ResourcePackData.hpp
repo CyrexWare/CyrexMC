@@ -25,7 +25,7 @@ public:
     std::vector<bool> sent;
     int nextToSend = 0;
 
-    ResourcePackData(const util::UUID& id, const std::shared_ptr<resourcepacks::ResourcePackDef>& p, int maxChunk, int chunks) :
+    ResourcePackData(const util::UUID& id, const std::shared_ptr<resourcepacks::ResourcePackDef>& p, const int maxChunk, const int chunks) :
         packId(id),
         pack(p),
         maxChunkSize(maxChunk),

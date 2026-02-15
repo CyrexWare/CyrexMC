@@ -15,19 +15,19 @@ class ClientCacheStatusPacket final :
 public:
     bool enabled = false;
 
-    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader& in) override
     {
         enabled = in.readBool();
         return true;
     }
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeBool(enabled);
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override
+    bool handle(session::NetworkSession& session) override
     {
         return true;
     }

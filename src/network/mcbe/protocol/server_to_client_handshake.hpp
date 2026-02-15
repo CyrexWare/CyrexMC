@@ -4,7 +4,6 @@
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/packet_direction.hpp"
 #include "network/mcbe/packetids.hpp"
-#include "network/session/network_session.hpp"
 
 #include <string>
 
@@ -17,19 +16,19 @@ class ServerToClientHandshakePacket final :
 public:
     std::string jwt;
 
-    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader& in) override
     {
         jwt = in.readString();
         return true;
     }
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeString(jwt);
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override
+    bool handle(session::NetworkSession& session) override
     {
         return true;
     }

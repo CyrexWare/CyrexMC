@@ -44,14 +44,14 @@ int ResourcePackFactory::getMaxChunkSize() const
     return maxChunkSize;
 }
 
-void ResourcePackFactory::setMaxChunkSize(int size)
+void ResourcePackFactory::setMaxChunkSize(const int size)
 {
     if (size <= 0)
         throw std::invalid_argument("Max chunk size must be positive");
     maxChunkSize = size;
 }
 
-void ResourcePackFactory::registerPackLoader(std::shared_ptr<ResourcePackLoaderDef> loader)
+void ResourcePackFactory::registerPackLoader(const std::shared_ptr<ResourcePackLoaderDef>& loader)
 {
     loaders.insert(loader);
 }

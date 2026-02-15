@@ -207,7 +207,7 @@ public:
 
     inline int32_t readVarInt()
     {
-        uint32_t v = readVarUInt();
+        const uint32_t v = readVarUInt();
         return static_cast<int32_t>((v >> 1) ^ (~(v & 1) + 1));
     }
 
@@ -218,7 +218,7 @@ public:
 
         for (uint32_t i = 0; i < 10; ++i)
         {
-            uint8_t b = readU8();
+            const uint8_t b = readU8();
             value |= (static_cast<uint64_t>(b & 0x7F) << shift);
 
             if ((b & 0x80) == 0)
@@ -232,13 +232,13 @@ public:
 
     inline int64_t readVarLong()
     {
-        uint64_t v = readVarULong();
+        const uint64_t v = readVarULong();
         return static_cast<int64_t>((v >> 1) ^ (~(v & 1) + 1));
     }
 
     inline std::string readString()
     {
-        uint32_t len = readVarUInt();
+        const uint32_t len = readVarUInt();
         ensureReadable(len);
 
         std::string out(reinterpret_cast<const char*>(dataPtr + offset), len);
@@ -246,18 +246,10 @@ public:
         return out;
     }
 
-    inline std::span<const uint8_t> readBytes(size_t len)
+    inline std::vector<uint8_t> readBytesVector(const size_t len)
     {
         ensureReadable(len);
-        auto span = std::span<const uint8_t>(dataPtr + offset, len);
-        offset += len;
-        return span;
-    }
-
-    inline std::vector<uint8_t> readBytesVector(size_t len)
-    {
-        ensureReadable(len);
-        std::vector<uint8_t> out(dataPtr + offset, dataPtr + offset + len);
+        std::vector out(dataPtr + offset, dataPtr + offset + len);
         offset += len;
         return out;
     }

@@ -2,7 +2,7 @@
 
 #include "network/session/network_session.hpp"
 
-bool cyrex::nw::protocol::ResourcePackClientResponsePacket::handle(cyrex::nw::session::NetworkSession& session)
+bool cyrex::nw::protocol::ResourcePackClientResponsePacket::handle(session::NetworkSession& session)
 {
     return session.handleResourcePackClientResponse(*this);
 }

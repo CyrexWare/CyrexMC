@@ -4,7 +4,6 @@
 #include "network/mcbe/packetids.hpp"
 
 #include <string>
-#include <vector>
 
 namespace cyrex::nw::session
 {
@@ -18,7 +17,7 @@ class ResourcePackChunkDataPacket final :
     public PacketImpl<ResourcePackChunkDataPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkData), PacketDirection::Clientbound, true>
 {
 public:
-    using PacketImpl<ResourcePackChunkDataPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkData), PacketDirection::Clientbound, true>::getDefStatic;
+    // using PacketImpl<ResourcePackChunkDataPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkData), PacketDirection::Clientbound, true>::getDefStatic;
 
     util::UUID packId{};
     std::string packVersion;
@@ -26,7 +25,7 @@ public:
     uint64_t progress = 0;
     std::string data;
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeString(util::uuidToString(packId));
         out.writeU32LE(chunkIndex);
@@ -35,13 +34,13 @@ public:
         return true;
     }
 
-    bool decodePayload(cyrex::nw::io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader& in) override
     {
         // NOOP
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession& session) override
+    bool handle(session::NetworkSession& session) override
     {
         return true;
     }

@@ -38,18 +38,18 @@ public:
 private:
     void tryDecodeRequestForConnection(const std::string& binary)
     {
-        cyrex::nw::io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
+        io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
 
         const uint32_t authLen = cr.readU32LE();
-        authInfoJson = std::string(reinterpret_cast<const char*>(cr.readBytes(authLen).data()), authLen);
+        authInfoJson = std::string(reinterpret_cast<const char*>(cr.readBytesVector(authLen).data()), authLen);
 
         const uint32_t clientLen = cr.readU32LE();
-        clientDataJwt = std::string(reinterpret_cast<const char*>(cr.readBytes(clientLen).data()), clientLen);
+        clientDataJwt = std::string(reinterpret_cast<const char*>(cr.readBytesVector(clientLen).data()), clientLen);
     }
 
     [[nodiscard]] std::string tryEncodeRequestForConnection() const
     {
-        cyrex::nw::io::BinaryWriter cr{};
+        io::BinaryWriter cr{};
 
         cr.writeU32LE(static_cast<uint32_t>(authInfoJson.size()));
         cr.writeBytes(reinterpret_cast<const uint8_t*>(authInfoJson.data()), authInfoJson.size());

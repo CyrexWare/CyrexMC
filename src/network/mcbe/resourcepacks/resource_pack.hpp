@@ -13,7 +13,7 @@ protected:
     nlohmann::json manifest;
     mutable util::UUID id{};
 
-    bool verifyManifest() const
+    virtual bool verifyManifest() const
     {
         if (!manifest.contains("format_version") || !manifest.contains("header") || !manifest.contains("modules"))
         {
@@ -32,26 +32,16 @@ public:
 
     util::UUID getPackId() const override
     {
-        const auto* bytes = reinterpret_cast<const uint8_t*>(&id);
-        bool isEmpty = std::all_of(bytes, bytes + 16, [](uint8_t b) { return b == 0; });
+        if (!id.is_nil())
+            return id;
 
-        if (isEmpty)
-        {
-            std::string idStr = manifest["header"]["uuid"].get<std::string>();
-            std::string cleanStr;
-            cleanStr.reserve(32);
+        const std::string uuidStr = manifest["header"]["uuid"].get<std::string>();
 
-            for (char c : idStr)
-                if (c != '-')
-                    cleanStr += c;
+        auto parsed = uuids::uuid::from_string(uuidStr);
+        if (!parsed.has_value())
+            throw std::invalid_argument("Invalid UUID format");
 
-            std::array<uint8_t, 16> tmp{};
-            for (size_t i = 0; i < 16; ++i)
-                tmp[i] = static_cast<uint8_t>(std::stoul(cleanStr.substr(i * 2, 2), nullptr, 16));
-
-            id = std::bit_cast<util::UUID>(tmp);
-        }
-
+        id = parsed.value();
         return id;
     }
 
@@ -64,8 +54,8 @@ public:
 
     std::size_t hashCode() const
     {
-        util::UUID uuid = getPackId();
-        const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&uuid);
+        const util::UUID uuid = getPackId();
+        const auto bytes = reinterpret_cast<const uint8_t*>(&uuid);
 
         std::size_t h = 0;
         for (size_t i = 0; i < 16; ++i)

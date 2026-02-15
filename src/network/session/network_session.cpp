@@ -66,7 +66,7 @@ void NetworkSession::tick()
     flush();
 }
 
-void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data, size_t len)
+void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const size_t len)
 {
     BinaryReader in(data, len);
     do
@@ -80,7 +80,7 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
         cyrex::logging::info(LOG_MCBE, "packet length = {}", packetLength);
         cyrex::logging::info(LOG_MCBE,
                              "packet id = {}0x{:02X} ({})",
-                             cyrex::logging::Color::GOLD,
+                             logging::Color::GOLD,
                              packetId,
                              cyrex::nw::protocol::toSimpleName(cyrex::nw::protocol::fromInt(packetId)));
 
@@ -88,7 +88,7 @@ void NetworkSession::onRaw(const RakNet::Packet& /*packet*/, const uint8_t* data
         {
             std::stringstream ss;
             const auto* payload = data + in.offset - packetLength + packetBuffer.offset;
-            size_t payloadSize = packetLength - (packetBuffer.offset);
+            const size_t payloadSize = packetLength - (packetBuffer.offset);
             ss << "raw payload (" << payloadSize << " bytes): ";
             for (size_t i = 0; i < payloadSize; ++i)
                 ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(payload[i]) << " ";
@@ -133,7 +133,7 @@ void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool i
     cyrex::logging::info("queueing packet with id = {}0x{:02X} ({})",
                          cyrex::logging::Color::GOLD,
                          packet->getDef().networkId,
-                         cyrex::nw::protocol::toSimpleName(cyrex::nw::protocol::fromInt(packet->getDef().networkId)));
+                         cyrex::nw::protocol::toSimpleName(protocol::fromInt(packet->getDef().networkId)));
     if (immediately)
     {
         BinaryWriter packetBuffer;
@@ -254,9 +254,7 @@ void NetworkSession::doLoginSuccess()
     auto packet = std::make_unique<protocol::PlayStatusPacket>();
     packet->status = protocol::PlayStatus::LoginSuccess;
     send(std::move(packet));
-    // Encryption below (handshake)
 
-    // Initial resource pack setup
     auto infoPkt = std::make_unique<protocol::ResourcePacksInfoPacket>();
     const auto& defs = m_server.getResourcePackFactory().getResourceStack();
     infoPkt->resourcePackEntries.reserve(defs.size());
@@ -274,7 +272,7 @@ void NetworkSession::doLoginSuccess()
 
         entry.packId = def.getPackId();
         entry.packVersion = def.getPackVersion();
-        entry.packSize = static_cast<int64_t>(def.getPackSize());
+        entry.packSize = def.getPackSize();
         entry.encryptionKey = def.getEncryptionKey();
         entry.subPackName = "";
 
@@ -321,9 +319,9 @@ bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
     return true;
 }
 
-bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol::ResourcePackClientResponsePacket& pk)
+bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk)
 {
-    using cyrex::nw::protocol::ResourcePackClientResponseStatus;
+    using protocol::ResourcePackClientResponseStatus;
 
     switch (pk.responseStatus)
     {
@@ -342,6 +340,7 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
                 auto resourcePack = m_server.getResourcePackFactory().getPackById(entry.uuid);
                 if (!resourcePack)
                 {
+                    printf("%s", util::uuidToString(entry.uuid).c_str());
                     markedForDisconnect = true;
                     return true;
                 }
@@ -351,7 +350,7 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
                     std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
 
                 auto data = std::make_shared<
-                    cyrex::nw::protocol::ResourcePackData>(resourcePack->getPackId(),
+                    protocol::ResourcePackData>(resourcePack->getPackId(),
                                                            std::static_pointer_cast<resourcepacks::ResourcePack>(resourcePack),
                                                            maxChunkSize,
                                                            chunkCount);
@@ -374,7 +373,7 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
 
         case ResourcePackClientResponseStatus::HaveAllPacks:
         {
-            auto stackPkt = std::make_unique<cyrex::nw::protocol::ResourcePackStackPacket>();
+            auto stackPkt = std::make_unique<protocol::ResourcePackStackPacket>();
             stackPkt->mustAccept = m_server.shouldForceResources();
 
             const auto& defStack = m_server.getResourcePackFactory().getResourceStack();
@@ -382,7 +381,7 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
 
             for (const auto& def : defStack)
             {
-                cyrex::nw::protocol::ResourcePackStackEntry entry;
+                protocol::ResourcePackStackEntry entry;
                 entry.packId = util::uuidToString(def->getPackId());
                 entry.packVersion = def->getPackVersion();
                 entry.subPackName = def->getSubPackName();
@@ -407,12 +406,12 @@ bool NetworkSession::handleResourcePackClientResponse(const cyrex::nw::protocol:
 
 bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& request)
 {
-    auto packFinder = loadedPacks.find(request.packId);
-    std::shared_ptr<cyrex::nw::protocol::ResourcePackData> packInfo;
+    const auto packFinder = loadedPacks.find(request.packId);
+    std::shared_ptr<protocol::ResourcePackData> packInfo;
 
     if (packFinder == loadedPacks.end())
     {
-        auto rawPack = m_server.getResourcePackFactory().getPackById(request.packId);
+        const auto rawPack = m_server.getResourcePackFactory().getPackById(request.packId);
         if (!rawPack)
         {
             markedForDisconnect = true;
@@ -420,10 +419,10 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
         }
 
         int maxSize = m_server.getResourcePackFactory().getMaxChunkSize();
-        size_t totalBytes = rawPack->getPackSize();
+        const size_t totalBytes = rawPack->getPackSize();
         int totalChunks = static_cast<int>((totalBytes + maxSize - 1) / maxSize);
 
-        packInfo = std::make_shared<cyrex::nw::protocol::ResourcePackData>(rawPack->getPackId(),
+        packInfo = std::make_shared<protocol::ResourcePackData>(rawPack->getPackId(),
                                                                            std::static_pointer_cast<resourcepacks::ResourcePack>(
                                                                                rawPack),
                                                                            maxSize,
@@ -442,13 +441,13 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
         pendingChunks.emplace_back(packInfo->packId, request.chunkIndex);
     }
 
-    if (currentPack == util::UUID{})
+    if (currentPack.is_nil())
     {
         currentPack = packInfo->packId;
-        if (std::find(packQueue.begin(), packQueue.end(), packInfo->packId) == packQueue.end())
+        if (std::ranges::find(packQueue, packInfo->packId) == packQueue.end())
             packQueue.push_back(packInfo->packId);
     }
-    else if (std::find(packQueue.begin(), packQueue.end(), packInfo->packId) == packQueue.end())
+    else if (std::ranges::find(packQueue.begin(), packQueue.end(), packInfo->packId) == packQueue.end())
     {
         packQueue.push_back(packInfo->packId);
     }

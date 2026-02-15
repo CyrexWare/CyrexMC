@@ -1,6 +1,7 @@
 #include "zipped_resource_pack_loader.hpp"
 
 #include "log/logging.hpp"
+#include "network/mcbe/resourcepacks/types/zipped_resource_pack.hpp"
 
 #include <algorithm>
 #include <filesystem>
@@ -36,7 +37,7 @@ std::vector<std::shared_ptr<ResourcePackDef>> ZippedResourcePackLoader::loadPack
 
         auto path = entry.path();
         auto ext = path.extension().string();
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        std::ranges::transform(ext, ext.begin(), ::tolower);
 
         if (ext == ".key")
             continue;

@@ -14,6 +14,6 @@ bool cyrex::nw::protocol::Packet::encode(io::BinaryWriter& out) const
     const std::uint32_t header = getDef().networkId & 0x3FF | subClientId << 10;
     out.writeVarUInt(payload.size() + io::BinaryWriter::getVarUIntSize(header));
     out.writeVarUInt(header);
-    out.writeBytes(payload.data(), payload.size());
+    out.writeBytes(payload.getBuffer());
     return true;
 }

@@ -58,12 +58,12 @@ class BinaryWriter
 public:
     BinaryWriter() = default;
 
-    explicit BinaryWriter(size_t reserveSize)
+    explicit BinaryWriter(const size_t reserveSize)
     {
         buffer.reserve(reserveSize);
     }
 
-    inline void reserve(size_t size)
+    inline void reserve(const size_t size)
     {
         buffer.reserve(size);
     }
@@ -93,73 +93,82 @@ public:
         buffer.emplace_back(v);
     }
 
-    inline void writeI8(int8_t v)
+    inline void writeI8(const int8_t v)
     {
         buffer.emplace_back(static_cast<uint8_t>(v));
     }
 
-    inline void writeBool(bool v)
+    inline void writeBool(const bool v)
     {
         buffer.emplace_back(static_cast<uint8_t>(v));
     }
 
-    inline void writeU16LE(uint16_t v)
+    inline void writeU16LE(const uint16_t v)
     {
         writeRawLE(v);
     }
-    inline void writeU16BE(uint16_t v)
-    {
-        writeRawBE(v);
-    }
-    inline void writeI16LE(int16_t v)
-    {
-        writeRawLE(v);
-    }
-    inline void writeI16BE(int16_t v)
+
+    inline void writeU16BE(const uint16_t v)
     {
         writeRawBE(v);
     }
 
-    inline void writeU32LE(uint32_t v)
+    inline void writeI16LE(const int16_t v)
     {
         writeRawLE(v);
     }
-    inline void writeU32BE(uint32_t v)
-    {
-        writeRawBE(v);
-    }
-    inline void writeI32LE(int32_t v)
-    {
-        writeRawLE(v);
-    }
-    inline void writeI32BE(int32_t v)
+
+    inline void writeI16BE(const int16_t v)
     {
         writeRawBE(v);
     }
 
-    inline void writeU64LE(uint64_t v)
+    inline void writeU32LE(const uint32_t v)
     {
         writeRawLE(v);
     }
-    inline void writeU64BE(uint64_t v)
-    {
-        writeRawBE(v);
-    }
-    inline void writeI64LE(int64_t v)
-    {
-        writeRawLE(v);
-    }
-    inline void writeI64BE(int64_t v)
+
+    inline void writeU32BE(const uint32_t v)
     {
         writeRawBE(v);
     }
 
-    inline void writeFloatLE(float v)
+    inline void writeI32LE(const int32_t v)
+    {
+        writeRawLE(v);
+    }
+
+    inline void writeI32BE(const int32_t v)
+    {
+        writeRawBE(v);
+    }
+
+    inline void writeFloatLE(const float v)
     {
         writeRawLE(std::bit_cast<uint32_t>(v));
     }
 
-    inline void writeDoubleLE(double v)
+    inline void writeU64LE(const uint64_t v)
+    {
+        writeRawLE(v);
+    }
+
+    inline void writeU64BE(const uint64_t v)
+    {
+        writeRawBE(v);
+    }
+
+    inline void writeI64LE(const int64_t v)
+    {
+        writeRawLE(v);
+    }
+
+    inline void writeI64BE(const int64_t v)
+    {
+        writeRawBE(v);
+    }
+
+    inline void writeDoubleLE(const double v)
     {
         writeRawLE(std::bit_cast<uint64_t>(v));
     }
@@ -197,9 +206,9 @@ public:
         buffer.emplace_back(static_cast<uint8_t>(v));
     }
 
-    inline void writeVarInt(int32_t v)
+    inline void writeVarInt(const int32_t v)
     {
-        writeVarUInt(static_cast<uint32_t>((v << 1) ^ (v >> 31)));
+        writeVarUInt(static_cast<uint32_t>(v << 1 ^ -(v & 1)));
     }
 
     inline void writeVarULong(uint64_t v)
@@ -212,44 +221,46 @@ public:
         buffer.emplace_back(static_cast<uint8_t>(v));
     }
 
-    inline void writeVarLong(int64_t v)
+    inline void writeVarLong(const int64_t v)
     {
-        writeVarULong(static_cast<uint64_t>((v << 1) ^ (v >> 63)));
+        writeVarULong(static_cast<uint64_t>(v << 1 ^ -(v & 1)));
     }
 
     static inline size_t getVarUIntSize(uint32_t v)
     {
-        size_t len = 1;
-        while (v >= 0x80)
+        size_t len = 0;
+        do
         {
+            len++;
             v >>= 7;
-            ++len;
         }
+        while (v != 0);
         return len;
     }
 
     static inline size_t getVarULongSize(uint64_t v)
     {
-        size_t len = 1;
-        while (v >= 0x80)
+        size_t len = 0;
+        do
         {
+            len++;
             v >>= 7;
-            ++len;
         }
+        while (v != 0);
         return len;
     }
 
-    static inline size_t getVarIntSize(int32_t v)
+    static inline size_t getVarIntSize(const int32_t v)
     {
-        return getVarUIntSize(static_cast<uint32_t>((v << 1) ^ (v >> 31)));
+        return getVarUIntSize(static_cast<uint32_t>(v << 1 ^ -(v & 1)));
     }
 
-    static inline size_t getVarLongSize(int64_t v)
+    static inline size_t getVarLongSize(const int64_t v)
     {
-        return getVarULongSize(static_cast<uint64_t>((v << 1) ^ (v >> 63)));
+        return getVarULongSize(static_cast<uint64_t>(v << 1 ^ -(v & 1)));
     }
 
-    inline void writeString(std::string_view str)
+    inline void writeString(const std::string_view str)
     {
         writeVarUInt(static_cast<uint32_t>(str.size()));
         buffer.insert(buffer.end(), str.begin(), str.end());
@@ -260,7 +271,7 @@ public:
         auto bytes = util::uuidToBytes(uuid);
         std::reverse(bytes.begin(), bytes.begin() + 8);
         std::reverse(bytes.begin() + 8, bytes.end());
-        writeBytes(std::vector<uint8_t>(bytes.begin(), bytes.end()));
+        writeBytes(bytes);
     }
 
     template <typename T, typename F>
