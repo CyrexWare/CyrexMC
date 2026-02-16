@@ -1,6 +1,4 @@
 #pragma once
-#define MAGIC_ENUM_RANGE_MIN 0x00
-#define MAGIC_ENUM_RANGE_MAX 0x14c
 
 #include "magic_enum/magic_enum.hpp"
 
@@ -237,7 +235,7 @@ enum class PacketId : std::uint32_t
     MaxValue = 0xffff
 };
 
-inline PacketId fromInt(std::uint32_t value)
+inline PacketId makePacketId(std::uint32_t value)
 {
     if (value == 0 || value > static_cast<std::uint32_t>(PacketId::MaxValue))
     {

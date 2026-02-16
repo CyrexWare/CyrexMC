@@ -264,12 +264,18 @@ public:
         buffer.insert(buffer.end(), str.begin(), str.end());
     }
 
-    inline void writeUUID(const util::UUID& uuid)
+    inline void writeUUID(const uuid::UUID& uuid)
     {
-        auto bytes = util::uuidToBytes(uuid);
+        auto bytes = uuid::uuidToBytes(uuid);
         std::reverse(bytes.begin(), bytes.begin() + 8);
         std::reverse(bytes.begin() + 8, bytes.end());
         writeBytes(bytes);
+    }
+
+    inline void writeStringU32LE(const std::string_view str)
+    {
+        writeU32LE(static_cast<uint32_t>(str.size()));
+        writeBytes(reinterpret_cast<const uint8_t*>(str.data()), str.size());
     }
 
     template <typename T, typename F>

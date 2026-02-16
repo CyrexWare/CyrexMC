@@ -13,16 +13,12 @@ namespace cyrex::nw::protocol
 {
 
 class ResourcePackDataInfoPacket final :
-    public PacketImpl<ResourcePackDataInfoPacket, static_cast<uint32_t>(PacketId::ResourcePackDataInfo), PacketDirection::Clientbound, true>
+    public PacketImpl<ResourcePackDataInfoPacket, std::to_underlying(PacketId::ResourcePackDataInfo), PacketDirection::Clientbound, true>
 {
 public:
-    using PacketImplType = PacketImpl<ResourcePackDataInfoPacket,
-                                      static_cast<uint32_t>(PacketId::ResourcePackDataInfo),
-                                      PacketDirection::Clientbound,
-                                      true>;
-    using PacketImplType::getDefStatic;
+    using PacketImpl::getDefStatic;
 
-    util::UUID packId{};
+    uuid::UUID packId{};
     std::string packVersion;
     int maxChunkSize = 0;
     int chunkCount = 0;
@@ -33,7 +29,7 @@ public:
 
     bool encodePayload(io::BinaryWriter& out) const override
     {
-        out.writeString(util::uuidToString(packId));
+        out.writeString(uuid::uuidToString(packId));
         out.writeI32LE(maxChunkSize);
         out.writeI32LE(chunkCount);
         out.writeU64LE(compressedPackSize);

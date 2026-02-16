@@ -14,19 +14,19 @@
 namespace cyrex::nw::protocol
 {
 
-class ResourcePackData
+class ResourcePackMeta
 {
 public:
-    util::UUID packId;
-    std::shared_ptr<resourcepacks::ResourcePackDef> pack;
+    uuid::UUID packId;
+    resourcepacks::ResourcePackDef* pack;
     int maxChunkSize;
     int chunkCount;
     std::vector<bool> want;
     std::vector<bool> sent;
     int nextToSend = 0;
 
-    ResourcePackData(const util::UUID& id,
-                     const std::shared_ptr<resourcepacks::ResourcePackDef>& p,
+    ResourcePackMeta(const uuid::UUID& id,
+                     resourcepacks::ResourcePackDef* p,
                      const int maxChunk,
                      const int chunks) :
         packId(id),

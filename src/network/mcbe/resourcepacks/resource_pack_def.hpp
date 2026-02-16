@@ -17,7 +17,7 @@ public:
     {
         return "";
     }
-    virtual util::UUID getPackId() const = 0;
+    virtual uuid::UUID getPackId() const = 0;
     virtual std::string getPackVersion() const = 0;
     virtual uint64_t getPackSize() const = 0;
     virtual std::vector<uint8_t> getSha256() const = 0;
@@ -47,8 +47,8 @@ public:
 
     virtual bool operator==(const ResourcePackDef& other) const
     {
-        const util::UUID a = getPackId();
-        const util::UUID b = other.getPackId();
+        const uuid::UUID a = getPackId();
+        const uuid::UUID b = other.getPackId();
         return a == b;
     }
 };

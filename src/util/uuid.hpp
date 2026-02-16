@@ -5,7 +5,7 @@
 #include <string>
 #include <uuid.h>
 
-namespace cyrex::util
+namespace cyrex::uuid
 {
 using UUID = uuids::uuid;
 
@@ -32,10 +32,10 @@ inline std::array<uint8_t, 16> uuidToBytes(const UUID& uuid) noexcept
     return std::bit_cast<std::array<uint8_t, 16>>(uuid);
 }
 
-inline UUID random()
+inline UUID randomUUID()
 {
     static std::mt19937 engine{std::random_device{}()};
     static uuids::uuid_random_generator gen{engine};
     return gen();
 }
-} // namespace cyrex::util
+} // namespace cyrex::uuid

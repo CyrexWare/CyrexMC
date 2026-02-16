@@ -1,6 +1,7 @@
 #pragma once
 #include "network/io/binary_reader.hpp"
 #include "network/io/binary_writer.hpp"
+#include "network/mcbe/packet_def.hpp"
 #include "network/mcbe/packetids.hpp"
 
 #include <string>
@@ -14,12 +15,10 @@ namespace cyrex::nw::protocol
 {
 
 class ResourcePackChunkDataPacket final :
-    public PacketImpl<ResourcePackChunkDataPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkData), PacketDirection::Clientbound, true>
+    public PacketImpl<ResourcePackChunkDataPacket, std::to_underlying(PacketId::ResourcePackChunkData), PacketDirection::Clientbound, true>
 {
 public:
-    // using PacketImpl<ResourcePackChunkDataPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkData), PacketDirection::Clientbound, true>::getDefStatic;
-
-    util::UUID packId{};
+    uuid::UUID packId{};
     std::string packVersion;
     int chunkIndex = 0;
     uint64_t progress = 0;
@@ -27,7 +26,7 @@ public:
 
     bool encodePayload(io::BinaryWriter& out) const override
     {
-        out.writeString(util::uuidToString(packId));
+        out.writeString(uuid::uuidToString(packId));
         out.writeU32LE(chunkIndex);
         out.writeU64LE(progress);
         out.writeString(data);

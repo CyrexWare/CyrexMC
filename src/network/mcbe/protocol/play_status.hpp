@@ -22,7 +22,7 @@ enum class PlayStatus : uint32_t
 };
 
 class PlayStatusPacket final :
-    public PacketImpl<PlayStatusPacket, static_cast<uint32_t>(PacketId::PlayStatus), PacketDirection::Clientbound, true>
+    public PacketImpl<PlayStatusPacket, std::to_underlying(PacketId::PlayStatus), PacketDirection::Clientbound, true>
 {
 public:
     PlayStatus status = PlayStatus::LoginSuccess;

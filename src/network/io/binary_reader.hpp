@@ -254,7 +254,7 @@ public:
         return out;
     }
 
-    inline util::UUID readUUID()
+    inline uuid::UUID readUUID()
     {
         ensureReadable(16);
 
@@ -270,8 +270,19 @@ public:
 
         offset += 8;
 
-        return util::UUID{bytes.begin(), bytes.end()};
+        return uuid::UUID{bytes.begin(), bytes.end()};
     }
+
+    inline std::string readStringU32LE()
+    {
+        const uint32_t len = readU32LE();
+        ensureReadable(len);
+
+        std::string out(reinterpret_cast<const char*>(dataPtr + offset), len);
+        offset += len;
+        return out;
+    }
+
 
     template <typename T, typename F>
     inline std::optional<T> readOptional(F&& reader)

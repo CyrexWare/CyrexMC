@@ -10,7 +10,7 @@ namespace cyrex::nw::protocol
 {
 
 class ClientCacheStatusPacket final :
-    public PacketImpl<ClientCacheStatusPacket, static_cast<uint32_t>(PacketId::ClientCacheStatus), PacketDirection::Serverbound, false>
+    public PacketImpl<ClientCacheStatusPacket, std::to_underlying(PacketId::ClientCacheStatus), PacketDirection::Serverbound, false>
 {
 public:
     bool enabled = false;

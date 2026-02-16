@@ -3,13 +3,16 @@
 #include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
 
-#include <iostream>
+#include <string>
+
+#include <cstdint>
 
 namespace cyrex::nw::protocol
 {
+
 class LoginPacket final :
     public cyrex::nw::protocol::
-        PacketImpl<LoginPacket, static_cast<uint32_t>(PacketId::Login), cyrex::nw::protocol::PacketDirection::Serverbound, false>
+        PacketImpl<LoginPacket, std::to_underlying(PacketId::Login), cyrex::nw::protocol::PacketDirection::Serverbound, false>
 {
 public:
     std::uint32_t protocol = 0;
@@ -38,24 +41,19 @@ public:
 private:
     void tryDecodeRequestForConnection(const std::string& binary)
     {
-        io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
+        cyrex::nw::io::BinaryReader cr(reinterpret_cast<const uint8_t*>(binary.data()), binary.size());
 
-        const uint32_t authLen = cr.readU32LE();
-        authInfoJson = std::string(reinterpret_cast<const char*>(cr.readBytesVector(authLen).data()), authLen);
-
-        const uint32_t clientLen = cr.readU32LE();
-        clientDataJwt = std::string(reinterpret_cast<const char*>(cr.readBytesVector(clientLen).data()), clientLen);
+        authInfoJson = cr.readStringU32LE();
+        clientDataJwt = cr.readStringU32LE();
     }
 
-    [[nodiscard]] std::string tryEncodeRequestForConnection() const
+    [[nodiscard]]
+    std::string tryEncodeRequestForConnection() const
     {
-        io::BinaryWriter cr{};
+        cyrex::nw::io::BinaryWriter cr{};
 
-        cr.writeU32LE(static_cast<uint32_t>(authInfoJson.size()));
-        cr.writeBytes(reinterpret_cast<const uint8_t*>(authInfoJson.data()), authInfoJson.size());
-
-        cr.writeU32LE(static_cast<uint32_t>(clientDataJwt.size()));
-        cr.writeBytes(reinterpret_cast<const uint8_t*>(clientDataJwt.data()), clientDataJwt.size());
+        cr.writeStringU32LE(authInfoJson);
+        cr.writeStringU32LE(clientDataJwt);
 
         return {reinterpret_cast<const char*>(cr.data()), cr.size()};
     }

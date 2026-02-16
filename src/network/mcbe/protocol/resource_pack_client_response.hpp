@@ -18,21 +18,16 @@ namespace cyrex::nw::protocol
 {
 
 class ResourcePackClientResponsePacket final :
-    public PacketImpl<ResourcePackClientResponsePacket, static_cast<uint32_t>(PacketId::ResourcePackClientResponse), PacketDirection::Serverbound, false>
+    public PacketImpl<ResourcePackClientResponsePacket, std::to_underlying(PacketId::ResourcePackClientResponse), PacketDirection::Serverbound, false>
 {
 public:
-    using PacketImpl<ResourcePackClientResponsePacket,
-                     static_cast<uint32_t>(PacketId::ResourcePackClientResponse),
-                     PacketDirection::Serverbound,
-                     false>::getDefStatic;
-
     struct Entry
     {
-        util::UUID uuid{};
+        uuid::UUID uuid{};
         std::string version;
 
         Entry() = default;
-        Entry(const util::UUID& id, const std::string& ver) : uuid(id), version(ver)
+        Entry(const uuid::UUID& id, const std::string& ver) : uuid(id), version(ver)
         {
         }
     };
@@ -57,7 +52,7 @@ public:
             std::string s = in.readString();
             if (const auto pos = s.find('_'); pos != std::string::npos)
             {
-                util::UUID id = util::stringToUUID(s.substr(0, pos));
+                uuid::UUID id = uuid::stringToUUID(s.substr(0, pos));
                 std::string ver = s.substr(pos + 1);
                 packEntries[i] = Entry{id, ver};
             }

@@ -12,7 +12,7 @@ namespace cyrex::nw::protocol
 {
 
 class ResourcePackStackPacket final :
-    public PacketImpl<ResourcePackStackPacket, static_cast<uint32_t>(PacketId::ResourcePackStack), PacketDirection::Clientbound, true>
+    public PacketImpl<ResourcePackStackPacket, std::to_underlying(PacketId::ResourcePackStack), PacketDirection::Clientbound, true>
 {
 public:
     bool mustAccept = false;

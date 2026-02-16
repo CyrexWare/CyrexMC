@@ -9,15 +9,10 @@ namespace cyrex::nw::protocol
 {
 
 class ResourcePackChunkRequestPacket final :
-    public PacketImpl<ResourcePackChunkRequestPacket, static_cast<uint32_t>(PacketId::ResourcePackChunkRequest), PacketDirection::Serverbound, true>
+    public PacketImpl<ResourcePackChunkRequestPacket, std::to_underlying(PacketId::ResourcePackChunkRequest), PacketDirection::Serverbound, true>
 {
 public:
-    using PacketImpl<ResourcePackChunkRequestPacket,
-                     static_cast<uint32_t>(PacketId::ResourcePackChunkRequest),
-                     PacketDirection::Serverbound,
-                     true>::getDefStatic;
-
-    util::UUID packId{};
+    uuid::UUID packId{};
     std::string packVersion;
     int chunkIndex = 0;
 
@@ -30,13 +25,9 @@ public:
     bool decodePayload(io::BinaryReader& in) override
     {
         std::string packInfo = in.readString();
-
-        const auto sepPos = packInfo.find('_');
-        const std::string uuidStr = packInfo.substr(0, sepPos);
-
-        packId = util::stringToUUID(uuidStr);
-        packVersion = packInfo.substr(sepPos + 1);
-
+        // depending on certain settings this could be set, but with our current setup this isnt needed, mabye in the future.
+        packVersion = "";
+        packId = uuid::stringToUUID(packInfo);
         chunkIndex = in.readI16LE();
         return true;
     }

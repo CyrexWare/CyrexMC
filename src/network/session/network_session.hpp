@@ -9,7 +9,7 @@
 #include "network/mcbe/protocol/resource_pack_client_response.hpp"
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackClientResponseStatus.hpp"
-#include "network/mcbe/protocol/types/packs/ResourcePackData.hpp"
+#include "network/mcbe/protocol/types/packs/ResourcePackMeta.hpp"
 #include "network/mcbe/transport.hpp"
 #include "server.hpp"
 #include "util/uuid.hpp"
@@ -117,11 +117,11 @@ private:
 
     protocol::PacketFactory m_packetFactory;
 
-    std::map<util::UUID, std::shared_ptr<protocol::ResourcePackData>> loadedPacks;
-    std::deque<util::UUID> packQueue;
-    std::deque<std::pair<util::UUID, int>> pendingChunks;
+    std::map<uuid::UUID, std::shared_ptr<protocol::ResourcePackMeta>> loadedPacks;
+    std::deque<uuid::UUID> packQueue;
+    std::deque<std::pair<uuid::UUID, int>> pendingChunks;
 
-    util::UUID currentPack{};
+    uuid::UUID currentPack{};
     bool queueProcessing = false;
 };
 } // namespace cyrex::nw::session

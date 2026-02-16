@@ -41,6 +41,8 @@ FetchContent_Declare(MagicEnum
     GIT_REPOSITORY https://github.com/Neargye/magic_enum
     GIT_TAG v0.9.7
 )
+set(MAGIC_ENUM_RANGE_MIN 0x00 CACHE STRING "" FORCE)
+set(MAGIC_ENUM_RANGE_MAX 0x14c CACHE STRING "" FORCE)
 FetchContent_MakeAvailable(MagicEnum)
 
 FetchContent_Declare(libdeflate
@@ -56,13 +58,6 @@ FetchContent_Declare(
     GIT_TAG v1.2.3
 )
 FetchContent_MakeAvailable(stduuid)
-
-FetchContent_Declare(
-    miniz
-    GIT_REPOSITORY https://github.com/richgel999/miniz.git
-    GIT_TAG master
-)
-FetchContent_MakeAvailable(miniz)
 
 FetchContent_Declare(
     glm
@@ -142,6 +137,8 @@ target_compile_definitions(CyrexMC PRIVATE
     WOLFSSL_AESGCM_STREAM
     WOLFSSL_AES_COUNTER
     WOLFSSL_AES_DIRECT
+    MAGIC_ENUM_RANGE_MIN=${MAGIC_ENUM_RANGE_MIN}
+    MAGIC_ENUM_RANGE_MAX=${MAGIC_ENUM_RANGE_MAX}
     OPENSSL_EXTRA
 )
 
@@ -154,7 +151,6 @@ target_link_libraries(CyrexMC PRIVATE
     nlohmann_json::nlohmann_json
     jwt-cpp
     glm::glm-header-only
-    miniz  
     stduuid
 )
 

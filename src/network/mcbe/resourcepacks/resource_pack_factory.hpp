@@ -18,14 +18,14 @@ public:
 
     void reloadPacks();
     std::vector<std::shared_ptr<ResourcePackDef>> getResourceStack() const;
-    std::shared_ptr<ResourcePackDef> getPackById(const util::UUID& id) const;
+    std::shared_ptr<ResourcePackDef> getPackById(const uuid::UUID& id) const;
     int getMaxChunkSize() const;
     void setMaxChunkSize(int size);
     void registerPackLoader(const std::shared_ptr<ResourcePackLoaderDef>& loader);
 
 private:
     int maxChunkSize = 1024 * 256;
-    std::unordered_map<util::UUID, std::shared_ptr<ResourcePackDef>, std::hash<util::UUID>> packsById;
+    std::unordered_map<uuid::UUID, std::shared_ptr<ResourcePackDef>, std::hash<uuid::UUID>> packsById;
     std::unordered_set<std::shared_ptr<ResourcePackDef>> packs;
     std::unordered_set<std::shared_ptr<ResourcePackLoaderDef>> loaders;
 };

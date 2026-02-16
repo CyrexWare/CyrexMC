@@ -11,7 +11,7 @@ namespace cyrex::nw::protocol
 {
 
 class ServerToClientHandshakePacket final :
-    public PacketImpl<ServerToClientHandshakePacket, static_cast<uint32_t>(PacketId::ServerToClientHandshake), PacketDirection::Clientbound, true>
+    public PacketImpl<ServerToClientHandshakePacket, std::to_underlying(PacketId::ServerToClientHandshake), PacketDirection::Clientbound, true>
 {
 public:
     std::string jwt;

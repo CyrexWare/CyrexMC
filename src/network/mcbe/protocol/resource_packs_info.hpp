@@ -13,7 +13,7 @@ namespace cyrex::nw::protocol
 {
 
 class ResourcePacksInfoPacket final :
-    public PacketImpl<ResourcePacksInfoPacket, static_cast<uint32_t>(PacketId::ResourcePacksInfo), PacketDirection::Clientbound, true>
+    public PacketImpl<ResourcePacksInfoPacket, std::to_underlying(PacketId::ResourcePacksInfo), PacketDirection::Clientbound, true>
 {
 public:
     bool mustAccept = false;
@@ -22,7 +22,7 @@ public:
 
     bool disableVibrantVisuals = false;
 
-    util::UUID worldTemplateId{};
+    uuid::UUID worldTemplateId{};
     std::string worldTemplateVersion;
 
     std::vector<ResourcePackInfoEntry> resourcePackEntries;

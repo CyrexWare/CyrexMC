@@ -10,7 +10,7 @@ namespace cyrex::nw::protocol
 
 struct ResourcePackInfoEntry
 {
-    util::UUID packId{};
+    uuid::UUID packId{};
     std::string packVersion;
     uint64_t packSize = 0;
     std::string encryptionKey;

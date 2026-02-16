@@ -10,7 +10,7 @@ namespace cyrex::nw::protocol
 {
 
 class ClientToServerHandshakePacket final :
-    public PacketImpl<ClientToServerHandshakePacket, static_cast<uint32_t>(PacketId::ClientToServerHandshake), PacketDirection::Serverbound, true>
+    public PacketImpl<ClientToServerHandshakePacket, std::to_underlying(PacketId::ClientToServerHandshake), PacketDirection::Serverbound, true>
 {
 public:
     bool decodePayload(io::BinaryReader&) override
