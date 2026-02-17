@@ -3,24 +3,10 @@
 #include "log/logging.hpp"
 // #include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
+#include "types/PlayStatus.hpp"
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
-
-enum class PlayStatus : uint32_t
-{
-    LoginSuccess = 0,
-    LoginFailedClient = 1,
-    LoginFailedServer = 2,
-    PlayerSpawn = 3,
-    LoginFailedInvalidTenant = 4,
-    LoginFailedVanillaEdu = 5,
-    LoginFailedEduVanilla = 6,
-    LoginFailedServerFull = 7,
-    LoginFailedEditorVanilla = 8,
-    LoginFailedVanillaEditor = 9
-};
-
 class PlayStatusPacket final :
     public PacketImpl<PlayStatusPacket, std::to_underlying(PacketId::PlayStatus), PacketDirection::Clientbound, true>
 {
@@ -44,4 +30,4 @@ public:
         return true;
     }
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

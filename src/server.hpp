@@ -33,7 +33,7 @@ public:
         std::uint32_t maxPlayers;
         std::string serverName;
         std::string motd;
-        nw::protocol::GameMode defaultGameMode;
+        nw::proto::GameMode defaultGameMode;
         bool forceResources;
 
         static Config fromProperties(const util::ServerProperties& props);
@@ -49,8 +49,8 @@ public:
     [[nodiscard]] const std::string& getServerName() const;
     [[nodiscard]] const std::string& getMotd() const;
 
-    [[nodiscard]] nw::protocol::GameMode getDefaultGameMode() const;
-    void setDefaultGameMode(nw::protocol::GameMode mode);
+    [[nodiscard]] nw::proto::GameMode getDefaultGameMode() const;
+    void setDefaultGameMode(nw::proto::GameMode mode);
     void setDefaultGameModeFromString(std::string_view mode);
 
     void addPlayer(const RakNet::RakNetGUID& guid);

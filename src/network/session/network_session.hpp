@@ -21,7 +21,7 @@
 #include <memory>
 #include <uuid.h>
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 class ResourcePackChunkRequestPacket;
 }
@@ -46,7 +46,7 @@ class NetworkSession
 public:
     NetworkSession(const RakNet::RakNetGUID& guid,
                    const RakNet::SystemAddress& address,
-                   protocol::Transport* transport,
+                   proto::Transport* transport,
                    Server& server) :
         m_guid(guid),
         m_address(address),
@@ -57,22 +57,22 @@ public:
     }
 
     bool compressionEnabled = false;
-    protocol::CompressionAlgorithm compressor;
+    proto::CompressionAlgorithm compressor;
 
     bool encryptionEnabled = false;
     Phase phase = Phase::PRELOGIN;
     bool markedForDisconnect = false;
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
-    void send(std::unique_ptr<protocol::Packet> packet, bool immediately = false);
-    void sendBatch(std::vector<std::unique_ptr<protocol::Packet>> packets, bool immediately = false);
+    void send(std::unique_ptr<proto::Packet> packet, bool immediately = false);
+    void sendBatch(std::vector<std::unique_ptr<proto::Packet>> packets, bool immediately = false);
     void flush();
     bool disconnectUserForIncompatibleProtocol(uint32_t);
     bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
     void doLoginSuccess();
     bool handleRequestNetworkSettings(uint32_t version);
-    bool handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk);
-    bool handleResourcePackChunkRequest(const protocol::ResourcePackChunkRequestPacket& pk);
+    bool handleResourcePackClientResponse(const proto::ResourcePackClientResponsePacket& pk);
+    bool handleResourcePackChunkRequest(const proto::ResourcePackChunkRequestPacket& pk);
     void nextPack();
     void processChunkQueue();
     void tick();
@@ -97,27 +97,27 @@ public:
         return m_address;
     }
 
-    [[nodiscard]] protocol::AesEncryptor& getEncryptor()
+    [[nodiscard]] proto::AesEncryptor& getEncryptor()
     {
         return *m_cipher;
     }
 
 private:
     void sendInternal(const io::BinaryWriter& payload);
-    std::vector<std::unique_ptr<protocol::Packet>> m_sendQueue;
+    std::vector<std::unique_ptr<proto::Packet>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
     RakNet::SystemAddress m_address;
-    protocol::Transport* m_transport;
+    proto::Transport* m_transport;
 
     Server& m_server;
 
     std::uint32_t m_protocolId{0};
-    std::optional<protocol::AesEncryptor> m_cipher;
+    std::optional<proto::AesEncryptor> m_cipher;
 
-    protocol::PacketFactory m_packetFactory;
+    proto::PacketFactory m_packetFactory;
 
-    std::map<uuid::UUID, std::unique_ptr<protocol::ResourcePackMeta>> loadedPacks;
+    std::map<uuid::UUID, std::unique_ptr<proto::ResourcePackMeta>> loadedPacks;
     std::deque<uuid::UUID> packQueue;
     std::deque<std::pair<uuid::UUID, int>> pendingChunks;
 

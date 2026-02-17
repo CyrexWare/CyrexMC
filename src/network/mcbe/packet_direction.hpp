@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 enum class PacketDirection : uint8_t
@@ -11,4 +11,4 @@ enum class PacketDirection : uint8_t
     Bidirectional = 3
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

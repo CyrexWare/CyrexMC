@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 class Transport
@@ -15,4 +15,4 @@ public:
 
     virtual void send(const RakNet::RakNetGUID& guid, const uint8_t* data, size_t len) = 0;
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

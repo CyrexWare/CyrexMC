@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 struct ResourcePackInfoEntry
@@ -50,4 +50,4 @@ struct ResourcePackInfoEntry
     }
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

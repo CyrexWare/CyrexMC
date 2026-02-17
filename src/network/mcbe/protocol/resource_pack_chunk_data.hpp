@@ -11,7 +11,7 @@ namespace cyrex::nw::session
 class NetworkSession;
 }
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 class ResourcePackChunkDataPacket final :
@@ -45,4 +45,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

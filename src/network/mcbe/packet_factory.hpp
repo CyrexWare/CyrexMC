@@ -24,7 +24,7 @@ std::unique_ptr<Derived> dynamicPointerCastUnique(std::unique_ptr<Base>&& ptr) n
     return nullptr;
 }
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 class PacketFactory
@@ -83,4 +83,4 @@ public:
 private:
     std::unordered_map<uint32_t, const PacketDef*> m_entries;
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

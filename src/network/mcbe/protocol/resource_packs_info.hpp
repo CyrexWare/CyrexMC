@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 class ResourcePacksInfoPacket final :
@@ -63,4 +63,4 @@ private:
     }
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

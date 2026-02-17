@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 enum class ResourcePackClientResponseStatus : uint8_t
@@ -12,4 +12,4 @@ enum class ResourcePackClientResponseStatus : uint8_t
     Completed = 4
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

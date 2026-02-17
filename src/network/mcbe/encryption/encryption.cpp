@@ -4,7 +4,7 @@
 #include "network/io/binary_writer.hpp"
 #include "wolfssl/openssl/ssl.h"
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 static uint64_t calculateChecksum(const int64_t blockCounter,
@@ -59,4 +59,4 @@ std::optional<std::vector<uint8_t>> AesEncryptor::decrypt(const std::span<const 
     return output;
 }
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

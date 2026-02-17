@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::nw::proto
 {
 
 class RequestNetworkSettingsPacket final :
@@ -33,4 +33,4 @@ public:
         return session.handleRequestNetworkSettings(protocolVersion);
     }
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::nw::proto

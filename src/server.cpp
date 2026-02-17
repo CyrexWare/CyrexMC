@@ -92,19 +92,19 @@ const std::string& cyrex::Server::getMotd() const
     return m_config.motd;
 }
 
-cyrex::nw::protocol::GameMode cyrex::Server::getDefaultGameMode() const
+cyrex::nw::proto::GameMode cyrex::Server::getDefaultGameMode() const
 {
     return m_config.defaultGameMode;
 }
 
-void cyrex::Server::setDefaultGameMode(cyrex::nw::protocol::GameMode mode)
+void cyrex::Server::setDefaultGameMode(cyrex::nw::proto::GameMode mode)
 {
     m_config.defaultGameMode = mode;
 }
 
 void cyrex::Server::setDefaultGameModeFromString(std::string_view mode)
 {
-    m_config.defaultGameMode = cyrex::nw::protocol::fromString(mode);
+    m_config.defaultGameMode = cyrex::nw::proto::parseGameMode(mode);
 }
 
 void cyrex::Server::addPlayer(const RakNet::RakNetGUID& guid)

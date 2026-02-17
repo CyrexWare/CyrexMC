@@ -8,7 +8,7 @@
 namespace cyrex::nw::raknet
 {
 
-class RaknetTransport : public cyrex::nw::protocol::Transport
+class RaknetTransport : public cyrex::nw::proto::Transport
 {
 public:
     explicit RaknetTransport(RakNet::RakPeerInterface* peer) : m_peer(peer)
