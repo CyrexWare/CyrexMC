@@ -3,7 +3,7 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/protocol/types/GameMode.hpp"
 
-std::string cyrex::nw::raknet::buildMotd(const Server& server)
+std::string cyrex::network::raknet::buildMotd(const Server& server)
 {
     auto gm = server.getDefaultGameMode();
 

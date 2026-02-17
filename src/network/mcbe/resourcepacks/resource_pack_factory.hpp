@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace cyrex::nw::resourcepacks
+namespace cyrex::network::resourcepacks
 {
 
 class ResourcePackFactory
@@ -30,4 +30,4 @@ private:
     std::unordered_set<ResourcePackLoaderDef*> loaders;
 };
 
-} // namespace cyrex::nw::resourcepacks
+} // namespace cyrex::network::resourcepacks

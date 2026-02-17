@@ -7,9 +7,9 @@
 #include <iostream>
 #include <utility>
 
-using namespace cyrex::nw::session;
+using namespace cyrex::network::session;
 
-void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, raknet::RaknetConnections& connections)
+void cyrex::network::raknet::McbePacketRouter::route(RakNet::Packet* p, raknet::RaknetConnections& connections)
 {
     session::NetworkSession* session = connections.get(p->guid);
     if (!session)

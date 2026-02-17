@@ -15,7 +15,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::raknet
+namespace cyrex::network::raknet
 {
 class RaknetHandler;
 }
@@ -33,7 +33,7 @@ public:
         std::uint32_t maxPlayers;
         std::string serverName;
         std::string motd;
-        nw::protocol::GameMode defaultGameMode;
+        network::protocol::GameMode defaultGameMode;
         bool forceResources;
 
         static Config fromProperties(const util::ServerProperties& props);
@@ -49,8 +49,8 @@ public:
     [[nodiscard]] const std::string& getServerName() const;
     [[nodiscard]] const std::string& getMotd() const;
 
-    [[nodiscard]] nw::protocol::GameMode getDefaultGameMode() const;
-    void setDefaultGameMode(nw::protocol::GameMode mode);
+    [[nodiscard]] network::protocol::GameMode getDefaultGameMode() const;
+    void setDefaultGameMode(network::protocol::GameMode mode);
     void setDefaultGameModeFromString(std::string_view mode);
 
     void addPlayer(const RakNet::RakNetGUID& guid);
@@ -62,20 +62,20 @@ public:
     void stop();
     void run();
 
-    [[nodiscard]] nw::resourcepacks::ResourcePackFactory& getResourcePackFactory();
-    [[nodiscard]] const nw::resourcepacks::ResourcePackFactory& getResourcePackFactory() const;
+    [[nodiscard]] network::resourcepacks::ResourcePackFactory& getResourcePackFactory();
+    [[nodiscard]] const network::resourcepacks::ResourcePackFactory& getResourcePackFactory() const;
     [[nodiscard]] bool shouldForceResources() const;
 
 private:
     void commandLoop();
 
     Config m_config;
-    std::unique_ptr<nw::raknet::RaknetHandler> m_raknet;
-    std::unique_ptr<nw::resourcepacks::ResourcePackFactory> m_resourcePackFactory;
+    std::unique_ptr<network::raknet::RaknetHandler> m_raknet;
+    std::unique_ptr<network::resourcepacks::ResourcePackFactory> m_resourcePackFactory;
     std::vector<RakNet::RakNetGUID> m_players;
     std::uint64_t m_serverUniqueId;
     std::atomic<bool> m_running;
     std::unique_ptr<command::CommandManager> m_commands;
-    std::unordered_set<std::unique_ptr<nw::resourcepacks::ResourcePackLoaderDef>> m_loaders;
+    std::unordered_set<std::unique_ptr<network::resourcepacks::ResourcePackLoaderDef>> m_loaders;
 };
 } // namespace cyrex

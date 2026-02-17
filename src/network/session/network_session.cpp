@@ -39,7 +39,7 @@
 #undef min
 #endif
 
-using namespace cyrex::nw::io;
+using namespace cyrex::network::io;
 
 namespace
 {
@@ -59,7 +59,7 @@ std::string hexDump(const uint8_t* data, size_t len)
 }
 } // namespace
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 
 void NetworkSession::tick()
@@ -83,7 +83,7 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
                       "packet id = {}0x{:02X} ({})",
                       logging::Color::GOLD,
                       packetId,
-                      protocol::toReadablePacketName(nw::protocol::makePacketId(packetId)));
+                      protocol::toReadablePacketName(network::protocol::makePacketId(packetId)));
 
         if (packetId != 0x01)
         {
@@ -538,4 +538,4 @@ void NetworkSession::nextPack()
     }
 }
 
-} // namespace cyrex::nw::session
+} // namespace cyrex::network::session

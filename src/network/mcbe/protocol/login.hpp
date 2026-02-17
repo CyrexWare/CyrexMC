@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 class LoginPacket final :
@@ -57,4 +57,4 @@ private:
     }
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

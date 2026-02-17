@@ -21,12 +21,12 @@
 #include <memory>
 #include <uuid.h>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 class ResourcePackChunkRequestPacket;
 }
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 
 // need getter/setter commands for this and proper usage
@@ -124,4 +124,4 @@ private:
     uuid::UUID currentPack{};
     bool queueProcessing = false;
 };
-} // namespace cyrex::nw::session
+} // namespace cyrex::network::session

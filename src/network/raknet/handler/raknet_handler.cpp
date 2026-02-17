@@ -10,7 +10,7 @@
 #include <RakNet/MessageIdentifiers.h>
 #include <string>
 
-namespace cyrex::nw::raknet
+namespace cyrex::network::raknet
 {
 
 RaknetHandler::RaknetHandler(Server& server) : m_server(server)
@@ -88,4 +88,4 @@ void RaknetHandler::handlePacket(Packet* packet)
     }
 }
 
-} // namespace cyrex::nw::raknet
+} // namespace cyrex::network::raknet

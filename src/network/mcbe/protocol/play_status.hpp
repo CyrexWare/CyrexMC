@@ -5,7 +5,7 @@
 #include "network/session/network_session.hpp"
 #include "types/PlayStatus.hpp"
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 class PlayStatusPacket final :
     public PacketImpl<PlayStatusPacket, std::to_underlying(PacketId::PlayStatus), PacketDirection::Clientbound, true>
@@ -30,4 +30,4 @@ public:
         return true;
     }
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

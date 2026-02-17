@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 enum class PacketId : std::uint32_t
@@ -253,4 +253,4 @@ inline std::string toReadablePacketName(PacketId id)
     }
     return std::string{name} + "Packet";
 }
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

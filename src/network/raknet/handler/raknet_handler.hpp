@@ -11,7 +11,7 @@ namespace cyrex
 class Server;
 }
 
-namespace cyrex::nw::raknet
+namespace cyrex::network::raknet
 {
 
 class RaknetHandler
@@ -33,4 +33,4 @@ private:
     std::unique_ptr<protocol::Transport> m_transportImpl;
 };
 
-} // namespace cyrex::nw::raknet
+} // namespace cyrex::network::raknet

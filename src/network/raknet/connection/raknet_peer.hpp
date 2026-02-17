@@ -6,10 +6,10 @@
 #include <RakNet/RakPeerInterface.h>
 #include <memory>
 
-namespace cyrex::nw::raknet
+namespace cyrex::network::raknet
 {
 
-class RaknetPeer : public cyrex::nw::INetworkPeer
+class RaknetPeer : public cyrex::network::INetworkPeer
 {
 public:
     explicit RaknetPeer() = default;
@@ -44,4 +44,4 @@ private:
     std::unique_ptr<RakNet::RakPeerInterface, RakPeerDeleter> m_peer;
 };
 
-} // namespace cyrex::nw::raknet
+} // namespace cyrex::network::raknet

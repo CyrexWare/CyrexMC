@@ -37,9 +37,9 @@ cyrex::Server::Server(Config config) :
     m_serverUniqueId(generateServerId()),
     m_running(true)
 {
-    m_raknet = std::make_unique<nw::raknet::RaknetHandler>(*this);
+    m_raknet = std::make_unique<network::raknet::RaknetHandler>(*this);
 
-    using namespace nw::resourcepacks;
+    using namespace network::resourcepacks;
 
     m_loaders.insert(std::make_unique<ZippedResourcePackLoader>(std::filesystem::path("resource_packs")));
     std::unordered_set<ResourcePackLoaderDef*> rawLoaders;
@@ -92,19 +92,19 @@ const std::string& cyrex::Server::getMotd() const
     return m_config.motd;
 }
 
-cyrex::nw::protocol::GameMode cyrex::Server::getDefaultGameMode() const
+cyrex::network::protocol::GameMode cyrex::Server::getDefaultGameMode() const
 {
     return m_config.defaultGameMode;
 }
 
-void cyrex::Server::setDefaultGameMode(cyrex::nw::protocol::GameMode mode)
+void cyrex::Server::setDefaultGameMode(cyrex::network::protocol::GameMode mode)
 {
     m_config.defaultGameMode = mode;
 }
 
 void cyrex::Server::setDefaultGameModeFromString(std::string_view mode)
 {
-    m_config.defaultGameMode = cyrex::nw::protocol::parseGameMode(mode);
+    m_config.defaultGameMode = cyrex::network::protocol::parseGameMode(mode);
 }
 
 void cyrex::Server::addPlayer(const RakNet::RakNetGUID& guid)
@@ -134,12 +134,12 @@ const std::vector<RakNet::RakNetGUID>& cyrex::Server::getAllPlayers() const
     return m_players;
 }
 
-cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory()
+cyrex::network::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory()
 {
     return *m_resourcePackFactory;
 }
 
-const cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory() const
+const cyrex::network::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory() const
 {
     return *m_resourcePackFactory;
 }

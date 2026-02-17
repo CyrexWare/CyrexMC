@@ -1,6 +1,6 @@
 #include "snappy_compressor.hpp"
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 std::optional<std::vector<uint8_t>> SnappyCompressor::compress(const std::span<const uint8_t> input) const
@@ -38,4 +38,4 @@ std::optional<std::vector<uint8_t>> SnappyCompressor::decompress(const std::span
 
     return output;
 }
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

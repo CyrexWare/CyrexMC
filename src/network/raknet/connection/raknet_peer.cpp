@@ -1,6 +1,6 @@
 #include "raknet_peer.hpp"
 
-namespace cyrex::nw::raknet
+namespace cyrex::network::raknet
 {
 
 StartupResult RaknetPeer::startup(StartupInfo startupInfo)
@@ -61,4 +61,4 @@ bool RaknetPeer::isActive() const
 
 RaknetPeer::~RaknetPeer() = default;
 
-} // namespace cyrex::nw::raknet
+} // namespace cyrex::network::raknet

@@ -9,12 +9,12 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 class ResourcePackClientResponsePacket final :
@@ -62,4 +62,4 @@ public:
 
     bool handle(session::NetworkSession& session) override;
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

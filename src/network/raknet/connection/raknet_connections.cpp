@@ -10,19 +10,19 @@
 
 using namespace cyrex::util;
 
-void cyrex::nw::raknet::RaknetConnections::onConnect(const RakNet::RakNetGUID& guid,
+void cyrex::network::raknet::RaknetConnections::onConnect(const RakNet::RakNetGUID& guid,
                                                      RakNet::SystemAddress address,
-                                                     cyrex::nw::raknet::RaknetHandler* handler,
+                                                     cyrex::network::raknet::RaknetHandler* handler,
                                                      cyrex::Server& server)
 {
-    auto session = std::make_unique<cyrex::nw::session::NetworkSession>(guid, address, handler->transport(), server);
+    auto session = std::make_unique<cyrex::network::session::NetworkSession>(guid, address, handler->transport(), server);
 
     m_sessions.emplace(guid, std::move(session));
 
     cyrex::logging::log(LOG_RAKNET, "New incoming connection");
 }
 
-void cyrex::nw::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
+void cyrex::network::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID& guid)
 {
     auto it = m_sessions.find(guid);
     if (it == m_sessions.end())
@@ -32,7 +32,7 @@ void cyrex::nw::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID
     cyrex::logging::log(LOG_RAKNET, "Client disconnected");
 }
 
-void cyrex::nw::raknet::RaknetConnections::tick()
+void cyrex::network::raknet::RaknetConnections::tick()
 {
     for (const auto& session : m_sessions | std::views::values)
     {
@@ -40,7 +40,7 @@ void cyrex::nw::raknet::RaknetConnections::tick()
     }
 }
 
-void cyrex::nw::raknet::RaknetConnections::cleanup()
+void cyrex::network::raknet::RaknetConnections::cleanup()
 {
     for (auto it = m_sessions.begin(); it != m_sessions.end();)
     {
@@ -52,7 +52,7 @@ void cyrex::nw::raknet::RaknetConnections::cleanup()
 }
 
 
-cyrex::nw::session::NetworkSession* cyrex::nw::raknet::RaknetConnections::get(const RakNet::RakNetGUID& guid)
+cyrex::network::session::NetworkSession* cyrex::network::raknet::RaknetConnections::get(const RakNet::RakNetGUID& guid)
 {
     auto it = m_sessions.find(guid);
     if (it == m_sessions.end())

@@ -4,7 +4,7 @@
 #include <cctype>
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 enum class GameMode : std::uint8_t
@@ -82,4 +82,4 @@ constexpr GameMode parseGameMode(std::string_view str) noexcept
     return GameMode::DEFAULT;
 }
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol
