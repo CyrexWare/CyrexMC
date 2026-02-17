@@ -14,15 +14,8 @@
 namespace cyrex::network::protocol
 {
 
-// mabye just remove this, i dont see the point.
-struct Chunk
-{
-    int index;
-};
-
 struct ResourcePackChunkState
 {
-    Chunk chunk;
     bool want;
     bool sent;
 };
@@ -43,11 +36,7 @@ public:
         maxChunkSize(maxChunk),
         chunkCount(chunksCount)
     {
-        chunks.reserve(static_cast<size_t>(chunkCount));
-        for (int i = 0; i < chunkCount; ++i)
-        {
-            chunks.push_back(ResourcePackChunkState{Chunk{i}, false, false});
-        }
+        chunks.resize(static_cast<size_t>(chunkCount), ResourcePackChunkState{false, false});
     }
 
     bool finished() const
