@@ -11,7 +11,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 class ResourcePackMeta
@@ -40,4 +40,4 @@ public:
         return nextToSend >= chunkCount;
     }
 };
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

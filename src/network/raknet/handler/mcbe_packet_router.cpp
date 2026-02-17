@@ -45,10 +45,10 @@ void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, raknet::Rakne
     }
     else
     {
-        const auto compressionMethod = static_cast<proto::CompressionAlgorithm>(payload.front());
+        const auto compressionMethod = static_cast<protocol::CompressionAlgorithm>(payload.front());
         ;
         logging::info(LOG_MCBE, "compression method = 0x{:02X}", std::to_underlying(compressionMethod));
-        if (const auto* compressor = proto::getCompressor(compressionMethod))
+        if (const auto* compressor = protocol::getCompressor(compressionMethod))
         {
             const std::vector old(payload);
             logging::info(LOG_MCBE, "decompressing...");

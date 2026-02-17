@@ -6,7 +6,7 @@
 #include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 class ClientCacheStatusPacket final :
@@ -33,4 +33,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

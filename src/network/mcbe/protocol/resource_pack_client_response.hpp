@@ -14,7 +14,7 @@ namespace cyrex::nw::session
 class NetworkSession;
 }
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 class ResourcePackClientResponsePacket final :
@@ -62,4 +62,4 @@ public:
 
     bool handle(session::NetworkSession& session) override;
 };
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

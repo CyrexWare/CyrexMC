@@ -2,7 +2,7 @@
 
 #include "network/session/network_session.hpp"
 
-bool cyrex::nw::proto::ResourcePackChunkRequestPacket::handle(session::NetworkSession& session)
+bool cyrex::nw::protocol::ResourcePackChunkRequestPacket::handle(session::NetworkSession& session)
 {
     return session.handleResourcePackChunkRequest(*this);
 }

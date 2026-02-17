@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 class NetworkSettingsPacket final :
     public PacketImpl<NetworkSettingsPacket, std::to_underlying(PacketId::NetworkSettings), PacketDirection::Clientbound, true>
@@ -43,4 +43,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

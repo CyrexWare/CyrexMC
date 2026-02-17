@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 class ResourcePackStackPacket final :
@@ -45,4 +45,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

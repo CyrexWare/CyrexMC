@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 enum class PlayStatus : uint32_t
@@ -17,4 +17,4 @@ enum class PlayStatus : uint32_t
     LoginFailedEditorVanilla = 8,
     LoginFailedVanillaEditor = 9
 };
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

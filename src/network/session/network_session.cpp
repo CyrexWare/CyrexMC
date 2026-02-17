@@ -83,7 +83,7 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
                       "packet id = {}0x{:02X} ({})",
                       logging::Color::GOLD,
                       packetId,
-                      proto::toReadablePacketName(nw::proto::makePacketId(packetId)));
+                      protocol::toReadablePacketName(nw::protocol::makePacketId(packetId)));
 
         if (packetId != 0x01)
         {
@@ -120,21 +120,21 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
 
 bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion)
 {
-    auto packet = std::make_unique<proto::PlayStatusPacket>();
-    packet->status = protocolVersion < proto::ProtocolInfo::currentProtocol
-                         ? proto::PlayStatus::LoginFailedClient
-                         : proto::PlayStatus::LoginFailedServer;
+    auto packet = std::make_unique<protocol::PlayStatusPacket>();
+    packet->status = protocolVersion < protocol::ProtocolInfo::currentProtocol
+                         ? protocol::PlayStatus::LoginFailedClient
+                         : protocol::PlayStatus::LoginFailedServer;
 
     send(std::move(packet), true);
     return true;
 }
 
-void NetworkSession::send(std::unique_ptr<proto::Packet> packet, const bool immediately)
+void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool immediately)
 {
     logging::info("queueing packet with id = {}0x{:02X} ({})",
                   logging::Color::GOLD,
                   packet->getDef().networkId,
-                  proto::toReadablePacketName(proto::makePacketId(packet->getDef().networkId)));
+                  protocol::toReadablePacketName(protocol::makePacketId(packet->getDef().networkId)));
     if (immediately)
     {
         BinaryWriter packetBuffer;
@@ -147,7 +147,7 @@ void NetworkSession::send(std::unique_ptr<proto::Packet> packet, const bool imme
     m_sendQueue.push_back(std::move(packet));
 }
 
-void NetworkSession::sendBatch(std::vector<std::unique_ptr<proto::Packet>> packets, const bool immediately)
+void NetworkSession::sendBatch(std::vector<std::unique_ptr<protocol::Packet>> packets, const bool immediately)
 {
     if (immediately)
     {
@@ -198,7 +198,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
     }
     else
     {
-        const auto* comp = proto::getCompressor(compressor);
+        const auto* comp = protocol::getCompressor(compressor);
         if (comp && comp->shouldCompress(payload.size()))
         {
             std::vector<uint8_t> compressed = *comp->compress(payload.getBuffer());
@@ -210,7 +210,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
         }
         else
         {
-            out.push_back(std::to_underlying(proto::CompressionAlgorithm::NONE));
+            out.push_back(std::to_underlying(protocol::CompressionAlgorithm::NONE));
             out.insert(out.end(), payload.data(), payload.data() + payload.size());
         }
     }
@@ -239,7 +239,7 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
 
 bool NetworkSession::handleLogin(const uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt)
 {
-    if (!proto::isSupportedProtocol(version))
+    if (!protocol::isSupportedProtocol(version))
     {
         disconnectUserForIncompatibleProtocol(version);
         return false;
@@ -252,11 +252,11 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
 
 void NetworkSession::doLoginSuccess()
 {
-    auto packet = std::make_unique<proto::PlayStatusPacket>();
-    packet->status = proto::PlayStatus::LoginSuccess;
+    auto packet = std::make_unique<protocol::PlayStatusPacket>();
+    packet->status = protocol::PlayStatus::LoginSuccess;
     send(std::move(packet));
 
-    auto infoPkt = std::make_unique<proto::ResourcePacksInfoPacket>();
+    auto infoPkt = std::make_unique<protocol::ResourcePacksInfoPacket>();
     const auto& defs = m_server.getResourcePackFactory().getResourceStack();
     infoPkt->resourcePackEntries.reserve(defs.size());
 
@@ -272,7 +272,7 @@ void NetworkSession::doLoginSuccess()
 
         logging::log("chunk={}", chunkCount);
 
-        proto::ResourcePackInfoEntry entry;
+        protocol::ResourcePackInfoEntry entry;
         entry.packId = def.getPackId();
         entry.packVersion = def.getPackVersion();
         entry.packSize = def.getPackSize();
@@ -299,17 +299,17 @@ void NetworkSession::doLoginSuccess()
 
 bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
 {
-    if (!proto::isSupportedProtocol(version))
+    if (!protocol::isSupportedProtocol(version))
     {
         disconnectUserForIncompatibleProtocol(version);
         return false;
     }
 
-    compressor = proto::CompressionAlgorithm::ZLIB;
+    compressor = protocol::CompressionAlgorithm::ZLIB;
 
     // this packet needs to be properly handled, and we should call session's compressor networkId, right now this is just hardcoded
-    auto packet = std::make_unique<proto::NetworkSettingsPacket>();
-    packet->compressionThreshold = proto::NetworkSettingsPacket::compressEverything;
+    auto packet = std::make_unique<protocol::NetworkSettingsPacket>();
+    packet->compressionThreshold = protocol::NetworkSettingsPacket::compressEverything;
     packet->compressionAlgorithm = std::to_underlying(compressor);
     packet->enableClientThrottling = false;
     packet->clientThrottleThreshold = 0;
@@ -322,9 +322,9 @@ bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
 }
 
 
-bool NetworkSession::handleResourcePackClientResponse(const proto::ResourcePackClientResponsePacket& pk)
+bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk)
 {
-    using proto::ResourcePackClientResponseStatus;
+    using protocol::ResourcePackClientResponseStatus;
 
     switch (pk.responseStatus)
     {
@@ -352,12 +352,12 @@ bool NetworkSession::handleResourcePackClientResponse(const proto::ResourcePackC
                 int chunkCount = static_cast<int>(
                     std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
 
-                auto data = std::make_unique<proto::ResourcePackMeta>(resourcePack->getPackId(), resourcePack, maxChunkSize, chunkCount);
+                auto data = std::make_unique<protocol::ResourcePackMeta>(resourcePack->getPackId(), resourcePack, maxChunkSize, chunkCount);
 
                 packQueue.push_back(data->packId);
                 loadedPacks.emplace(data->packId, std::move(data));
 
-                auto dataInfoPkt = std::make_unique<proto::ResourcePackDataInfoPacket>();
+                auto dataInfoPkt = std::make_unique<protocol::ResourcePackDataInfoPacket>();
                 dataInfoPkt->packId = resourcePack->getPackId();
                 dataInfoPkt->packVersion = resourcePack->getPackVersion();
                 dataInfoPkt->maxChunkSize = maxChunkSize;
@@ -371,7 +371,7 @@ bool NetworkSession::handleResourcePackClientResponse(const proto::ResourcePackC
 
         case ResourcePackClientResponseStatus::HaveAllPacks:
         {
-            auto stackPkt = std::make_unique<proto::ResourcePackStackPacket>();
+            auto stackPkt = std::make_unique<protocol::ResourcePackStackPacket>();
             stackPkt->mustAccept = m_server.shouldForceResources();
 
             const auto& defStack = m_server.getResourcePackFactory().getResourceStack();
@@ -379,14 +379,14 @@ bool NetworkSession::handleResourcePackClientResponse(const proto::ResourcePackC
 
             for (const auto& def : defStack)
             {
-                proto::ResourcePackStackEntry entry;
+                protocol::ResourcePackStackEntry entry;
                 entry.packId = uuid::toString(def->getPackId());
                 entry.packVersion = def->getPackVersion();
                 entry.subPackName = def->getSubPackName();
                 stackPkt->resourcePackStack.push_back(std::move(entry));
             }
 
-            stackPkt->baseGameVersion = proto::ProtocolInfo::minecraftVersionNetwork;
+            stackPkt->baseGameVersion = protocol::ProtocolInfo::minecraftVersionNetwork;
             stackPkt->experiments = {};
             send(std::move(stackPkt), true);
             break;
@@ -400,9 +400,9 @@ bool NetworkSession::handleResourcePackClientResponse(const proto::ResourcePackC
     return true;
 }
 
-bool NetworkSession::handleResourcePackChunkRequest(const proto::ResourcePackChunkRequestPacket& request)
+bool NetworkSession::handleResourcePackChunkRequest(const protocol::ResourcePackChunkRequestPacket& request)
 {
-    proto::ResourcePackMeta* packInfoPtr = nullptr;
+    protocol::ResourcePackMeta* packInfoPtr = nullptr;
 
     auto packFinder = loadedPacks.find(request.packId);
 
@@ -418,7 +418,7 @@ bool NetworkSession::handleResourcePackChunkRequest(const proto::ResourcePackChu
         int maxSize = m_server.getResourcePackFactory().getMaxChunkSize();
         int totalChunks = static_cast<int>((rawPack->getPackSize() + maxSize - 1) / maxSize);
 
-        auto packInfo = std::make_unique<proto::ResourcePackMeta>(rawPack->getPackId(), rawPack, maxSize, totalChunks);
+        auto packInfo = std::make_unique<protocol::ResourcePackMeta>(rawPack->getPackId(), rawPack, maxSize, totalChunks);
 
         packInfoPtr = loadedPacks.emplace(packInfo->packId, std::move(packInfo)).first->second.get();
     }
@@ -492,7 +492,7 @@ void NetworkSession::processChunkQueue()
                 return;
             }
 
-            auto pkt = std::make_unique<proto::ResourcePackChunkDataPacket>();
+            auto pkt = std::make_unique<protocol::ResourcePackChunkDataPacket>();
             pkt->packId = pack->packId;
             pkt->packVersion = pack->pack->getPackVersion();
             pkt->chunkIndex = idx;

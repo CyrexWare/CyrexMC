@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 class Compressor
@@ -29,4 +29,4 @@ public:
     static constexpr size_t defaultThreshold = 256;
     std::optional<size_t> minCompressionSize = defaultThreshold;
 };
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

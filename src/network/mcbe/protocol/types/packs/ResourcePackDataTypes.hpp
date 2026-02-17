@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 enum class ResourcePackDataType : uint8_t
@@ -18,4 +18,4 @@ enum class ResourcePackDataType : uint8_t
     Count = 9
 };
 
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

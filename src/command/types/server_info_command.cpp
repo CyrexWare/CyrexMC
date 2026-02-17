@@ -49,7 +49,7 @@ void ServerInfoCommand::execute(CommandContext& ctx)
 
                               logging::Color::WHITE,
                               logging::Color::GOLD,
-                              nw::proto::ProtocolInfo::minecraftVersion,
+                              nw::protocol::ProtocolInfo::minecraftVersion,
 
                               logging::Color::WHITE,
                               logging::Color::GOLD,

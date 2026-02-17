@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 class ServerToClientHandshakePacket final :
@@ -34,4 +34,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

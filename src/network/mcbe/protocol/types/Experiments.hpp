@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 struct ExperimentEntry
@@ -66,4 +66,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

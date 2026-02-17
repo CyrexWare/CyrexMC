@@ -8,18 +8,18 @@ std::string cyrex::nw::raknet::buildMotd(const Server& server)
     auto gm = server.getDefaultGameMode();
 
     int gmNumeric = 1;
-    if (gm == proto::GameMode::CREATIVE)
+    if (gm == protocol::GameMode::CREATIVE)
         gmNumeric = 0;
-    if (gm == proto::GameMode::ADVENTURE)
+    if (gm == protocol::GameMode::ADVENTURE)
         gmNumeric = 2;
 
     std::string motd;
     motd += "MCPE;";
     motd += server.getMotd();
     motd += ";";
-    motd += std::to_string(proto::ProtocolInfo::currentProtocol);
+    motd += std::to_string(protocol::ProtocolInfo::currentProtocol);
     motd += ";";
-    motd += proto::ProtocolInfo::minecraftVersionNetwork;
+    motd += protocol::ProtocolInfo::minecraftVersionNetwork;
     motd += ";";
     motd += std::to_string(server.getPlayerCount());
     motd += ";";
@@ -29,7 +29,7 @@ std::string cyrex::nw::raknet::buildMotd(const Server& server)
     motd += ";";
     motd += server.getServerName();
     motd += ";";
-    motd += proto::toGameModeString(gm);
+    motd += protocol::toGameModeString(gm);
     motd += ";";
     motd += std::to_string(gmNumeric);
     motd += ";";

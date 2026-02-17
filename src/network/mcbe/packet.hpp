@@ -11,7 +11,7 @@ namespace cyrex::nw::session
 class NetworkSession;
 }
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 
 class PacketDef;
@@ -65,4 +65,4 @@ public:
 private:
     PacketImpl() = default;
 };
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol

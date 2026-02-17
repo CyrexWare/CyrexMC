@@ -40,7 +40,7 @@ RaknetHandler::RaknetHandler(Server& server) : m_server(server)
 
 RaknetHandler::~RaknetHandler() = default;
 
-proto::Transport* RaknetHandler::transport() const
+protocol::Transport* RaknetHandler::transport() const
 {
     return m_transportImpl.get();
 }

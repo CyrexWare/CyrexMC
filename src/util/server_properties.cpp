@@ -14,7 +14,7 @@ namespace
 
 ServerProperties defaults()
 {
-    return {19132, 19133, 100, "CyrexMC", "Cyrex MCBE Software", nw::proto::GameMode::SURVIVAL, false};
+    return {19132, 19133, 100, "CyrexMC", "Cyrex MCBE Software", nw::protocol::GameMode::SURVIVAL, false};
 }
 
 void writeDefaults(const std::string& path, const ServerProperties& cfg)
@@ -28,7 +28,7 @@ void writeDefaults(const std::string& path, const ServerProperties& cfg)
     out << "max-players=" << cfg.maxPlayers << "\n";
     out << "server-name=" << cfg.serverName << "\n";
     out << "motd=" << cfg.motd << "\n";
-    out << "gamemode=" << nw::proto::toGameModeString(cfg.defaultGameMode) << "\n";
+    out << "gamemode=" << nw::protocol::toGameModeString(cfg.defaultGameMode) << "\n";
     out << "force-resources=" << cfg.forceResources << "\n";
 }
 
@@ -73,8 +73,8 @@ ServerProperties ServerProperties::load(const std::string& path)
         else if (key == "motd")
             cfg.motd = val;
         else if (key == "gamemode")
-            // proto::fromString is confusing, we need to  change it soon
-            cfg.defaultGameMode = nw::proto::parseGameMode(val);
+            // protocol::fromString is confusing, we need to  change it soon
+            cfg.defaultGameMode = nw::protocol::parseGameMode(val);
         else if (key == "force-resources")
             cfg.forceResources = (val == "1" || val == "true" || val == "yes");
     }

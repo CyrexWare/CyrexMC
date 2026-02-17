@@ -4,7 +4,7 @@
 
 #include <cassert>
 
-bool cyrex::nw::proto::Packet::encode(io::BinaryWriter& out) const
+bool cyrex::nw::protocol::Packet::encode(io::BinaryWriter& out) const
 {
     io::BinaryWriter payload;
     if (!encodePayload(payload))

@@ -21,7 +21,7 @@ public:
     ~RaknetHandler();
 
     void poll();
-    proto::Transport* transport() const;
+    protocol::Transport* transport() const;
     Server& getServer() const;
 
 private:
@@ -30,7 +30,7 @@ private:
     Server& m_server;
     std::unique_ptr<RaknetPeer> m_peer;
     RaknetConnections m_connections;
-    std::unique_ptr<proto::Transport> m_transportImpl;
+    std::unique_ptr<protocol::Transport> m_transportImpl;
 };
 
 } // namespace cyrex::nw::raknet

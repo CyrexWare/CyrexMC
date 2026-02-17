@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::proto
+namespace cyrex::nw::protocol
 {
 enum class CompressionAlgorithm : std::uint8_t
 {
@@ -10,4 +10,4 @@ enum class CompressionAlgorithm : std::uint8_t
     SNAPPY = 1,
     NONE = 0xFF
 };
-} // namespace cyrex::nw::proto
+} // namespace cyrex::nw::protocol
