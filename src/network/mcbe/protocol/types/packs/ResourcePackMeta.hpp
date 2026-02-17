@@ -16,6 +16,7 @@ namespace cyrex::network::protocol
 
 struct ResourcePackChunkState
 {
+    int chunkIndex;
     bool want;
     bool sent;
 };
@@ -36,7 +37,11 @@ public:
         maxChunkSize(maxChunk),
         chunkCount(chunksCount)
     {
-        chunks.resize(static_cast<size_t>(chunkCount), ResourcePackChunkState{false, false});
+        chunks.resize(static_cast<size_t>(chunkCount));
+        for (int i = 0; i < chunkCount; ++i)
+        {
+            chunks[i] = ResourcePackChunkState{i, false, false};
+        }
     }
 
     bool finished() const
