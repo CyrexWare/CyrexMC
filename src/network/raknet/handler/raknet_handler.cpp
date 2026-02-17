@@ -20,7 +20,6 @@ RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
     INetworkPeer::StartupInfo info{};
     info.port = static_cast<std::uint16_t>(m_server.getPort());
     info.maxConnections = static_cast<std::uint32_t>(m_server.getMaxPlayers());
-    // What todo with the returned value?
     m_peer->startup(info);
 
     m_peer->setMaximumIncomingConnections(static_cast<std::uint16_t>(m_server.getMaxPlayers()));
@@ -46,6 +45,11 @@ cyrex::nw::protocol::Transport* RaknetHandler::transport() const
     return m_transportImpl.get();
 }
 
+cyrex::Server& RaknetHandler::getServer() const
+{
+    return m_server;
+}
+
 void RaknetHandler::poll()
 {
     INetworkPeer* peer = m_peer.get();
@@ -67,7 +71,7 @@ void RaknetHandler::handlePacket(Packet* packet)
     switch (packet->data[0])
     {
         case ID_NEW_INCOMING_CONNECTION:
-            m_connections.onConnect(packet->guid, packet->systemAddress, this);
+            m_connections.onConnect(packet->guid, packet->systemAddress, this, getServer());
             break;
 
         case ID_CONNECTION_LOST:

@@ -1,17 +1,14 @@
 #pragma once
 
+#include "network/mcbe/packetids.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
 
 #include <cstdint>
 
-using namespace cyrex::nw::io;
-using namespace cyrex::nw::session;
-
 namespace cyrex::nw::protocol
 {
 class NetworkSettingsPacket final :
-    public cyrex::nw::protocol::
-        PacketImpl<NetworkSettingsPacket, ProtocolInfo::networkSettingsPacket, cyrex::nw::protocol::PacketDirection::Clientbound, true>
+    public PacketImpl<NetworkSettingsPacket, std::to_underlying(PacketId::NetworkSettings), PacketDirection::Clientbound, true>
 {
 public:
     static constexpr uint16_t compressNothing = 0;
@@ -24,13 +21,13 @@ public:
     std::int8_t clientThrottleThreshold = 0;
     float clientThrottleScalar = 0.0f;
 
-    bool decodePayload(cyrex::nw::io::BinaryReader&) override
+    bool decodePayload(io::BinaryReader&) override
     {
         // NOOP
         return false;
     }
 
-    bool encodePayload(cyrex::nw::io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter& out) const override
     {
         out.writeI16LE(compressionThreshold);
         out.writeI16LE(compressionAlgorithm);
@@ -40,7 +37,7 @@ public:
         return true;
     }
 
-    bool handle(cyrex::nw::session::NetworkSession&) override
+    bool handle(session::NetworkSession&) override
     {
         return true;
     }

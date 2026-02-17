@@ -1,0 +1,56 @@
+#pragma once
+#include "network/io/binary_reader.hpp"
+
+#include <string>
+#include <vector>
+
+namespace cyrex::nw::resourcepacks
+{
+
+class ResourcePackDef
+{
+public:
+    virtual ~ResourcePackDef() = default;
+
+    virtual std::string getPackName() const = 0;
+    virtual std::string getSubPackName() const
+    {
+        return "";
+    }
+    virtual uuid::UUID getPackId() const = 0;
+    virtual std::string getPackVersion() const = 0;
+    virtual uint64_t getPackSize() const = 0;
+    virtual std::vector<uint8_t> getSha256() const = 0;
+    virtual std::vector<uint8_t> getPackChunk(uint64_t off, uint64_t len) = 0;
+    virtual std::string getPackChunkString(std::streamoff start, std::size_t length) const = 0;
+
+    virtual bool isAddonPack() const
+    {
+        return false;
+    }
+    virtual std::string cdnUrl() const
+    {
+        return "";
+    }
+    virtual bool isRaytracingCapable() const
+    {
+        return false;
+    }
+    virtual bool usesScript() const
+    {
+        return false;
+    }
+    virtual std::string getEncryptionKey() const
+    {
+        return "";
+    }
+
+    virtual bool operator==(const ResourcePackDef& other) const
+    {
+        const uuid::UUID a = getPackId();
+        const uuid::UUID b = other.getPackId();
+        return a == b;
+    }
+};
+
+} // namespace cyrex::nw::resourcepacks

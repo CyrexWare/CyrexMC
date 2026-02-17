@@ -17,6 +17,7 @@ struct ServerProperties
     std::string serverName;
     std::string motd;
     nw::protocol::GameMode defaultGameMode;
+    bool forceResources;
 
     static ServerProperties load(const std::string& path);
 };
