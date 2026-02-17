@@ -352,7 +352,10 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
                 int chunkCount = static_cast<int>(
                     std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
 
-                auto data = std::make_unique<protocol::ResourcePackMeta>(resourcePack->getPackId(), resourcePack, maxChunkSize, chunkCount);
+                auto data = std::make_unique<protocol::ResourcePackMeta>(resourcePack->getPackId(),
+                                                                         resourcePack,
+                                                                         maxChunkSize,
+                                                                         chunkCount);
 
                 packQueue.push_back(data->packId);
                 loadedPacks.emplace(data->packId, std::move(data));
