@@ -367,7 +367,7 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
                 dataInfoPkt->chunkCount = chunkCount;
                 dataInfoPkt->compressedPackSize = resourcePack->getPackSize();
                 dataInfoPkt->sha256 = resourcePack->getSha256();
-                send(std::move(dataInfoPkt), true);
+                send(std::move(dataInfoPkt), true); // want[]
             }
             break;
         }
@@ -434,7 +434,7 @@ bool NetworkSession::handleResourcePackChunkRequest(const protocol::ResourcePack
 
     if (request.chunkIndex >= 0 && request.chunkIndex < packInfo.chunkCount)
     {
-        packInfo.want[static_cast<size_t>(request.chunkIndex)] = true;
+        packInfo.chunks[static_cast<size_t>(request.chunkIndex)].want = true;
 
         pendingChunks.emplace_back(packInfo.packId, static_cast<int>(request.chunkIndex));
     }
@@ -481,7 +481,7 @@ void NetworkSession::processChunkQueue()
                 return;
             }
 
-            if (pack->sent[static_cast<size_t>(idx)])
+            if (pack->chunks[static_cast<size_t>(idx)].sent)
                 continue;
 
             size_t startOffset = static_cast<size_t>(idx) * pack->maxChunkSize;
@@ -504,9 +504,9 @@ void NetworkSession::processChunkQueue()
 
             send(std::move(pkt), true);
 
-            pack->sent[static_cast<size_t>(idx)] = true;
+            pack->chunks[static_cast<size_t>(idx)].sent = true;
 
-            while (pack->nextToSend < pack->chunkCount && pack->sent[static_cast<size_t>(pack->nextToSend)])
+            while (pack->nextToSend < pack->chunkCount && pack->chunks[static_cast<size_t>(pack->nextToSend)].sent)
                 pack->nextToSend++;
 
             if (pack->nextToSend >= pack->chunkCount)
