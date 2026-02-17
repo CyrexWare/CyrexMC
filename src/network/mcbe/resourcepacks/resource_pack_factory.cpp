@@ -2,12 +2,11 @@
 
 #include <algorithm>
 #include <stdexcept>
-#include <uuid.h>
 
 namespace cyrex::nw::resourcepacks
 {
 
-ResourcePackFactory::ResourcePackFactory(const std::unordered_set<std::shared_ptr<ResourcePackLoaderDef>>& loadersSet) :
+ResourcePackFactory::ResourcePackFactory(const std::unordered_set<ResourcePackLoaderDef*>& loadersSet) :
     loaders(loadersSet)
 {
     reloadPacks();
@@ -18,22 +17,30 @@ void ResourcePackFactory::reloadPacks()
     packs.clear();
     packsById.clear();
 
-    for (auto& loader : loaders)
+    for (auto* loader : loaders)
     {
-        for (auto& pack : loader->loadPacks())
+        auto loaded = loader->loadPacks();
+
+        for (auto& packPtr : loaded)
         {
-            packs.insert(pack);
-            packsById[pack->getPackId()] = pack;
+            packs.push_back(std::move(packPtr));
+            packsById[packs.back()->getPackId()] = packs.back().get();
         }
     }
 }
 
-std::vector<std::shared_ptr<ResourcePackDef>> ResourcePackFactory::getResourceStack() const
+std::vector<ResourcePackDef*> ResourcePackFactory::getResourceStack() const
 {
-    return {packs.begin(), packs.end()};
+    std::vector<ResourcePackDef*> out;
+    out.reserve(packs.size());
+
+    for (auto& p : packs)
+        out.push_back(p.get());
+
+    return out;
 }
 
-std::shared_ptr<ResourcePackDef> ResourcePackFactory::getPackById(const uuid::UUID& id) const
+ResourcePackDef* ResourcePackFactory::getPackById(const uuid::UUID& id) const
 {
     auto it = packsById.find(id);
     return it != packsById.end() ? it->second : nullptr;
@@ -51,7 +58,7 @@ void ResourcePackFactory::setMaxChunkSize(const int size)
     maxChunkSize = size;
 }
 
-void ResourcePackFactory::registerPackLoader(const std::shared_ptr<ResourcePackLoaderDef>& loader)
+void ResourcePackFactory::registerPackLoader(ResourcePackLoaderDef* loader)
 {
     loaders.insert(loader);
 }

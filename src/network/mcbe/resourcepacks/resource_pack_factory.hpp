@@ -14,20 +14,20 @@ namespace cyrex::nw::resourcepacks
 class ResourcePackFactory
 {
 public:
-    explicit ResourcePackFactory(const std::unordered_set<std::shared_ptr<ResourcePackLoaderDef>>& loadersSet);
+    explicit ResourcePackFactory(const std::unordered_set<ResourcePackLoaderDef*>& loadersSet);
 
     void reloadPacks();
-    std::vector<std::shared_ptr<ResourcePackDef>> getResourceStack() const;
-    std::shared_ptr<ResourcePackDef> getPackById(const uuid::UUID& id) const;
+    std::vector<ResourcePackDef*> getResourceStack() const;
+    ResourcePackDef* getPackById(const uuid::UUID& id) const;
     int getMaxChunkSize() const;
     void setMaxChunkSize(int size);
-    void registerPackLoader(const std::shared_ptr<ResourcePackLoaderDef>& loader);
+    void registerPackLoader(ResourcePackLoaderDef* loader);
 
 private:
     int maxChunkSize = 1024 * 256;
-    std::unordered_map<uuid::UUID, std::shared_ptr<ResourcePackDef>, std::hash<uuid::UUID>> packsById;
-    std::unordered_set<std::shared_ptr<ResourcePackDef>> packs;
-    std::unordered_set<std::shared_ptr<ResourcePackLoaderDef>> loaders;
+    std::vector<std::unique_ptr<ResourcePackDef>> packs;
+    std::unordered_map<uuid::UUID, ResourcePackDef*> packsById;
+    std::unordered_set<ResourcePackLoaderDef*> loaders;
 };
 
 } // namespace cyrex::nw::resourcepacks

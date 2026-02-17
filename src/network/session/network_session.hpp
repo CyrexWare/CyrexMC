@@ -117,7 +117,7 @@ private:
 
     protocol::PacketFactory m_packetFactory;
 
-    std::map<uuid::UUID, std::shared_ptr<protocol::ResourcePackMeta>> loadedPacks;
+    std::map<uuid::UUID, std::unique_ptr<protocol::ResourcePackMeta>> loadedPacks;
     std::deque<uuid::UUID> packQueue;
     std::deque<std::pair<uuid::UUID, int>> pendingChunks;
 

@@ -9,12 +9,12 @@ namespace cyrex::uuid
 {
 using UUID = uuids::uuid;
 
-inline std::string uuidToString(const UUID& uuid)
+inline std::string toString(const UUID& uuid)
 {
     return uuids::to_string(uuid);
 }
 
-inline UUID stringToUUID(const std::string& str)
+inline UUID fromString(const std::string& str)
 {
     auto opt = uuids::uuid::from_string(str);
     if (!opt)
@@ -22,12 +22,12 @@ inline UUID stringToUUID(const std::string& str)
     return *opt;
 }
 
-inline UUID bytesToUUID(const std::array<uint8_t, 16>& bytes) noexcept
+inline UUID fromBytes(const std::array<uint8_t, 16>& bytes) noexcept
 {
     return std::bit_cast<UUID>(bytes);
 }
 
-inline std::array<uint8_t, 16> uuidToBytes(const UUID& uuid) noexcept
+inline std::array<uint8_t, 16> toBytes(const UUID& uuid) noexcept
 {
     return std::bit_cast<std::array<uint8_t, 16>>(uuid);
 }

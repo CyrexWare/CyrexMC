@@ -22,6 +22,7 @@
 #include "network/raknet/handler/raknet_handler.hpp"
 #include "util/uuid.hpp"
 
+#include <algorithm>
 #include <array>
 #include <iomanip>
 #include <iostream>
@@ -261,23 +262,24 @@ void NetworkSession::doLoginSuccess()
 
     for (const auto& defPtr : defs)
     {
-        const auto& def = *defPtr;
+        if (!defPtr)
+            continue;
 
-        protocol::ResourcePackInfoEntry entry;
+        const auto& def = *defPtr;
 
         int chunkCount = static_cast<int>(
             std::ceil(static_cast<double>(def.getPackSize()) / m_server.getResourcePackFactory().getMaxChunkSize()));
 
         logging::log("chunk={}", chunkCount);
 
+        protocol::ResourcePackInfoEntry entry;
         entry.packId = def.getPackId();
         entry.packVersion = def.getPackVersion();
         entry.packSize = def.getPackSize();
         entry.encryptionKey = def.getEncryptionKey();
         entry.subPackName = "";
 
-        entry.contentIdentity = uuid::uuidToString(entry.packId);
-
+        entry.contentIdentity = uuid::toString(entry.packId);
         entry.scripting = def.usesScript();
         entry.addonPack = def.isAddonPack();
         entry.raytracingCapable = def.isRaytracingCapable();
@@ -319,6 +321,7 @@ bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
     return true;
 }
 
+
 bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk)
 {
     using protocol::ResourcePackClientResponseStatus;
@@ -340,7 +343,7 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
                 auto resourcePack = m_server.getResourcePackFactory().getPackById(entry.uuid);
                 if (!resourcePack)
                 {
-                    printf("%s", uuid::uuidToString(entry.uuid).c_str());
+                    printf("%s", uuid::toString(entry.uuid).c_str());
                     markedForDisconnect = true;
                     return true;
                 }
@@ -349,13 +352,13 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
                 int chunkCount = static_cast<int>(
                     std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
 
-                auto data = std::make_shared<protocol::ResourcePackMeta>(resourcePack->getPackId(),
-                                                                         resourcePack.get(),
+                auto data = std::make_unique<protocol::ResourcePackMeta>(resourcePack->getPackId(),
+                                                                         resourcePack,
                                                                          maxChunkSize,
                                                                          chunkCount);
 
-                loadedPacks.emplace(data->packId, data);
                 packQueue.push_back(data->packId);
+                loadedPacks.emplace(data->packId, std::move(data));
 
                 auto dataInfoPkt = std::make_unique<protocol::ResourcePackDataInfoPacket>();
                 dataInfoPkt->packId = resourcePack->getPackId();
@@ -366,7 +369,6 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
                 dataInfoPkt->sha256 = resourcePack->getSha256();
                 send(std::move(dataInfoPkt), true);
             }
-
             break;
         }
 
@@ -381,7 +383,7 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
             for (const auto& def : defStack)
             {
                 protocol::ResourcePackStackEntry entry;
-                entry.packId = uuid::uuidToString(def->getPackId());
+                entry.packId = uuid::toString(def->getPackId());
                 entry.packVersion = def->getPackVersion();
                 entry.subPackName = def->getSubPackName();
                 stackPkt->resourcePackStack.push_back(std::move(entry));
@@ -394,10 +396,8 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
         }
 
         case ResourcePackClientResponseStatus::Completed:
-        {
             logging::log("client has completed process");
             break;
-        }
     }
 
     return true;
@@ -405,8 +405,9 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
 
 bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& request)
 {
-    const auto packFinder = loadedPacks.find(request.packId);
-    std::shared_ptr<protocol::ResourcePackMeta> packInfo;
+    protocol::ResourcePackMeta* packInfoPtr = nullptr;
+
+    auto packFinder = loadedPacks.find(request.packId);
 
     if (packFinder == loadedPacks.end())
     {
@@ -418,39 +419,41 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
         }
 
         int maxSize = m_server.getResourcePackFactory().getMaxChunkSize();
-        const size_t totalBytes = rawPack->getPackSize();
-        int totalChunks = static_cast<int>((totalBytes + maxSize - 1) / maxSize);
+        int totalChunks = static_cast<int>((rawPack->getPackSize() + maxSize - 1) / maxSize);
 
-        packInfo = std::make_shared<protocol::ResourcePackMeta>(rawPack->getPackId(), rawPack.get(), maxSize, totalChunks);
+        auto packInfo = std::make_unique<protocol::ResourcePackMeta>(rawPack->getPackId(), rawPack, maxSize, totalChunks);
 
-        loadedPacks.emplace(packInfo->packId, packInfo);
+        packInfoPtr = loadedPacks.emplace(packInfo->packId, std::move(packInfo)).first->second.get();
     }
     else
     {
-        packInfo = packFinder->second;
+        packInfoPtr = packFinder->second.get();
     }
 
-    if (request.chunkIndex >= 0 && request.chunkIndex < packInfo->chunkCount)
+    auto& packInfo = *packInfoPtr;
+
+    if (request.chunkIndex >= 0 && request.chunkIndex < packInfo.chunkCount)
     {
-        packInfo->want[static_cast<size_t>(request.chunkIndex)] = true;
-        pendingChunks.emplace_back(packInfo->packId, request.chunkIndex);
+        packInfo.want[static_cast<size_t>(request.chunkIndex)] = true;
+
+        pendingChunks.emplace_back(packInfo.packId, static_cast<int>(request.chunkIndex));
     }
 
     if (currentPack.is_nil())
     {
-        currentPack = packInfo->packId;
-        if (std::ranges::find(packQueue, packInfo->packId) == packQueue.end())
-            packQueue.push_back(packInfo->packId);
+        currentPack = packInfo.packId;
+
+        if (std::find(packQueue.begin(), packQueue.end(), packInfo.packId) == packQueue.end())
+            packQueue.push_back(packInfo.packId);
     }
-    else if (std::ranges::find(packQueue.begin(), packQueue.end(), packInfo->packId) == packQueue.end())
+    else if (std::find(packQueue.begin(), packQueue.end(), packInfo.packId) == packQueue.end())
     {
-        packQueue.push_back(packInfo->packId);
+        packQueue.push_back(packInfo.packId);
     }
 
     processChunkQueue();
     return true;
 }
-
 
 void NetworkSession::processChunkQueue()
 {

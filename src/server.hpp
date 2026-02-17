@@ -10,6 +10,7 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include <cstdint>
@@ -69,11 +70,12 @@ private:
     void commandLoop();
 
     Config m_config;
-    std::unique_ptr<cyrex::nw::raknet::RaknetHandler> m_raknet;
-    std::unique_ptr<cyrex::nw::resourcepacks::ResourcePackFactory> m_resourcePackFactory;
+    std::unique_ptr<nw::raknet::RaknetHandler> m_raknet;
+    std::unique_ptr<nw::resourcepacks::ResourcePackFactory> m_resourcePackFactory;
     std::vector<RakNet::RakNetGUID> m_players;
     std::uint64_t m_serverUniqueId;
     std::atomic<bool> m_running;
-    std::unique_ptr<cyrex::command::CommandManager> m_commands;
+    std::unique_ptr<command::CommandManager> m_commands;
+    std::unordered_set<std::unique_ptr<nw::resourcepacks::ResourcePackLoaderDef>> m_loaders;
 };
 } // namespace cyrex

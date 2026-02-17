@@ -26,7 +26,7 @@ public:
 
     bool encodePayload(io::BinaryWriter& out) const override
     {
-        out.writeString(uuid::uuidToString(packId));
+        out.writeString(uuid::toString(packId));
         out.writeU32LE(chunkIndex);
         out.writeU64LE(progress);
         out.writeString(data);

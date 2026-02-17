@@ -9,9 +9,9 @@
 namespace cyrex::nw::resourcepacks
 {
 
-std::vector<std::shared_ptr<ResourcePackDef>> ZippedResourcePackLoader::loadPacks()
+std::vector<std::unique_ptr<ResourcePackDef>> ZippedResourcePackLoader::loadPacks()
 {
-    std::vector<std::shared_ptr<ResourcePackDef>> loadedPacks;
+    std::vector<std::unique_ptr<ResourcePackDef>> loadedPacks;
 
     namespace fs = std::filesystem;
 
@@ -44,11 +44,11 @@ std::vector<std::shared_ptr<ResourcePackDef>> ZippedResourcePackLoader::loadPack
 
         try
         {
-            std::shared_ptr<ResourcePackDef> pack;
+            std::unique_ptr<ResourcePackDef> pack;
 
             if (ext == ".zip" || ext == ".mcpack")
             {
-                pack = std::make_shared<ZippedResourcePack>(path.string());
+                pack = std::make_unique<ZippedResourcePack>(path.string());
             }
             else
             {
@@ -56,7 +56,7 @@ std::vector<std::shared_ptr<ResourcePackDef>> ZippedResourcePackLoader::loadPack
                 continue;
             }
 
-            loadedPacks.push_back(pack);
+            loadedPacks.push_back(std::move(pack));
             anyPackFound = true;
             logging::info("Loaded resource pack '{}'", path.filename().string());
 

@@ -266,7 +266,7 @@ public:
 
     inline void writeUUID(const uuid::UUID& uuid)
     {
-        auto bytes = uuid::uuidToBytes(uuid);
+        auto bytes = uuid::toBytes(uuid);
         std::reverse(bytes.begin(), bytes.begin() + 8);
         std::reverse(bytes.begin() + 8, bytes.end());
         writeBytes(bytes);

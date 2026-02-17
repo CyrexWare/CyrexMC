@@ -19,7 +19,7 @@ public:
     {
     }
 
-    std::vector<std::shared_ptr<ResourcePackDef>> loadPacks() override;
+    std::vector<std::unique_ptr<ResourcePackDef>> loadPacks() override;
 };
 
 } // namespace cyrex::nw::resourcepacks

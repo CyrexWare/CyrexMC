@@ -41,13 +41,15 @@ cyrex::Server::Server(Config config) :
 
     using namespace cyrex::nw::resourcepacks;
 
-    std::unordered_set<std::shared_ptr<ResourcePackLoaderDef>> loaders;
+    m_loaders.insert(std::make_unique<ZippedResourcePackLoader>(std::filesystem::path("resource_packs")));
+    std::unordered_set<ResourcePackLoaderDef*> rawLoaders;
+    for (auto& loader : m_loaders)
+    {
+        rawLoaders.insert(loader.get());
+    }
 
-    // use registerLoader instead?
-    loaders.insert(
-        std::make_shared<cyrex::nw::resourcepacks::ZippedResourcePackLoader>(std::filesystem::path("resource_packs")));
+    m_resourcePackFactory = std::make_unique<ResourcePackFactory>(rawLoaders);
 
-    m_resourcePackFactory = std::make_unique<ResourcePackFactory>(std::move(loaders));
 
     m_commands = std::make_unique<cyrex::command::CommandManager>(*this);
     m_commands->registerDefaults();

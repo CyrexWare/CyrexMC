@@ -27,7 +27,7 @@ public:
         std::string packInfo = in.readString();
         // depending on certain settings this could be set, but with our current setup this isnt needed, mabye in the future.
         packVersion = "";
-        packId = uuid::stringToUUID(packInfo);
+        packId = uuid::fromString(packInfo);
         chunkIndex = in.readI16LE();
         return true;
     }

@@ -12,7 +12,7 @@ class ResourcePackLoaderDef
 public:
     virtual ~ResourcePackLoaderDef() = default;
 
-    virtual std::vector<std::shared_ptr<ResourcePackDef>> loadPacks() = 0;
+    virtual std::vector<std::unique_ptr<ResourcePackDef>> loadPacks() = 0;
 };
 
 } // namespace cyrex::nw::resourcepacks

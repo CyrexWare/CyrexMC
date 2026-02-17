@@ -47,8 +47,7 @@ private:
         clientDataJwt = cr.readStringU32LE();
     }
 
-    [[nodiscard]]
-    std::string tryEncodeRequestForConnection() const
+    [[nodiscard]] std::string tryEncodeRequestForConnection() const
     {
         cyrex::nw::io::BinaryWriter cr{};
 

@@ -29,7 +29,7 @@ public:
 
     bool encodePayload(io::BinaryWriter& out) const override
     {
-        out.writeString(uuid::uuidToString(packId));
+        out.writeString(uuid::toString(packId));
         out.writeI32LE(maxChunkSize);
         out.writeI32LE(chunkCount);
         out.writeU64LE(compressedPackSize);
