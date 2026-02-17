@@ -33,10 +33,10 @@ public:
         std::uint32_t maxPlayers;
         std::string serverName;
         std::string motd;
-        cyrex::nw::protocol::GameMode defaultGameMode;
+        nw::protocol::GameMode defaultGameMode;
         bool forceResources;
 
-        static Config fromProperties(const cyrex::util::ServerProperties& props);
+        static Config fromProperties(const util::ServerProperties& props);
     };
 
     explicit Server(Config config);
@@ -49,8 +49,8 @@ public:
     [[nodiscard]] const std::string& getServerName() const;
     [[nodiscard]] const std::string& getMotd() const;
 
-    [[nodiscard]] cyrex::nw::protocol::GameMode getDefaultGameMode() const;
-    void setDefaultGameMode(cyrex::nw::protocol::GameMode mode);
+    [[nodiscard]] nw::protocol::GameMode getDefaultGameMode() const;
+    void setDefaultGameMode(nw::protocol::GameMode mode);
     void setDefaultGameModeFromString(std::string_view mode);
 
     void addPlayer(const RakNet::RakNetGUID& guid);
@@ -62,8 +62,8 @@ public:
     void stop();
     void run();
 
-    [[nodiscard]] cyrex::nw::resourcepacks::ResourcePackFactory& getResourcePackFactory();
-    [[nodiscard]] const cyrex::nw::resourcepacks::ResourcePackFactory& getResourcePackFactory() const;
+    [[nodiscard]] nw::resourcepacks::ResourcePackFactory& getResourcePackFactory();
+    [[nodiscard]] const nw::resourcepacks::ResourcePackFactory& getResourcePackFactory() const;
     [[nodiscard]] bool shouldForceResources() const;
 
 private:

@@ -57,7 +57,7 @@ public:
     }
 
     bool compressionEnabled = false;
-    cyrex::nw::protocol::CompressionAlgorithm compressor;
+    protocol::CompressionAlgorithm compressor;
 
     bool encryptionEnabled = false;
     Phase phase = Phase::PRELOGIN;

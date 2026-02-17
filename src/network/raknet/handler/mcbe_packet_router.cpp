@@ -9,9 +9,9 @@
 
 using namespace cyrex::nw::session;
 
-void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::nw::raknet::RaknetConnections& connections)
+void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, raknet::RaknetConnections& connections)
 {
-    cyrex::nw::session::NetworkSession* session = connections.get(p->guid);
+    session::NetworkSession* session = connections.get(p->guid);
     if (!session)
         return;
     //SKIP 0xFE
@@ -30,7 +30,7 @@ void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::nw::ra
         }
         else
         {
-            cyrex::logging::error(LOG_MCBE, "failed to decrypt!");
+            logging::error(LOG_MCBE, "failed to decrypt!");
             return;
         }
     }
@@ -41,23 +41,24 @@ void cyrex::nw::raknet::McbePacketRouter::route(RakNet::Packet* p, cyrex::nw::ra
 
     if (!session->compressionEnabled)
     {
-        cyrex::logging::info(LOG_MCBE, "compression inactive.");
+        logging::info(LOG_MCBE, "compression inactive.");
     }
     else
     {
         const auto compressionMethod = static_cast<protocol::CompressionAlgorithm>(payload.front());
-        cyrex::logging::info(LOG_MCBE, "compression method = 0x{:02X}", std::to_underlying(compressionMethod));
+        ;
+        logging::info(LOG_MCBE, "compression method = 0x{:02X}", std::to_underlying(compressionMethod));
         if (const auto* compressor = protocol::getCompressor(compressionMethod))
         {
             const std::vector old(payload);
-            cyrex::logging::info(LOG_MCBE, "decompressing...");
+            logging::info(LOG_MCBE, "decompressing...");
             payload = *compressor->decompress({old.data() + 1, old.size() - 1});
-            cyrex::logging::info(LOG_MCBE, "decompressed size = {}", payload.size());
+            logging::info(LOG_MCBE, "decompressed size = {}", payload.size());
         }
         else
         {
             session->onRaw(*p, payload.data() + 1, payload.size() - 1);
-            cyrex::logging::info(LOG_MCBE, "compression inactive.");
+            logging::info(LOG_MCBE, "compression inactive.");
             return;
         }
     }

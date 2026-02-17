@@ -37,9 +37,9 @@ cyrex::Server::Server(Config config) :
     m_serverUniqueId(generateServerId()),
     m_running(true)
 {
-    m_raknet = std::make_unique<cyrex::nw::raknet::RaknetHandler>(*this);
+    m_raknet = std::make_unique<nw::raknet::RaknetHandler>(*this);
 
-    using namespace cyrex::nw::resourcepacks;
+    using namespace nw::resourcepacks;
 
     m_loaders.insert(std::make_unique<ZippedResourcePackLoader>(std::filesystem::path("resource_packs")));
     std::unordered_set<ResourcePackLoaderDef*> rawLoaders;
@@ -51,7 +51,7 @@ cyrex::Server::Server(Config config) :
     m_resourcePackFactory = std::make_unique<ResourcePackFactory>(rawLoaders);
 
 
-    m_commands = std::make_unique<cyrex::command::CommandManager>(*this);
+    m_commands = std::make_unique<command::CommandManager>(*this);
     m_commands->registerDefaults();
 }
 
@@ -169,7 +169,7 @@ void cyrex::Server::commandLoop()
 
 void cyrex::Server::run()
 {
-    std::thread commandThread(&cyrex::Server::commandLoop, this);
+    std::thread commandThread(&Server::commandLoop, this);
 
     while (m_running)
     {
