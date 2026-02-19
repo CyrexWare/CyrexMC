@@ -54,7 +54,7 @@ cyrex::Server::Server(Config config) :
     m_resourcePackFactory = std::make_unique<ResourcePackFactory>(rawLoaders);
     // if (config.enableEncryption)
     // {
-        m_serverPrivateKey = nw::protocol::AesEncryptor::generateServerKeypair();
+    m_serverPrivateKey = nw::protocol::AesEncryptor::generateServerKeypair();
     // }
 
     m_commands = std::make_unique<cyrex::command::CommandManager>(*this);

@@ -1,9 +1,9 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
 #include <string>
 
 #include <cstdint>
-#include <nlohmann/json.hpp>
 
 namespace cyrex::nw::protocol
 {
@@ -104,29 +104,28 @@ struct AuthIdentityData
     std::string XUID;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ClientDataAnimationFrame, // NOLINT
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    ClientDataAnimationFrame, // NOLINT
     ImageHeight,
     ImageWidth,
     Frames,
     Type,
     Image,
-    AnimationExpression
-);
+    AnimationExpression);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ClientDataPersonaSkinPiece, // NOLINT
-    PieceId,
-    PieceType,
-    PackId,
-    IsDefault,
-    ProductId
-);
+                                   PieceId,
+                                   PieceType,
+                                   PackId,
+                                   IsDefault,
+                                   ProductId);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ClientDataPersonaPieceTintColor, // NOLINT
-    PieceType,
-    Colors
-);
+                                   PieceType,
+                                   Colors);
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(NetworkSkinData, // NOLINT
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    NetworkSkinData, // NOLINT
     AnimatedImageData,
     ArmSize,
     CapeData,
@@ -169,14 +168,12 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(NetworkSkinData, // NOLINT
     SkinResourcePatch,
     ThirdPartyName,
     TrustedSkin,
-    UIProfile
-);
+    UIProfile);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AuthenticationInfo, // NOLINT
-    AuthenticationType,
-    Certificate,
-    Token
-);
+                                   AuthenticationType,
+                                   Certificate,
+                                   Token);
 // NOLINTEND(readability-identifier-naming)
 
 } // namespace cyrex::nw::protocol

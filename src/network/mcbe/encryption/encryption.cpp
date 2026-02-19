@@ -23,13 +23,16 @@ static uint64_t calculateChecksum(const int64_t blockCounter,
     return ri.readU64LE();
 }
 
-AesEncryptor::EccKeyPtr AesEncryptor::generateServerKeypair() {
+AesEncryptor::EccKeyPtr AesEncryptor::generateServerKeypair()
+{
     WC_RNG rng;
-    if (wc_InitRng(&rng) != 0) {
+    if (wc_InitRng(&rng) != 0)
+    {
         return nullptr;
     }
     auto serverKey = std::make_unique<EccKey>();
-    if (wc_ecc_make_key(&rng, 48, serverKey.get()) != 0) {
+    if (wc_ecc_make_key(&rng, 48, serverKey.get()) != 0)
+    {
         wc_FreeRng(&rng);
         return nullptr;
     }

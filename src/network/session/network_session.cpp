@@ -151,7 +151,7 @@ void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool i
     m_sendQueue.push_back(std::move(packet));
 }
 
-template<typename... Packets>
+template <typename... Packets>
 void NetworkSession::sendBatch(const bool immediately, Packets&&... packets)
 {
     std::vector<std::unique_ptr<protocol::Packet>> batch;
@@ -238,19 +238,22 @@ void NetworkSession::sendInternal(const BinaryWriter& payload)
 
 static bool verifyChainData(const std::string& chain, std::string& identityPublicKeyDer, const long index)
 {
-    try{
+    try
+    {
         const auto jwtChain = jwt::decode(chain);
         const auto x5u = jwtChain.get_header_claim("x5u").as_string();
         const auto es384 = jwt::algorithm::es384{"-----BEGIN PUBLIC KEY-----\n" + x5u + "\n-----END PUBLIC KEY-----"};
         if (!identityPublicKeyDer.empty() && x5u != identityPublicKeyDer)
             return false;
-        [&]() {
+        [&]()
+        {
             if (index == 0)
                 return jwt::verify().allow_algorithm(es384);
             if (index == 3)
                 return jwt::verify().leeway(UINT32_MAX).allow_algorithm(es384);
             return jwt::verify().with_issuer("Mojang").allow_algorithm(es384);
-        }().verify(jwtChain);
+        }()
+            .verify(jwtChain);
         if (index == 3)
         {
             return true;
@@ -260,8 +263,7 @@ static bool verifyChainData(const std::string& chain, std::string& identityPubli
             return false;
         }
         identityPublicKeyDer = jwtChain.get_payload_claim("identityPublicKey").as_string();
-    }
-    catch (const std::exception& e)
+    } catch (const std::exception& e)
     {
         cyrex::logging::error(LOG_MCBE, "failed exception %s", e.what());
         return false;
@@ -273,22 +275,25 @@ static std::string createEncryptionJwt(protocol::AesEncryptor::EccKey* serverKey
 {
     std::vector<byte> derBuffer(1024);
     auto derLength = static_cast<word32>(derBuffer.size());
-    int const ret = wc_EccPublicKeyToDer(serverKey, derBuffer.data(), derLength, 1);
+    const int ret = wc_EccPublicKeyToDer(serverKey, derBuffer.data(), derLength, 1);
     if (ret <= 0)
     {
         throw std::runtime_error("Failed to export public key to DER");
     }
     derLength = static_cast<word32>(ret);
-    const std::string x5u = jwt::base::encode<jwt::alphabet::base64>(std::string(reinterpret_cast<char*>(derBuffer.data()), derLength));
-    const std::string saltBase64 = jwt::base::encode<jwt::alphabet::base64>(std::string(reinterpret_cast<const char*>(salt.data()), salt.size()));
+    const std::string x5u = jwt::base::encode<jwt::alphabet::base64>(
+        std::string(reinterpret_cast<char*>(derBuffer.data()), derLength));
+    const std::string saltBase64 = jwt::base::encode<jwt::alphabet::base64>(
+        std::string(reinterpret_cast<const char*>(salt.data()), salt.size()));
     auto builder = jwt::create()
-            .set_header_claim("alg", jwt::claim(std::string("ES384")))
-            .set_header_claim("x5u", jwt::claim(x5u))
-            .set_payload_claim("salt", jwt::claim(saltBase64))
-            .sign(jwt::algorithm::none());
+                       .set_header_claim("alg", jwt::claim(std::string("ES384")))
+                       .set_header_claim("x5u", jwt::claim(x5u))
+                       .set_payload_claim("salt", jwt::claim(saltBase64))
+                       .sign(jwt::algorithm::none());
     std::string message = builder.substr(0, builder.size() - 1);
     WC_RNG rng;
-    if (wc_InitRng(&rng) != 0) throw std::runtime_error("RNG Init Failed");
+    if (wc_InitRng(&rng) != 0)
+        throw std::runtime_error("RNG Init Failed");
     std::array<byte, 48> hash{};
     wc_Sha384 sha;
     wc_InitSha384(&sha);
@@ -296,28 +301,32 @@ static std::string createEncryptionJwt(protocol::AesEncryptor::EccKey* serverKey
     wc_Sha384Final(&sha, hash.data());
     std::vector<byte> derSig(200);
     auto derSigLen = static_cast<word32>(derSig.size());
-    if (wc_ecc_sign_hash(hash.data(), (word32)hash.size(), derSig.data(), &derSigLen, &rng, serverKey) != 0) {
+    if (wc_ecc_sign_hash(hash.data(), (word32)hash.size(), derSig.data(), &derSigLen, &rng, serverKey) != 0)
+    {
         wc_FreeRng(&rng);
         throw std::runtime_error("ECC Sign Failed");
     }
     wc_FreeRng(&rng);
     mp_int r;
     mp_int s;
-    if (mp_init_multi(&r, &s, nullptr, nullptr, nullptr, nullptr) != MP_OKAY) {
+    if (mp_init_multi(&r, &s, nullptr, nullptr, nullptr, nullptr) != MP_OKAY)
+    {
         throw std::runtime_error("MP Init Failed");
     }
     std::string signatureRaw;
-    if (DecodeECC_DSA_Sig(derSig.data(), derSigLen, &r, &s) == 0) {
+    if (DecodeECC_DSA_Sig(derSig.data(), derSigLen, &r, &s) == 0)
+    {
         std::array<byte, 96> rawBuffer{};
-        int const rSize = mp_unsigned_bin_size(&r);
-        int const sSize = mp_unsigned_bin_size(&s);
+        const int rSize = mp_unsigned_bin_size(&r);
+        const int sSize = mp_unsigned_bin_size(&s);
         mp_to_unsigned_bin(&r, rawBuffer.data() + (48 - rSize));
         mp_to_unsigned_bin(&s, rawBuffer.data() + 48 + (48 - sSize));
         signatureRaw = std::string(reinterpret_cast<char*>(rawBuffer.data()), rawBuffer.size());
     }
     mp_clear(&r);
     mp_clear(&s);
-    if (signatureRaw.empty()) throw std::runtime_error("Signature decoding failed");
+    if (signatureRaw.empty())
+        throw std::runtime_error("Signature decoding failed");
     return message + "." + jwt::base::encode<jwt::alphabet::base64url>(signatureRaw);
 }
 
@@ -331,18 +340,18 @@ bool NetworkSession::verifyLegacyJwtChains(const std::string& chainData, const s
     std::string identityPublicKeyDer{};
     for (auto [i, chain] : chains | std::views::enumerate)
     {
-        if(!verifyChainData(chain, identityPublicKeyDer, i))
+        if (!verifyChainData(chain, identityPublicKeyDer, i))
         {
             return false;
         }
     }
-    if(!verifyChainData(clientDataJwt, identityPublicKeyDer, 3))
+    if (!verifyChainData(clientDataJwt, identityPublicKeyDer, 3))
     {
         return false;
     }
-    std::string const playerPublicKey = jwt::base::decode<jwt::alphabet::base64>(identityPublicKeyDer);
+    const std::string playerPublicKey = jwt::base::decode<jwt::alphabet::base64>(identityPublicKeyDer);
     m_cipher = protocol::AesEncryptor(m_server.getServerPrivateKey(), playerPublicKey);
-    std::string const payload = createEncryptionJwt(m_cipher->serverKey, m_cipher->salt);
+    const std::string payload = createEncryptionJwt(m_cipher->serverKey, m_cipher->salt);
     auto pS2Cjwt = std::make_unique<protocol::ServerToClientHandshakePacket>();
     pS2Cjwt->jwt = payload;
     send(std::move(pS2Cjwt), true);
@@ -359,7 +368,7 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
         return false;
     }
     const auto authData = nlohmann::json::parse(authInfoJson);
-    protocol::AuthenticationInfo const auth = authData.get<protocol::AuthenticationInfo>();
+    const protocol::AuthenticationInfo auth = authData.get<protocol::AuthenticationInfo>();
     if (cyrex::Server::isEncryptionEnabled())
     {
         if (!verifyLegacyJwtChains(auth.Certificate, clientDataJwt, cyrex::Server::isOnlineMode()))
@@ -367,7 +376,9 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
             //TODO: kick
             return false;
         }
-    }else{
+    }
+    else
+    {
         doLoginSuccess();
     }
     return true;
@@ -381,7 +392,7 @@ bool NetworkSession::handleClientToServerHandshake()
 
 void NetworkSession::doLoginSuccess()
 {
-    constexpr std::vector<std::unique_ptr<Packet>> packets;
+    std::vector<std::unique_ptr<Packet>> packets;
     auto playStatus = std::make_unique<protocol::PlayStatusPacket>();
     playStatus->status = protocol::PlayStatus::LoginSuccess;
 
@@ -401,7 +412,7 @@ void NetworkSession::doLoginSuccess()
 
         logging::log("chunk={}", chunkCount);
 
-        auto & [packId,
+        auto& [packId,
                packVersion,
                packSize,
                encryptionKey,
@@ -429,11 +440,7 @@ void NetworkSession::doLoginSuccess()
 
     resourcePacksInfo->worldTemplateId = uuid::randomUUID();
     resourcePacksInfo->worldTemplateVersion = "";
-    sendBatch(
-        true,
-        std::move(playStatus),
-        std::move(resourcePacksInfo)
-    );
+    sendBatch(true, std::move(playStatus), std::move(resourcePacksInfo));
 }
 
 bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
@@ -484,8 +491,8 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
                     return true;
                 }
 
-                int const maxChunkSize = m_server.getResourcePackFactory().getMaxChunkSize();
-                int const chunkCount = static_cast<int>(
+                const int maxChunkSize = m_server.getResourcePackFactory().getMaxChunkSize();
+                const int chunkCount = static_cast<int>(
                     std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
 
                 auto data = std::make_unique<protocol::ResourcePackMeta>(resourcePack->getPackId(),
@@ -518,7 +525,7 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
 
             for (const auto& def : defStack)
             {
-                auto &[packId, packVersion, subPackName] = stackPkt->resourcePackStack.emplace_back();
+                auto& [packId, packVersion, subPackName] = stackPkt->resourcePackStack.emplace_back();
                 packId = uuid::toString(def->getPackId());
                 packVersion = def->getPackVersion();
                 subPackName = def->getSubPackName();
@@ -620,7 +627,8 @@ void NetworkSession::processChunkQueue()
                 continue;
 
             const size_t startOffset = static_cast<size_t>(idx) * pack->maxChunkSize;
-            const size_t chunkSize = std::min(static_cast<size_t>(pack->maxChunkSize), pack->pack->getPackSize() - startOffset);
+            const size_t chunkSize = std::min(static_cast<size_t>(pack->maxChunkSize),
+                                              pack->pack->getPackSize() - startOffset);
 
             std::string chunk = pack->pack->getPackChunkString(startOffset, chunkSize);
             if (chunk.empty())

@@ -127,6 +127,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(nlohmann_json)
 
 target_compile_features(CyrexMC PRIVATE cxx_std_23)
+add_compile_definitions(NOMINMAX)
 
 target_include_directories(CyrexMC PRIVATE
     "${PROJECT_SOURCE_DIR}/src"

@@ -76,7 +76,8 @@ struct AesEncryptor
     {
         word32 idx = 0;
         EccKey playerPublicKey;
-        if (wc_EccPublicKeyDecode(reinterpret_cast<const byte*>(playerKey.data()), &idx, &playerPublicKey, playerKey.size()) != 0)
+        if (wc_EccPublicKeyDecode(reinterpret_cast<const byte*>(playerKey.data()), &idx, &playerPublicKey, playerKey.size()) !=
+            0)
         {
             throw std::runtime_error("couldn't init ecc key");
         }
@@ -92,7 +93,7 @@ struct AesEncryptor
         }
         std::array<uint8_t, 48> sharedSecret{};
         auto sharedSecretLength = static_cast<word32>(sharedSecret.size()); // 48
-        int const ret = wc_ecc_shared_secret(serverKey, &playerPublicKey, sharedSecret.data(), &sharedSecretLength);
+        const int ret = wc_ecc_shared_secret(serverKey, &playerPublicKey, sharedSecret.data(), &sharedSecretLength);
         wc_FreeRng(&rng);
         if (ret != 0)
         {
@@ -107,7 +108,7 @@ struct AesEncryptor
         wc_Sha256Final(&sha256, key.data());
 
         std::array<std::uint8_t, 16> iv{};
-        std::ranges::copy_n(key.begin(), 12, iv.begin());
+        std::copy_n(key.begin(), 12, iv.begin());
         iv.back() = 0x02;
 
         wc_AesSetKeyDirect(encryptBlock.get(), key.data(), key.size(), iv.data(), AES_ENCRYPTION);
