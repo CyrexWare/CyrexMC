@@ -2,20 +2,13 @@
 
 #include "network/mcbe/packetids.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
+#include "network/mcbe/protocol/types/ViolationSeverity.hpp"
 #include "network/session/network_session.hpp"
 
 #include <cstdint>
 
 namespace cyrex::nw::protocol
 {
-
-
-enum class ViolationSeverity : int32_t
-{
-    Warning,
-    FinalWarning,
-    TerminatingConnection
-};
 
 class PacketViolationWarningPacket final :
     public PacketImpl<PacketViolationWarningPacket, std::to_underlying(PacketId::PacketViolationWarning), PacketDirection::Serverbound, true>
