@@ -21,7 +21,6 @@ public:
     resourcepacks::ResourcePackDef* pack;
     int maxChunkSize;
     int chunkCount;
-    std::vector<bool> want;
     std::vector<bool> sent;
     int nextToSend = 0;
 
@@ -30,12 +29,11 @@ public:
         pack(p),
         maxChunkSize(maxChunk),
         chunkCount(chunks),
-        want(static_cast<size_t>(chunks), false),
         sent(static_cast<size_t>(chunks), false)
     {
     }
 
-    bool finished() const
+    [[nodiscard]] bool finished() const
     {
         return nextToSend >= chunkCount;
     }

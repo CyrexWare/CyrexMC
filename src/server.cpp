@@ -1,10 +1,13 @@
 #include "server.hpp"
 
+#include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/resourcepacks/loader/resource_pack_loader_def.hpp"
 #include "network/mcbe/resourcepacks/loader/zipped_resource_pack_loader.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
 #include "network/raknet/handler/raknet_handler.hpp"
+#include "wolfcrypt/ecc.h"
+#include "wolfcrypt/random.h"
 
 #include <algorithm>
 #include <chrono>
@@ -16,9 +19,9 @@
 #include <unordered_set>
 #include <utility>
 
-cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::ServerProperties& p)
+cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::ServerProperties& props)
 {
-    return {p.port, p.portIpv6, p.maxPlayers, p.serverName, p.motd, p.defaultGameMode, p.forceResources};
+    return {props.port, props.portIpv6, props.maxPlayers, props.serverName, props.motd, props.defaultGameMode, props.forceResources};
 }
 
 namespace
@@ -37,7 +40,7 @@ cyrex::Server::Server(Config config) :
     m_serverUniqueId(generateServerId()),
     m_running(true)
 {
-    m_raknet = std::make_unique<cyrex::nw::raknet::RaknetHandler>(*this);
+    m_raknet = std::make_unique<nw::raknet::RaknetHandler>(*this);
 
     using namespace cyrex::nw::resourcepacks;
 
@@ -49,11 +52,15 @@ cyrex::Server::Server(Config config) :
     }
 
     m_resourcePackFactory = std::make_unique<ResourcePackFactory>(rawLoaders);
-
+    // if (config.enableEncryption)
+    // {
+        m_serverPrivateKey = nw::protocol::AesEncryptor::generateServerKeypair();
+    // }
 
     m_commands = std::make_unique<cyrex::command::CommandManager>(*this);
     m_commands->registerDefaults();
 }
+
 
 cyrex::Server::~Server()
 {
@@ -102,7 +109,7 @@ void cyrex::Server::setDefaultGameMode(cyrex::nw::protocol::GameMode mode)
     m_config.defaultGameMode = mode;
 }
 
-void cyrex::Server::setDefaultGameModeFromString(std::string_view mode)
+void cyrex::Server::setDefaultGameModeFromString(const std::string_view mode)
 {
     m_config.defaultGameMode = cyrex::nw::protocol::fromString(mode);
 }
@@ -115,13 +122,13 @@ void cyrex::Server::addPlayer(const RakNet::RakNetGUID& guid)
 
 void cyrex::Server::removePlayer(const RakNet::RakNetGUID& guid)
 {
-    auto it = std::remove(m_players.begin(), m_players.end(), guid);
+    const auto it = std::ranges::remove(m_players, guid).begin();
     m_players.erase(it, m_players.end());
 }
 
 bool cyrex::Server::hasPlayer(const RakNet::RakNetGUID& guid) const
 {
-    return std::find(m_players.begin(), m_players.end(), guid) != m_players.end();
+    return std::ranges::find(m_players, guid) != m_players.end();
 }
 
 std::size_t cyrex::Server::getPlayerCount() const
@@ -144,9 +151,24 @@ const cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourceP
     return *m_resourcePackFactory;
 }
 
+cyrex::nw::protocol::AesEncryptor::EccKey* cyrex::Server::getServerPrivateKey() const
+{
+    return m_serverPrivateKey.get();
+}
+
 bool cyrex::Server::shouldForceResources() const
 {
     return m_config.forceResources;
+}
+
+bool cyrex::Server::isEncryptionEnabled()
+{
+    return true;
+}
+
+bool cyrex::Server::isOnlineMode()
+{
+    return true;
 }
 
 void cyrex::Server::stop()
@@ -155,7 +177,7 @@ void cyrex::Server::stop()
     m_players.clear();
 }
 
-void cyrex::Server::commandLoop()
+void cyrex::Server::commandLoop() const
 {
     while (m_running)
     {

@@ -42,7 +42,7 @@ std::vector<ResourcePackDef*> ResourcePackFactory::getResourceStack() const
 
 ResourcePackDef* ResourcePackFactory::getPackById(const uuid::UUID& id) const
 {
-    auto it = packsById.find(id);
+    const auto it = packsById.find(id);
     return it != packsById.end() ? it->second : nullptr;
 }
 

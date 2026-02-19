@@ -23,6 +23,20 @@ static uint64_t calculateChecksum(const int64_t blockCounter,
     return ri.readU64LE();
 }
 
+AesEncryptor::EccKeyPtr AesEncryptor::generateServerKeypair() {
+    WC_RNG rng;
+    if (wc_InitRng(&rng) != 0) {
+        return nullptr;
+    }
+    auto serverKey = std::make_unique<EccKey>();
+    if (wc_ecc_make_key(&rng, 48, serverKey.get()) != 0) {
+        wc_FreeRng(&rng);
+        return nullptr;
+    }
+    wc_FreeRng(&rng);
+    return serverKey;
+}
+
 using Hash = std::uint64_t;
 constexpr auto hashSize = sizeof(Hash);
 
@@ -44,7 +58,7 @@ std::optional<std::vector<uint8_t>> AesEncryptor::decrypt(const std::span<const 
 {
     std::vector<std::uint8_t> output(input.size());
     wc_AesCtrEncrypt(decryptBlock.get(), output.data(), input.data(), input.size());
-    io::BinaryReader ri(output.data() + input.size() - hashSize, hashSize);
+    io::BinaryReader ri(output.data() + (input.size() - hashSize), hashSize);
     const Hash receivedHash = ri.readU64LE();
     const Hash calculatedHash = calculateChecksum(decryptBlock->counter++,
                                                   key.data(),

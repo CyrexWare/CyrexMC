@@ -2,6 +2,7 @@
 
 #include "network/mcbe/packetids.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
+#include "network/session/network_session.hpp"
 
 #include <cstdint>
 

@@ -16,7 +16,7 @@ inline std::string toString(const UUID& uuid)
 
 inline UUID fromString(const std::string& str)
 {
-    auto opt = uuids::uuid::from_string(str);
+    const auto opt = uuids::uuid::from_string(str);
     if (!opt)
         throw std::runtime_error("Invalid UUID string: " + str);
     return *opt;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "command/command_manager.hpp"
+#include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/protocol/types/GameMode.hpp"
 #include "network/mcbe/resourcepacks/loader/resource_pack_loader_def.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
@@ -35,6 +36,7 @@ public:
         std::string motd;
         cyrex::nw::protocol::GameMode defaultGameMode;
         bool forceResources;
+        bool enableEncryption;
 
         static Config fromProperties(const cyrex::util::ServerProperties& props);
     };
@@ -64,14 +66,18 @@ public:
 
     [[nodiscard]] cyrex::nw::resourcepacks::ResourcePackFactory& getResourcePackFactory();
     [[nodiscard]] const cyrex::nw::resourcepacks::ResourcePackFactory& getResourcePackFactory() const;
+    cyrex::nw::protocol::AesEncryptor::EccKey* getServerPrivateKey() const;
     [[nodiscard]] bool shouldForceResources() const;
+    [[nodiscard]] static bool isEncryptionEnabled();
+    [[nodiscard]] static bool isOnlineMode();
 
 private:
-    void commandLoop();
+    void commandLoop() const;
 
     Config m_config;
     std::unique_ptr<nw::raknet::RaknetHandler> m_raknet;
     std::unique_ptr<nw::resourcepacks::ResourcePackFactory> m_resourcePackFactory;
+    nw::protocol::AesEncryptor::EccKeyPtr m_serverPrivateKey;
     std::vector<RakNet::RakNetGUID> m_players;
     std::uint64_t m_serverUniqueId;
     std::atomic<bool> m_running;

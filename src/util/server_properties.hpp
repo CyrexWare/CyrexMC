@@ -18,6 +18,7 @@ struct ServerProperties
     std::string motd;
     nw::protocol::GameMode defaultGameMode;
     bool forceResources;
+    bool enableEncryption = true;
 
     static ServerProperties load(const std::string& path);
 };

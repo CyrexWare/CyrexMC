@@ -57,7 +57,7 @@ public:
     }
 
     bool compressionEnabled = false;
-    cyrex::nw::protocol::CompressionAlgorithm compressor;
+    protocol::CompressionAlgorithm compressor = protocol::CompressionAlgorithm::NONE;
 
     bool encryptionEnabled = false;
     Phase phase = Phase::PRELOGIN;
@@ -65,10 +65,12 @@ public:
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
     void send(std::unique_ptr<protocol::Packet> packet, bool immediately = false);
-    void sendBatch(std::vector<std::unique_ptr<protocol::Packet>> packets, bool immediately = false);
+    template <class... Packets>
+    void sendBatch(bool immediately, Packets&&... packets);
     void flush();
     bool disconnectUserForIncompatibleProtocol(uint32_t);
     bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
+    bool handleClientToServerHandshake();
     void doLoginSuccess();
     bool handleRequestNetworkSettings(uint32_t version);
     bool handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk);
@@ -104,6 +106,7 @@ public:
 
 private:
     void sendInternal(const io::BinaryWriter& payload);
+    bool verifyLegacyJwtChains(const std::string& chainData, const std::string& clientDataJwt, bool isOnline);
     std::vector<std::unique_ptr<protocol::Packet>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
@@ -117,11 +120,11 @@ private:
 
     protocol::PacketFactory m_packetFactory;
 
-    std::map<uuid::UUID, std::unique_ptr<protocol::ResourcePackMeta>> loadedPacks;
-    std::deque<uuid::UUID> packQueue;
-    std::deque<std::pair<uuid::UUID, int>> pendingChunks;
+    std::map<uuid::UUID, std::unique_ptr<protocol::ResourcePackMeta>> m_loadedPacks;
+    std::deque<uuid::UUID> m_packQueue;
+    std::deque<std::pair<uuid::UUID, int>> m_pendingChunks;
 
-    uuid::UUID currentPack{};
-    bool queueProcessing = false;
+    uuid::UUID m_currentPack{};
+    bool m_queueProcessing = false;
 };
 } // namespace cyrex::nw::session

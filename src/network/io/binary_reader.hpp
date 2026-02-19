@@ -19,12 +19,12 @@ namespace cyrex::nw::io
 
 class BinaryReader
 {
-    const uint8_t* dataPtr = nullptr;
-    size_t dataSize = 0;
+    const uint8_t* m_dataPtr = nullptr;
+    size_t m_dataSize = 0;
 
     inline void ensureReadable(size_t n) const
     {
-        if (offset + n > dataSize)
+        if (offset + n > m_dataSize)
             throw std::runtime_error("BinaryReader overflow");
     }
 
@@ -33,14 +33,13 @@ class BinaryReader
     inline T readRawLE()
     {
         ensureReadable(sizeof(T));
-        std::array<uint8_t, sizeof(T)> bytes{};
-        std::copy_n(dataPtr + offset, sizeof(T), bytes.begin());
+        T value;
+        std::memcpy(&value, m_dataPtr + offset, sizeof(T));
         offset += sizeof(T);
 
         if constexpr (std::endian::native == std::endian::big)
-            std::reverse(bytes.begin(), bytes.end());
-
-        return std::bit_cast<T>(bytes);
+            value = std::byteswap(value);
+        return value;
     }
 
     template <typename T>
@@ -48,25 +47,24 @@ class BinaryReader
     inline T readRawBE()
     {
         ensureReadable(sizeof(T));
-        std::array<uint8_t, sizeof(T)> bytes{};
-        std::copy_n(dataPtr + offset, sizeof(T), bytes.begin());
+        T value;
+        std::memcpy(&value, m_dataPtr + offset, sizeof(T));
         offset += sizeof(T);
 
         if constexpr (std::endian::native == std::endian::little)
-            std::reverse(bytes.begin(), bytes.end());
-
-        return std::bit_cast<T>(bytes);
+            value = std::byteswap(value);
+        return value;
     }
 
 public:
     BinaryReader() = default;
     size_t offset = 0;
 
-    BinaryReader(const uint8_t* data, size_t len) : dataPtr(data), dataSize(len), offset(0)
+    BinaryReader(const uint8_t* data, const size_t len) : m_dataPtr(data), m_dataSize(len)
     {
     }
 
-    BinaryReader(std::span<const uint8_t> span) : dataPtr(span.data()), dataSize(span.size()), offset(0)
+    explicit BinaryReader(const std::span<const uint8_t> span) : m_dataPtr(span.data()), m_dataSize(span.size())
     {
     }
 
@@ -77,7 +75,7 @@ public:
 
     inline size_t remaining() const
     {
-        return dataSize - offset;
+        return m_dataSize - offset;
     }
 
     inline size_t position() const
@@ -87,13 +85,13 @@ public:
 
     inline const uint8_t* currentPtr() const
     {
-        return dataPtr + offset;
+        return m_dataPtr + offset;
     }
 
     inline uint8_t readU8()
     {
         ensureReadable(1);
-        return dataPtr[offset++];
+        return m_dataPtr[offset++];
     }
 
     inline int8_t readI8()
@@ -110,14 +108,17 @@ public:
     {
         return readRawLE<uint16_t>();
     }
+
     inline uint16_t readU16BE()
     {
         return readRawBE<uint16_t>();
     }
+
     inline int16_t readI16LE()
     {
         return readRawLE<int16_t>();
     }
+
     inline int16_t readI16BE()
     {
         return readRawBE<int16_t>();
@@ -127,48 +128,45 @@ public:
     {
         return readRawLE<uint32_t>();
     }
+
     inline uint32_t readU32BE()
     {
         return readRawBE<uint32_t>();
     }
+
     inline int32_t readI32LE()
     {
         return readRawLE<int32_t>();
     }
+
     inline int32_t readI32BE()
     {
         return readRawBE<int32_t>();
+    }
+
+    inline float readFloatLE()
+    {
+        return std::bit_cast<float>(readU32LE());
     }
 
     inline uint64_t readU64LE()
     {
         return readRawLE<uint64_t>();
     }
+
     inline uint64_t readU64BE()
     {
         return readRawBE<uint64_t>();
     }
+
     inline int64_t readI64LE()
     {
         return readRawLE<int64_t>();
     }
+
     inline int64_t readI64BE()
     {
         return readRawBE<int64_t>();
-    }
-
-    inline int16_t readShort()
-    {
-        return readI16BE();
-    }
-    inline uint16_t readUShort()
-    {
-        return readU16BE();
-    }
-
-    inline float readFloatLE()
-    {
-        return std::bit_cast<float>(readU32LE());
     }
 
     inline double readDoubleLE()
@@ -193,8 +191,8 @@ public:
 
         for (uint32_t i = 0; i < 5; ++i)
         {
-            uint8_t b = readU8();
-            value |= (static_cast<uint32_t>(b & 0x7F) << shift);
+            const uint8_t b = readU8();
+            value |= static_cast<uint32_t>(b & 0x7F) << shift;
 
             if ((b & 0x80) == 0)
                 return value;
@@ -208,7 +206,7 @@ public:
     inline int32_t readVarInt()
     {
         const uint32_t v = readVarUInt();
-        return static_cast<int32_t>((v >> 1) ^ (~(v & 1) + 1));
+        return static_cast<int32_t>(v >> 1 ^ -1 * (v & 1));
     }
 
     inline uint64_t readVarULong()
@@ -219,7 +217,7 @@ public:
         for (uint32_t i = 0; i < 10; ++i)
         {
             const uint8_t b = readU8();
-            value |= (static_cast<uint64_t>(b & 0x7F) << shift);
+            value |= static_cast<uint64_t>(b & 0x7F) << shift;
 
             if ((b & 0x80) == 0)
                 return value;
@@ -233,7 +231,7 @@ public:
     inline int64_t readVarLong()
     {
         const uint64_t v = readVarULong();
-        return static_cast<int64_t>((v >> 1) ^ (~(v & 1) + 1));
+        return static_cast<int64_t>(v >> 1 ^ -1 * (v & 1));
     }
 
     inline std::string readString()
@@ -241,7 +239,7 @@ public:
         const uint32_t len = readVarUInt();
         ensureReadable(len);
 
-        std::string out(reinterpret_cast<const char*>(dataPtr + offset), len);
+        std::string out(reinterpret_cast<const char*>(m_dataPtr + offset), len);
         offset += len;
         return out;
     }
@@ -249,26 +247,19 @@ public:
     inline std::vector<uint8_t> readBytesVector(const size_t len)
     {
         ensureReadable(len);
-        std::vector out(dataPtr + offset, dataPtr + offset + len);
+        std::vector out(m_dataPtr + offset, m_dataPtr + offset + len);
         offset += len;
         return out;
     }
 
     inline uuid::UUID readUUID()
     {
-        ensureReadable(16);
+        const auto mostSignificant = readRawBE<uint64_t>();
+        const auto leastSignificant = readRawBE<uint64_t>();
 
-        std::array<uint8_t, 16> bytes;
-
-        for (size_t i = 0; i < 8; ++i)
-            bytes[i] = dataPtr[offset + 7 - i];
-
-        offset += 8;
-
-        for (size_t i = 0; i < 8; ++i)
-            bytes[8 + i] = dataPtr[offset + 7 - i];
-
-        offset += 8;
+        std::array<uint8_t, 16> bytes{};
+        std::memcpy(bytes.data(), &mostSignificant, 8);
+        std::memcpy(bytes.data() + 8, &leastSignificant, 8);
 
         return uuid::UUID{bytes.begin(), bytes.end()};
     }
@@ -278,7 +269,7 @@ public:
         const uint32_t len = readU32LE();
         ensureReadable(len);
 
-        std::string out(reinterpret_cast<const char*>(dataPtr + offset), len);
+        std::string out(reinterpret_cast<const char*>(m_dataPtr + offset), len);
         offset += len;
         return out;
     }
@@ -288,7 +279,7 @@ public:
     inline std::optional<T> readOptional(F&& reader)
     {
         if (readBool())
-            return reader();
+            return std::invoke(std::forward<F>(reader));
 
         return std::nullopt;
     }

@@ -27,7 +27,7 @@ public:
 
     bool handle(session::NetworkSession& session) override
     {
-        // NOOP
+        session.handleClientToServerHandshake();
         return true;
     }
 };

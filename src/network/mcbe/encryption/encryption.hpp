@@ -18,11 +18,9 @@
 
 namespace cyrex::nw::protocol
 {
-
-
 struct AesEncryptor
 {
-    struct EccKey : public ecc_key
+    struct EccKey : ecc_key
     {
         EccKey()
         {
@@ -42,11 +40,11 @@ struct AesEncryptor
     };
     using EccKeyPtr = std::unique_ptr<EccKey>;
 
-    struct AesBlock : public Aes
+    struct AesBlock : Aes
     {
-        std::int64_t counter;
+        std::int64_t counter{};
 
-        AesBlock()
+        AesBlock() : Aes()
         {
             assert(wc_AesInit(this, nullptr, INVALID_DEVID) == 0);
         }
@@ -74,20 +72,31 @@ struct AesEncryptor
     std::array<uint8_t, 32> key{};
     std::array<uint8_t, 16> salt{};
 
-    AesEncryptor(EccKey* serverKey, std::string_view playerKey) : serverKey(serverKey)
+    AesEncryptor(EccKey* serverKey, const std::string_view playerKey) : serverKey(serverKey)
     {
         word32 idx = 0;
         EccKey playerPublicKey;
-        if (wc_EccPublicKeyDecode(reinterpret_cast<const byte*>(playerKey.data()), &idx, &playerPublicKey, playerKey.size()))
+        if (wc_EccPublicKeyDecode(reinterpret_cast<const byte*>(playerKey.data()), &idx, &playerPublicKey, playerKey.size()) != 0)
         {
-            throw std::runtime_error("couldn't init ecc  key");
+            throw std::runtime_error("couldn't init ecc key");
         }
-
-        word32 sharedSecretLength = 0;
-        std::array<uint8_t, 48> sharedSecret{};
-        if (wc_ecc_shared_secret(serverKey, &playerPublicKey, sharedSecret.data(), &sharedSecretLength) != 0)
+        WC_RNG rng;
+        if (wc_InitRng(&rng) != 0)
         {
-            throw std::runtime_error("couldn't init ecc  key");
+            throw std::runtime_error("couldn't init rng");
+        }
+        if (wc_ecc_set_rng(serverKey, &rng) != 0)
+        {
+            wc_FreeRng(&rng);
+            throw std::runtime_error("couldn't set rng on server key");
+        }
+        std::array<uint8_t, 48> sharedSecret{};
+        auto sharedSecretLength = static_cast<word32>(sharedSecret.size()); // 48
+        int const ret = wc_ecc_shared_secret(serverKey, &playerPublicKey, sharedSecret.data(), &sharedSecretLength);
+        wc_FreeRng(&rng);
+        if (ret != 0)
+        {
+            throw std::runtime_error("couldn't init ecc key %s");
         }
         RAND_bytes(salt.data(), salt.size());
 
@@ -97,14 +106,15 @@ struct AesEncryptor
         wc_Sha256Update(&sha256, sharedSecret.data(), sharedSecretLength);
         wc_Sha256Final(&sha256, key.data());
 
-        std::array<::uint8_t, 16> iv{};
-        std::ranges::copy(key, iv.begin());
+        std::array<std::uint8_t, 16> iv{};
+        std::ranges::copy_n(key.begin(), 12, iv.begin());
         iv.back() = 0x02;
 
         wc_AesSetKeyDirect(encryptBlock.get(), key.data(), key.size(), iv.data(), AES_ENCRYPTION);
-        wc_AesSetKeyDirect(decryptBlock.get(), key.data(), key.size(), iv.data(), AES_DECRYPTION);
+        wc_AesSetKeyDirect(decryptBlock.get(), key.data(), key.size(), iv.data(), AES_ENCRYPTION);
     }
 
+    static EccKeyPtr generateServerKeypair();
     [[nodiscard]] std::optional<std::vector<uint8_t>> encrypt(std::span<const uint8_t> input) const;
     [[nodiscard]] std::optional<std::vector<uint8_t>> decrypt(std::span<const uint8_t> input) const;
 };

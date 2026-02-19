@@ -19,23 +19,17 @@ namespace cyrex::nw::io
 
 class BinaryWriter
 {
-    std::vector<uint8_t> buffer;
+    std::vector<uint8_t> m_buffer;
 
     template <typename T>
         requires(std::is_trivially_copyable_v<T>)
     inline void writeRawLE(T value)
     {
         if constexpr (std::endian::native == std::endian::big)
-        {
-            auto bytes = std::bit_cast<std::array<uint8_t, sizeof(T)>>(value);
-            std::reverse(bytes.begin(), bytes.end());
-            buffer.insert(buffer.end(), bytes.begin(), bytes.end());
-        }
-        else
-        {
-            auto bytes = std::bit_cast<std::array<uint8_t, sizeof(T)>>(value);
-            buffer.insert(buffer.end(), bytes.begin(), bytes.end());
-        }
+            value = std::byteswap(value);
+
+        auto bytes = std::bit_cast<std::array<uint8_t, sizeof(T)>>(value);
+        m_buffer.insert(m_buffer.end(), bytes.begin(), bytes.end());
     }
 
     template <typename T>
@@ -43,16 +37,10 @@ class BinaryWriter
     inline void writeRawBE(T value)
     {
         if constexpr (std::endian::native == std::endian::little)
-        {
-            auto bytes = std::bit_cast<std::array<uint8_t, sizeof(T)>>(value);
-            std::reverse(bytes.begin(), bytes.end());
-            buffer.insert(buffer.end(), bytes.begin(), bytes.end());
-        }
-        else
-        {
-            auto bytes = std::bit_cast<std::array<uint8_t, sizeof(T)>>(value);
-            buffer.insert(buffer.end(), bytes.begin(), bytes.end());
-        }
+            value = std::byteswap(value);
+
+        auto bytes = std::bit_cast<std::array<uint8_t, sizeof(T)>>(value);
+        m_buffer.insert(m_buffer.end(), bytes.begin(), bytes.end());
     }
 
 public:
@@ -60,47 +48,47 @@ public:
 
     explicit BinaryWriter(const size_t reserveSize)
     {
-        buffer.reserve(reserveSize);
+        m_buffer.reserve(reserveSize);
     }
 
     inline void reserve(const size_t size)
     {
-        buffer.reserve(size);
+        m_buffer.reserve(size);
     }
 
     inline void clear()
     {
-        buffer.clear();
+        m_buffer.clear();
     }
 
     inline const uint8_t* data() const
     {
-        return buffer.data();
+        return m_buffer.data();
     }
 
     inline size_t size() const
     {
-        return buffer.size();
+        return m_buffer.size();
     }
 
     inline const std::vector<uint8_t>& getBuffer() const
     {
-        return buffer;
+        return m_buffer;
     }
 
     inline void writeU8(uint8_t v)
     {
-        buffer.emplace_back(v);
+        m_buffer.emplace_back(v);
     }
 
     inline void writeI8(const int8_t v)
     {
-        buffer.emplace_back(static_cast<uint8_t>(v));
+        m_buffer.emplace_back(static_cast<uint8_t>(v));
     }
 
     inline void writeBool(const bool v)
     {
-        buffer.emplace_back(static_cast<uint8_t>(v));
+        m_buffer.emplace_back(static_cast<uint8_t>(v));
     }
 
     inline void writeU16LE(const uint16_t v)
@@ -188,22 +176,22 @@ public:
 
     inline void writeBytes(std::span<const uint8_t> bytes)
     {
-        buffer.insert(buffer.end(), bytes.begin(), bytes.end());
+        m_buffer.insert(m_buffer.end(), bytes.begin(), bytes.end());
     }
 
     inline void writeBytes(const uint8_t* data, size_t len)
     {
-        buffer.insert(buffer.end(), data, data + len);
+        m_buffer.insert(m_buffer.end(), data, data + len);
     }
 
     inline void writeVarUInt(uint32_t v)
     {
         while (v >= 0x80)
         {
-            buffer.emplace_back(static_cast<uint8_t>(v) | 0x80);
+            m_buffer.emplace_back(static_cast<uint8_t>(v) | 0x80);
             v >>= 7;
         }
-        buffer.emplace_back(static_cast<uint8_t>(v));
+        m_buffer.emplace_back(static_cast<uint8_t>(v));
     }
 
     inline void writeVarInt(const int32_t v)
@@ -215,10 +203,10 @@ public:
     {
         while (v >= 0x80)
         {
-            buffer.emplace_back(static_cast<uint8_t>(v) | 0x80);
+            m_buffer.emplace_back(static_cast<uint8_t>(v) | 0x80);
             v >>= 7;
         }
-        buffer.emplace_back(static_cast<uint8_t>(v));
+        m_buffer.emplace_back(static_cast<uint8_t>(v));
     }
 
     inline void writeVarLong(const int64_t v)
@@ -261,7 +249,7 @@ public:
     inline void writeString(const std::string_view str)
     {
         writeVarUInt(static_cast<uint32_t>(str.size()));
-        buffer.insert(buffer.end(), str.begin(), str.end());
+        m_buffer.insert(m_buffer.end(), str.begin(), str.end());
     }
 
     inline void writeUUID(const uuid::UUID& uuid)
@@ -281,15 +269,9 @@ public:
     template <typename T, typename F>
     inline void writeOptional(const std::optional<T>& value, F&& writer)
     {
+        writeBool(value.has_value());
         if (value)
-        {
-            writeBool(true);
-            writer(*value);
-        }
-        else
-        {
-            writeBool(false);
-        }
+            std::invoke(std::forward<F>(writer), *value);
     }
 };
 

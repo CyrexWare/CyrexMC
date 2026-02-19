@@ -4,6 +4,7 @@
 #include "protocol/client_to_server_handshake.hpp"
 #include "protocol/login.hpp"
 #include "protocol/network_settings.hpp"
+#include "protocol/packet_violation_warning.hpp"
 #include "protocol/play_status.hpp"
 #include "protocol/request_network_settings.hpp"
 #include "protocol/resource_pack_chunk_data.hpp"
@@ -16,10 +17,10 @@
 
 void cyrex::nw::protocol::PacketFactory::registerAll()
 {
-    add<RequestNetworkSettingsPacket>();
-    add<NetworkSettingsPacket>();
     add<LoginPacket>();
     add<PlayStatusPacket>();
+    add<RequestNetworkSettingsPacket>();
+    add<NetworkSettingsPacket>();
     add<ServerToClientHandshakePacket>();
     add<ClientCacheStatusPacket>();
     add<ClientToServerHandshakePacket>();
@@ -29,4 +30,5 @@ void cyrex::nw::protocol::PacketFactory::registerAll()
     add<ResourcePackClientResponsePacket>();
     add<ResourcePackDataInfoPacket>();
     add<ResourcePackStackPacket>();
+    add<PacketViolationWarningPacket>();
 }
