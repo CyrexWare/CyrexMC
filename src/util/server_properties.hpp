@@ -16,7 +16,7 @@ struct ServerProperties
     std::uint32_t maxPlayers;
     std::string serverName;
     std::string motd;
-    nw::protocol::GameMode defaultGameMode;
+    network::protocol::GameMode defaultGameMode;
     bool forceResources;
 
     static ServerProperties load(const std::string& path);

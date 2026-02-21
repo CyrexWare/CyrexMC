@@ -14,7 +14,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::io
+namespace cyrex::network::io
 {
 
 class BinaryReader
@@ -294,4 +294,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::io
+} // namespace cyrex::network::io

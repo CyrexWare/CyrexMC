@@ -3,16 +3,22 @@
 #include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 #include "util/uuid.hpp"
 
-#include <bitset>
 #include <memory>
 #include <unordered_map>
 #include <uuid.h>
+#include <vector>
 
 #include <cmath>
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
+
+struct ResourcePackChunkState
+{
+    bool want;
+    bool sent;
+};
 
 class ResourcePackMeta
 {
@@ -21,18 +27,16 @@ public:
     resourcepacks::ResourcePackDef* pack;
     int maxChunkSize;
     int chunkCount;
-    std::vector<bool> want;
-    std::vector<bool> sent;
+    std::vector<ResourcePackChunkState> chunks;
     int nextToSend = 0;
 
-    ResourcePackMeta(const uuid::UUID& id, resourcepacks::ResourcePackDef* p, const int maxChunk, const int chunks) :
+    ResourcePackMeta(const uuid::UUID& id, resourcepacks::ResourcePackDef* p, const int maxChunk, const int chunksCount) :
         packId(id),
         pack(p),
         maxChunkSize(maxChunk),
-        chunkCount(chunks),
-        want(static_cast<size_t>(chunks), false),
-        sent(static_cast<size_t>(chunks), false)
+        chunkCount(chunksCount)
     {
+        chunks.resize(static_cast<size_t>(chunkCount), ResourcePackChunkState{false, false});
     }
 
     bool finished() const
@@ -40,4 +44,5 @@ public:
         return nextToSend >= chunkCount;
     }
 };
-} // namespace cyrex::nw::protocol
+
+} // namespace cyrex::network::protocol

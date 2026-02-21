@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 struct ExperimentEntry
@@ -33,7 +33,7 @@ public:
     std::vector<ExperimentEntry> alwaysOnToggles;
     bool wereAnyExperimentsEverToggled = false;
 
-    void encode(cyrex::nw::io::BinaryWriter& out) const
+    void encode(io::BinaryWriter& out) const
     {
         const uint32_t total = static_cast<uint32_t>(activeToggles.size() + alwaysOnToggles.size());
         out.writeU32LE(total);
@@ -47,7 +47,7 @@ public:
         out.writeBool(wereAnyExperimentsEverToggled);
     }
 
-    void decode(cyrex::nw::io::BinaryReader& in)
+    void decode(io::BinaryReader& in)
     {
         const uint32_t total = in.readU32LE();
 
@@ -66,4 +66,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

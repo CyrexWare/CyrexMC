@@ -15,7 +15,7 @@ namespace cyrex::command
 
 struct CommandContext
 {
-    cyrex::Server& server;
+    Server& server;
     std::string raw;
     std::vector<std::string> args;
     PermissionLevel sourceLevel;

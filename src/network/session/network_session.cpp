@@ -39,7 +39,7 @@
 #undef min
 #endif
 
-using namespace cyrex::nw::io;
+using namespace cyrex::network::io;
 
 namespace
 {
@@ -59,7 +59,7 @@ std::string hexDump(const uint8_t* data, size_t len)
 }
 } // namespace
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 
 void NetworkSession::tick()
@@ -78,12 +78,12 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
         in.offset += packetLength;
         const std::uint32_t packetHeader = packetBuffer.readVarUInt();
         const std::uint32_t packetId = packetHeader & 0x3FF;
-        cyrex::logging::info(LOG_MCBE, "packet length = {}", packetLength);
-        cyrex::logging::info(LOG_MCBE,
-                             "packet id = {}0x{:02X} ({})",
-                             logging::Color::GOLD,
-                             packetId,
-                             cyrex::nw::protocol::toSimpleName(cyrex::nw::protocol::makePacketId(packetId)));
+        logging::info(LOG_MCBE, "packet length = {}", packetLength);
+        logging::info(LOG_MCBE,
+                      "packet id = {}0x{:02X} ({})",
+                      logging::Color::GOLD,
+                      packetId,
+                      protocol::toReadablePacketName(network::protocol::makePacketId(packetId)));
 
         if (packetId != 0x01)
         {
@@ -93,26 +93,26 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
             ss << "raw payload (" << payloadSize << " bytes): ";
             for (size_t i = 0; i < payloadSize; ++i)
                 ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(payload[i]) << " ";
-            cyrex::logging::info(LOG_MCBE, "{}", ss.str());
+            logging::info(LOG_MCBE, "{}", ss.str());
         }
 
         const auto* packetDef = m_packetFactory.find(packetId);
         if (!packetDef)
         {
-            cyrex::logging::error(LOG_MCBE, "unknown packet id");
+            logging::error(LOG_MCBE, "unknown packet id");
             return;
         }
 
         const auto packet = packetDef->decode(packetBuffer);
         if (!packet)
         {
-            cyrex::logging::error(LOG_MCBE, "error decoding packet");
+            logging::error(LOG_MCBE, "error decoding packet");
             return;
         }
         packet->subClientId = packetHeader >> 10 & 0x03;
         if (!packet->handle(*this))
         {
-            cyrex::logging::error(LOG_MCBE, "error handling packet");
+            logging::error(LOG_MCBE, "error handling packet");
             return;
         }
     } while (in.remaining() > 0);
@@ -131,10 +131,10 @@ bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protoc
 
 void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool immediately)
 {
-    cyrex::logging::info("queueing packet with id = {}0x{:02X} ({})",
-                         cyrex::logging::Color::GOLD,
-                         packet->getDef().networkId,
-                         cyrex::nw::protocol::toSimpleName(protocol::makePacketId(packet->getDef().networkId)));
+    logging::info("queueing packet with id = {}0x{:02X} ({})",
+                  logging::Color::GOLD,
+                  packet->getDef().networkId,
+                  protocol::toReadablePacketName(protocol::makePacketId(packet->getDef().networkId)));
     if (immediately)
     {
         BinaryWriter packetBuffer;
@@ -367,7 +367,7 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
                 dataInfoPkt->chunkCount = chunkCount;
                 dataInfoPkt->compressedPackSize = resourcePack->getPackSize();
                 dataInfoPkt->sha256 = resourcePack->getSha256();
-                send(std::move(dataInfoPkt), true);
+                send(std::move(dataInfoPkt), true); // want[]
             }
             break;
         }
@@ -403,7 +403,7 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
     return true;
 }
 
-bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& request)
+bool NetworkSession::handleResourcePackChunkRequest(const protocol::ResourcePackChunkRequestPacket& request)
 {
     protocol::ResourcePackMeta* packInfoPtr = nullptr;
 
@@ -434,7 +434,7 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
 
     if (request.chunkIndex >= 0 && request.chunkIndex < packInfo.chunkCount)
     {
-        packInfo.want[static_cast<size_t>(request.chunkIndex)] = true;
+        packInfo.chunks[static_cast<size_t>(request.chunkIndex)].want = true;
 
         pendingChunks.emplace_back(packInfo.packId, static_cast<int>(request.chunkIndex));
     }
@@ -481,7 +481,7 @@ void NetworkSession::processChunkQueue()
                 return;
             }
 
-            if (pack->sent[static_cast<size_t>(idx)])
+            if (pack->chunks[static_cast<size_t>(idx)].sent)
                 continue;
 
             size_t startOffset = static_cast<size_t>(idx) * pack->maxChunkSize;
@@ -495,7 +495,7 @@ void NetworkSession::processChunkQueue()
                 return;
             }
 
-            auto pkt = std::make_unique<cyrex::nw::protocol::ResourcePackChunkDataPacket>();
+            auto pkt = std::make_unique<protocol::ResourcePackChunkDataPacket>();
             pkt->packId = pack->packId;
             pkt->packVersion = pack->pack->getPackVersion();
             pkt->chunkIndex = idx;
@@ -504,9 +504,9 @@ void NetworkSession::processChunkQueue()
 
             send(std::move(pkt), true);
 
-            pack->sent[static_cast<size_t>(idx)] = true;
+            pack->chunks[static_cast<size_t>(idx)].sent = true;
 
-            while (pack->nextToSend < pack->chunkCount && pack->sent[static_cast<size_t>(pack->nextToSend)])
+            while (pack->nextToSend < pack->chunkCount && pack->chunks[static_cast<size_t>(pack->nextToSend)].sent)
                 pack->nextToSend++;
 
             if (pack->nextToSend >= pack->chunkCount)
@@ -538,4 +538,4 @@ void NetworkSession::nextPack()
     }
 }
 
-} // namespace cyrex::nw::session
+} // namespace cyrex::network::session

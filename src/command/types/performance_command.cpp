@@ -23,5 +23,5 @@ cyrex::command::Permission cyrex::command::PerformanceCommand::permission() cons
 
 void cyrex::command::PerformanceCommand::execute(CommandContext&)
 {
-    cyrex::util::logServerStatus();
+    util::logServerStatus();
 }

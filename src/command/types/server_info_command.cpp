@@ -33,32 +33,32 @@ Permission ServerInfoCommand::permission() const
 
 void ServerInfoCommand::execute(CommandContext& ctx)
 {
-    cyrex::logging::info("{}",
-                         std::format("\n{}=== CyrexMC Server Information ==={}\n"
-                                     "{}Build Version:{} {} ({})\n"
-                                     "{}Supported Game Version:{} {}\n"
-                                     "{}Players:{} {}/{}\n"
-                                     "{}Port:{} {}\n",
-                                     cyrex::logging::Color::BLUE,
-                                     cyrex::logging::Color::GOLD,
+    logging::info("{}",
+                  std::format("\n{}=== CyrexMC Server Information ==={}\n"
+                              "{}Build Version:{} {} ({})\n"
+                              "{}Supported Game Version:{} {}\n"
+                              "{}Players:{} {}/{}\n"
+                              "{}Port:{} {}\n",
+                              logging::Color::BLUE,
+                              logging::Color::GOLD,
 
-                                     cyrex::logging::Color::WHITE,
-                                     cyrex::logging::Color::GOLD,
-                                     cyrex::Info::version().toString(),
-                                     cyrex::Info::buildTypeString(),
+                              logging::Color::WHITE,
+                              logging::Color::GOLD,
+                              Info::version().toString(),
+                              Info::buildTypeString(),
 
-                                     cyrex::logging::Color::WHITE,
-                                     cyrex::logging::Color::GOLD,
-                                     cyrex::nw::protocol::ProtocolInfo::minecraftVersion,
+                              logging::Color::WHITE,
+                              logging::Color::GOLD,
+                              network::protocol::ProtocolInfo::minecraftVersion,
 
-                                     cyrex::logging::Color::WHITE,
-                                     cyrex::logging::Color::GOLD,
-                                     ctx.server.getPlayerCount(),
-                                     ctx.server.getMaxPlayers(),
+                              logging::Color::WHITE,
+                              logging::Color::GOLD,
+                              ctx.server.getPlayerCount(),
+                              ctx.server.getMaxPlayers(),
 
-                                     cyrex::logging::Color::WHITE,
-                                     cyrex::logging::Color::GOLD,
-                                     ctx.server.getPort()));
+                              logging::Color::WHITE,
+                              logging::Color::GOLD,
+                              ctx.server.getPort()));
 }
 
 } // namespace cyrex::command

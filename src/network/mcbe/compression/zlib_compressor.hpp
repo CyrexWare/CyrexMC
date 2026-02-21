@@ -5,7 +5,7 @@
 #include <libdeflate.h>
 #include <memory>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 class ZlibCompressor final : public Compressor
 {
@@ -46,4 +46,4 @@ private:
     std::unique_ptr<libdeflate_compressor, CustomDeleterLibdeflateCompressor> m_compressor;
     std::unique_ptr<libdeflate_decompressor, CustomDeleterLibdeflateDecompressor> m_decompressor;
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

@@ -4,7 +4,7 @@
 #include <cctype>
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 enum class GameMode : std::uint8_t
@@ -17,7 +17,7 @@ enum class GameMode : std::uint8_t
     DEFAULT = 5
 };
 
-constexpr std::string_view toString(GameMode mode) noexcept
+constexpr std::string_view toGameModeString(GameMode mode) noexcept
 {
     switch (mode)
     {
@@ -51,7 +51,7 @@ constexpr bool iequals(std::string_view a, std::string_view b) noexcept
     return true;
 }
 
-constexpr GameMode fromString(std::string_view str) noexcept
+constexpr GameMode parseGameMode(std::string_view str) noexcept
 {
     if (iequals(str, "survival") || iequals(str, "s"))
     {
@@ -82,4 +82,4 @@ constexpr GameMode fromString(std::string_view str) noexcept
     return GameMode::DEFAULT;
 }
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

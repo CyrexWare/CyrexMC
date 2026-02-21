@@ -3,23 +3,23 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/protocol/types/GameMode.hpp"
 
-std::string cyrex::nw::raknet::buildMotd(const cyrex::Server& server)
+std::string cyrex::network::raknet::buildMotd(const Server& server)
 {
     auto gm = server.getDefaultGameMode();
 
     int gmNumeric = 1;
-    if (gm == cyrex::nw::protocol::GameMode::CREATIVE)
+    if (gm == protocol::GameMode::CREATIVE)
         gmNumeric = 0;
-    if (gm == cyrex::nw::protocol::GameMode::ADVENTURE)
+    if (gm == protocol::GameMode::ADVENTURE)
         gmNumeric = 2;
 
     std::string motd;
     motd += "MCPE;";
     motd += server.getMotd();
     motd += ";";
-    motd += std::to_string(cyrex::nw::protocol::ProtocolInfo::currentProtocol);
+    motd += std::to_string(protocol::ProtocolInfo::currentProtocol);
     motd += ";";
-    motd += cyrex::nw::protocol::ProtocolInfo::minecraftVersionNetwork;
+    motd += protocol::ProtocolInfo::minecraftVersionNetwork;
     motd += ";";
     motd += std::to_string(server.getPlayerCount());
     motd += ";";
@@ -29,7 +29,7 @@ std::string cyrex::nw::raknet::buildMotd(const cyrex::Server& server)
     motd += ";";
     motd += server.getServerName();
     motd += ";";
-    motd += protocol::toString(gm);
+    motd += protocol::toGameModeString(gm);
     motd += ";";
     motd += std::to_string(gmNumeric);
     motd += ";";

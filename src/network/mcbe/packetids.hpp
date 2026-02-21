@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 enum class PacketId : std::uint32_t
@@ -244,7 +244,7 @@ inline PacketId makePacketId(std::uint32_t value)
     return static_cast<PacketId>(value);
 }
 
-inline std::string toSimpleName(PacketId id)
+inline std::string toReadablePacketName(PacketId id)
 {
     const auto name = magic_enum::enum_name(id);
     if (name.empty())
@@ -253,4 +253,4 @@ inline std::string toSimpleName(PacketId id)
     }
     return std::string{name} + "Packet";
 }
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

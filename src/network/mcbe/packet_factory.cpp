@@ -14,7 +14,7 @@
 #include "protocol/resource_packs_info.hpp"
 #include "protocol/server_to_client_handshake.hpp"
 
-void cyrex::nw::protocol::PacketFactory::registerAll()
+void cyrex::network::protocol::PacketFactory::registerAll()
 {
     add<RequestNetworkSettingsPacket>();
     add<NetworkSettingsPacket>();

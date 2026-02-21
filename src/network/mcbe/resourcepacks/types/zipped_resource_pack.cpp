@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <cstring>
 
-namespace cyrex::nw::resourcepacks
+namespace cyrex::network::resourcepacks
 {
 
 ZippedResourcePack::ZippedResourcePack(const std::string& path) : filePath(path)
@@ -198,4 +198,4 @@ bool ZippedResourcePack::verifyManifest() const
     return manifest.contains("format_version") && manifest.contains("header") && manifest.contains("modules");
 }
 
-} // namespace cyrex::nw::resourcepacks
+} // namespace cyrex::network::resourcepacks

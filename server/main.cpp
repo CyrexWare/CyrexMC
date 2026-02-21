@@ -104,7 +104,7 @@ int main()
     cyrex::logging::log(LOG_MCBE,
                         "Current Supported Game Version: {}{}",
                         cyrex::logging::Color::AQUA,
-                        cyrex::nw::protocol::ProtocolInfo::minecraftVersion);
+                        cyrex::network::protocol::ProtocolInfo::minecraftVersion);
     if (cyrex::Info::buildType() == cyrex::Info::BuildType::Development)
     {
         cyrex::logging::warn(

@@ -7,12 +7,12 @@
 #include <memory>
 #include <unordered_map>
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::nw::raknet
+namespace cyrex::network::raknet
 {
 class RaknetHandler;
 
@@ -26,9 +26,9 @@ public:
 
     void tick();
 
-    cyrex::nw::session::NetworkSession* get(const RakNet::RakNetGUID& guid);
+    cyrex::network::session::NetworkSession* get(const RakNet::RakNetGUID& guid);
 
 private:
-    std::unordered_map<RakNet::RakNetGUID, std::unique_ptr<cyrex::nw::session::NetworkSession>> m_sessions;
+    std::unordered_map<RakNet::RakNetGUID, std::unique_ptr<cyrex::network::session::NetworkSession>> m_sessions;
 };
-} // namespace cyrex::nw::raknet
+} // namespace cyrex::network::raknet
