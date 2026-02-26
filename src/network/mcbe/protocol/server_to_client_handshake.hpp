@@ -18,7 +18,6 @@ public:
 
     bool decodePayload(io::BinaryReader& in) override
     {
-        jwt = in.readString();
         return true;
     }
 
@@ -28,7 +27,7 @@ public:
         return true;
     }
 
-    bool handle(session::NetworkSession& session) override
+    bool handle(session::NetworkSession&) override
     {
         return true;
     }

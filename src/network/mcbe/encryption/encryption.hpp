@@ -62,9 +62,6 @@ struct AesEncryptor
     };
     using AesBlockPtr = std::unique_ptr<AesBlock>;
 
-    std::int64_t encryptBlockCounter = 0;
-    std::int64_t decryptBlockCounter = 0;
-
     EccKey* serverKey;
     AesBlockPtr encryptBlock = std::make_unique<AesBlock>();
     AesBlockPtr decryptBlock = std::make_unique<AesBlock>();
@@ -92,7 +89,7 @@ struct AesEncryptor
             throw std::runtime_error("couldn't set rng on server key");
         }
         std::array<uint8_t, 48> sharedSecret{};
-        auto sharedSecretLength = static_cast<word32>(sharedSecret.size()); // 48
+        auto sharedSecretLength = static_cast<word32>(sharedSecret.size());
         const int ret = wc_ecc_shared_secret(serverKey, &playerPublicKey, sharedSecret.data(), &sharedSecretLength);
         wc_FreeRng(&rng);
         if (ret != 0)
@@ -108,7 +105,7 @@ struct AesEncryptor
         wc_Sha256Final(&sha256, key.data());
 
         std::array<std::uint8_t, 16> iv{};
-        std::copy_n(key.begin(), 12, iv.begin());
+        std::copy(key.begin(), key.begin() + 12, iv.begin()); // NOLINT compatible with more compiler
         iv.back() = 0x02;
 
         wc_AesSetKeyDirect(encryptBlock.get(), key.data(), key.size(), iv.data(), AES_ENCRYPTION);

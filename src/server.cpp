@@ -52,8 +52,6 @@ cyrex::Server::Server(Config config) :
     }
 
     m_resourcePackFactory = std::make_unique<ResourcePackFactory>(rawLoaders);
-    // if (config.enableEncryption)
-    // {
     m_serverPrivateKey = nw::protocol::AesEncryptor::generateServerKeypair();
     // }
 
@@ -66,7 +64,7 @@ cyrex::Server::~Server()
 {
     // more better cleanup, and we need cleanup function for sessions, etc
     m_running = false;
-    m_players.clear();
+    // m_players.clear();
 }
 
 std::uint16_t cyrex::Server::getPort() const
@@ -114,32 +112,33 @@ void cyrex::Server::setDefaultGameModeFromString(const std::string_view mode)
     m_config.defaultGameMode = cyrex::nw::protocol::fromString(mode);
 }
 
-void cyrex::Server::addPlayer(const RakNet::RakNetGUID& guid)
-{
-    if (!hasPlayer(guid))
-        m_players.push_back(guid);
-}
-
-void cyrex::Server::removePlayer(const RakNet::RakNetGUID& guid)
-{
-    const auto it = std::ranges::remove(m_players, guid).begin();
-    m_players.erase(it, m_players.end());
-}
-
-bool cyrex::Server::hasPlayer(const RakNet::RakNetGUID& guid) const
-{
-    return std::ranges::find(m_players, guid) != m_players.end();
-}
+// void cyrex::Server::addPlayer(const Player& guid)
+// {
+//     if (!hasPlayer(guid))
+//         m_players.push_back(guid);
+// }
+//
+// void cyrex::Server::removePlayer(const Player& guid) // player class call this
+// {
+//     const auto it = std::ranges::remove(m_players, guid).begin();
+//     m_players.erase(it, m_players.end());
+// }
+//
+// bool cyrex::Server::hasPlayer(const Player& guid) const
+// {
+//     return std::ranges::find(m_players, guid) != m_players.end();
+// }
 
 std::size_t cyrex::Server::getPlayerCount() const
 {
-    return m_players.size();
+    // return m_players.size();
+    return 0;
 }
 
-const std::vector<RakNet::RakNetGUID>& cyrex::Server::getAllPlayers() const
-{
-    return m_players;
-}
+// const std::vector<Player>& cyrex::Server::getAllPlayers() const
+// {
+//     return m_players;
+// }
 
 cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory()
 {
@@ -174,7 +173,7 @@ bool cyrex::Server::isOnlineMode()
 void cyrex::Server::stop()
 {
     m_running = false;
-    m_players.clear();
+    // m_players.clear();
 }
 
 void cyrex::Server::commandLoop() const

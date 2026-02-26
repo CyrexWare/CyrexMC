@@ -16,15 +16,9 @@ public:
     std::string message;
     std::string filteredMessage;
 
-    bool decodePayload(io::BinaryReader& in) override
+    bool decodePayload(io::BinaryReader&) override
     {
-        reason = in.readVarInt();
-        if (!in.readBool())
-        {
-            message = in.readString();
-            filteredMessage = in.readString();
-        }
-        return true;
+        return false;
     }
 
     bool encodePayload(io::BinaryWriter& out) const override
@@ -40,7 +34,7 @@ public:
         return true;
     }
 
-    bool handle(session::NetworkSession& /*session*/) override
+    bool handle(session::NetworkSession&) override
     {
         return true;
     }

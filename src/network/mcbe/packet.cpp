@@ -2,7 +2,7 @@
 
 #include "packet_def.hpp"
 
-#include <cassert>
+#include <utility>
 
 bool cyrex::nw::protocol::Packet::encode(io::BinaryWriter& out) const
 {
@@ -11,7 +11,7 @@ bool cyrex::nw::protocol::Packet::encode(io::BinaryWriter& out) const
     {
         return false;
     }
-    const std::uint32_t header = getDef().networkId & 0x3FF | subClientId << 10;
+    const std::uint32_t header = getDef().networkId & 0x3FF | std::to_underlying(subClientId) << 10;
     out.writeVarUInt(payload.size() + io::BinaryWriter::getVarUIntSize(header));
     out.writeVarUInt(header);
     out.writeBytes(payload.getBuffer());

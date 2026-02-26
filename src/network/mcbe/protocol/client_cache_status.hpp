@@ -21,10 +21,9 @@ public:
         return true;
     }
 
-    bool encodePayload(io::BinaryWriter& out) const override
+    bool encodePayload(io::BinaryWriter&) const override
     {
-        out.writeBool(enabled);
-        return true;
+        return false;
     }
 
     bool handle(session::NetworkSession& session) override

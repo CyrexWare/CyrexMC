@@ -10,33 +10,32 @@
 namespace cyrex::nw::protocol
 {
 
-class LoginPacket final :
-    public PacketImpl<LoginPacket, std::to_underlying(PacketId::Login), PacketDirection::Serverbound, false>
+class SubClientLoginPacket final :
+    public PacketImpl<SubClientLoginPacket, std::to_underlying(PacketId::SubClientLogin), PacketDirection::Serverbound, false>
 {
 public:
-    std::uint32_t protocol = 0;
     std::string authInfoJson;
     std::string clientDataJwt;
 
     bool encodePayload(io::BinaryWriter& out) const override
     {
+        // NOOP
         return false;
     }
 
     bool decodePayload(io::BinaryReader& in) override
     {
-        if (subClientId != SubClientId::PrimaryClient)
-        {
-            return false;
-        }
-        protocol = in.readU32BE();
         tryDecodeRequestForConnection(in.readString());
         return true;
     }
 
     bool handle(session::NetworkSession& session) override
     {
-        return session.handleLogin(protocol, authInfoJson, clientDataJwt);
+        if (subClientId == SubClientId::PrimaryClient)
+        {
+            return false;
+        }
+        return session.handleSubClientLogin(authInfoJson, clientDataJwt);
     }
 
 private:

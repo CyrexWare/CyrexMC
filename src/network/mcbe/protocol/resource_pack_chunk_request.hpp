@@ -13,7 +13,6 @@ class ResourcePackChunkRequestPacket final :
 {
 public:
     uuid::UUID packId{};
-    std::string packVersion;
     int chunkIndex = 0;
 
     bool encodePayload(io::BinaryWriter& out) const override
@@ -24,15 +23,12 @@ public:
 
     bool decodePayload(io::BinaryReader& in) override
     {
-        std::string packInfo = in.readString();
-        // depending on certain settings this could be set, but with our current setup this isnt needed, mabye in the future.
-        packVersion = "";
-        packId = uuid::fromString(packInfo);
+        packId = uuid::fromString(in.readString());
         chunkIndex = in.readI16LE();
         return true;
     }
 
-    bool handle(session::NetworkSession& session);
+    bool handle(session::NetworkSession& session) override;
 };
 
 } // namespace cyrex::nw::protocol

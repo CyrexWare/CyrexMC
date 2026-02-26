@@ -52,7 +52,7 @@ public:
     }
 
 private:
-    void encodePacks(io::BinaryWriter& out, const std::vector<ResourcePackInfoEntry>& packs) const
+    static void encodePacks(io::BinaryWriter& out, const std::vector<ResourcePackInfoEntry>& packs)
     {
         out.writeU16LE(static_cast<uint16_t>(packs.size()));
 

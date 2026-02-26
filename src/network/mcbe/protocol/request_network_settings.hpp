@@ -30,6 +30,10 @@ public:
 
     bool handle(session::NetworkSession& session) override
     {
+        if (subClientId != SubClientId::PrimaryClient)
+        {
+            return false;
+        }
         return session.handleRequestNetworkSettings(protocolVersion);
     }
 };

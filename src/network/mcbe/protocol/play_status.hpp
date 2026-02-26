@@ -29,7 +29,6 @@ public:
 
     bool decodePayload(io::BinaryReader& in) override
     {
-        status = static_cast<PlayStatus>(in.readU32BE());
         return true;
     }
 

@@ -99,81 +99,93 @@ struct AuthIdentityData
 {
     std::string displayName;
     std::string identity;
-    std::string sandboxId;
+    std::string sandboxId = "RETAIL";
     std::string titleId;
     std::string XUID;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
-    ClientDataAnimationFrame, // NOLINT
-    ImageHeight,
-    ImageWidth,
-    Frames,
-    Type,
-    Image,
-    AnimationExpression);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
+                                    ClientDataAnimationFrame,
+                                    ImageHeight,
+                                    ImageWidth,
+                                    Frames,
+                                    Type,
+                                    Image,
+                                    AnimationExpression);
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ClientDataPersonaSkinPiece, // NOLINT
-                                   PieceId,
-                                   PieceType,
-                                   PackId,
-                                   IsDefault,
-                                   ProductId);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
+                                    ClientDataPersonaSkinPiece,
+                                    PieceId,
+                                    PieceType,
+                                    PackId,
+                                    IsDefault,
+                                    ProductId);
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ClientDataPersonaPieceTintColor, // NOLINT
-                                   PieceType,
-                                   Colors);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
+                                    ClientDataPersonaPieceTintColor,
+                                    PieceType,
+                                    Colors);
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
-    NetworkSkinData, // NOLINT
-    AnimatedImageData,
-    ArmSize,
-    CapeData,
-    CapeId,
-    CapeImageHeight,
-    CapeImageWidth,
-    CapeOnClassicSkin,
-    ClientRandomId,
-    CompatibleWithClientSideChunkGen,
-    CurrentInputMode,
-    DefaultInputMode,
-    DeviceId,
-    DeviceModel,
-    DeviceOS,
-    GameVersion,
-    GraphicsMode,
-    GuiScale,
-    IsEditorMode,
-    LanguageCode,
-    MaxViewDistance,
-    MemoryTier,
-    OverrideSkin,
-    PersonaPieces,
-    PersonaSkin,
-    PieceTintColors,
-    PlatformOfflineId,
-    PlatformOnlineId,
-    PlatformType,
-    PremiumSkin,
-    SelfSignedId,
-    ServerAddress,
-    SkinAnimationData,
-    SkinColor,
-    SkinData,
-    SkinGeometryData,
-    SkinGeometryDataEngineVersion,
-    SkinId,
-    SkinImageHeight,
-    SkinImageWidth,
-    SkinResourcePatch,
-    ThirdPartyName,
-    TrustedSkin,
-    UIProfile);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
+                                    NetworkSkinData,
+                                    AnimatedImageData,
+                                    ArmSize,
+                                    CapeData,
+                                    CapeId,
+                                    CapeImageHeight,
+                                    CapeImageWidth,
+                                    CapeOnClassicSkin,
+                                    ClientRandomId,
+                                    CompatibleWithClientSideChunkGen,
+                                    CurrentInputMode,
+                                    DefaultInputMode,
+                                    DeviceId,
+                                    DeviceModel,
+                                    DeviceOS,
+                                    GameVersion,
+                                    GraphicsMode,
+                                    GuiScale,
+                                    IsEditorMode,
+                                    LanguageCode,
+                                    MaxViewDistance,
+                                    MemoryTier,
+                                    OverrideSkin,
+                                    PersonaPieces,
+                                    PersonaSkin,
+                                    PieceTintColors,
+                                    PlatformOfflineId,
+                                    PlatformOnlineId,
+                                    PlatformType,
+                                    PremiumSkin,
+                                    SelfSignedId,
+                                    ServerAddress,
+                                    SkinAnimationData,
+                                    SkinColor,
+                                    SkinData,
+                                    SkinGeometryData,
+                                    SkinGeometryDataEngineVersion,
+                                    SkinId,
+                                    SkinImageHeight,
+                                    SkinImageWidth,
+                                    SkinResourcePatch,
+                                    ThirdPartyName,
+                                    TrustedSkin,
+                                    UIProfile);
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AuthenticationInfo, // NOLINT
-                                   AuthenticationType,
-                                   Certificate,
-                                   Token);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
+                                    AuthenticationInfo,
+                                    AuthenticationType,
+                                    Certificate,
+                                    Token);
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT( // NOLINT
+                                    AuthIdentityData,
+                                    displayName,
+                                    identity,
+                                    sandboxId,
+                                    titleId,
+                                    XUID);
+
 // NOLINTEND(readability-identifier-naming)
 
 } // namespace cyrex::nw::protocol

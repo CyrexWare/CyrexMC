@@ -5,6 +5,7 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "packet_def.hpp"
 #include "packet_direction.hpp"
+#include "protocol/types/SubClientId.hpp"
 
 namespace cyrex::nw::session
 {
@@ -21,7 +22,7 @@ class Packet
 public:
     virtual ~Packet() = default;
     Packet() = default;
-    uint8_t subClientId : 3 = 0;
+    SubClientId subClientId = SubClientId::PrimaryClient;
 
     [[nodiscard]] virtual const PacketDef& getDef() const = 0;
 
@@ -51,7 +52,7 @@ public:
                                    allowBeforeLogin,
                                    +[]() -> std::unique_ptr<Packet>
                                    {
-                                       PacketType* raw = new PacketType();
+                                       auto* raw = new PacketType();
                                        return std::unique_ptr<Packet>(dynamic_cast<Packet*>(raw));
                                    }};
         return def;

@@ -8,6 +8,7 @@
 #include "network/mcbe/protocol/resource_pack_chunk_request.hpp"
 #include "network/mcbe/protocol/resource_pack_client_response.hpp"
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
+#include "network/mcbe/protocol/types/ViolationSeverity.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackClientResponseStatus.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackMeta.hpp"
 #include "network/mcbe/transport.hpp"
@@ -69,9 +70,12 @@ public:
     void sendBatch(bool immediately, Packets&&... packets);
     void flush();
     bool disconnectUserForIncompatibleProtocol(uint32_t);
+    void disconnect(const std::string& message);
     bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
+    bool handleSubClientLogin(const std::string& authInfoJson, const std::string& clientDataJwt);
     bool handleClientToServerHandshake();
     void doLoginSuccess();
+    bool handlePacketViolationWarning(protocol::ViolationSeverity severity, std::int32_t packetId, std::string message);
     bool handleRequestNetworkSettings(uint32_t version);
     bool handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk);
     bool handleResourcePackChunkRequest(const protocol::ResourcePackChunkRequestPacket& pk);
@@ -104,9 +108,15 @@ public:
         return *m_cipher;
     }
 
+    //Player getPlayer()
+    // {
+    //     find clientid in map (m_player)
+    //     return player if not find mark the main player disconnect
+    // }
+
 private:
     void sendInternal(const io::BinaryWriter& payload);
-    bool verifyLegacyJwtChains(const std::string& chainData, const std::string& clientDataJwt, bool isOnline);
+    bool verifyLegacyJwtChains(const std::string& chainData, const std::string& clientDataJwt, bool isOnline, bool isEncryption);
     std::vector<std::unique_ptr<protocol::Packet>> m_sendQueue;
 
     RakNet::RakNetGUID m_guid;
@@ -117,7 +127,7 @@ private:
 
     std::uint32_t m_protocolId{0};
     std::optional<protocol::AesEncryptor> m_cipher;
-
+    // std::map<protocol::SubClientId, player> m_player; maybe weakptr idk
     protocol::PacketFactory m_packetFactory;
 
     std::map<uuid::UUID, std::unique_ptr<protocol::ResourcePackMeta>> m_loadedPacks;

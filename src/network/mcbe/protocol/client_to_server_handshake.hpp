@@ -15,14 +15,13 @@ class ClientToServerHandshakePacket final :
 public:
     bool decodePayload(io::BinaryReader&) override
     {
-        // NOOP
-        return true;
+        return subClientId == SubClientId::PrimaryClient;
     }
 
     bool encodePayload(io::BinaryWriter&) const override
     {
         // NOOP
-        return true;
+        return false;
     }
 
     bool handle(session::NetworkSession& session) override

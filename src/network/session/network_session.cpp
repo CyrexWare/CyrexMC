@@ -5,6 +5,7 @@
 #include "network/io/binary_writer.hpp"
 #include "network/mcbe/compression/compressors.hpp"
 #include "network/mcbe/packetids.hpp"
+#include "network/mcbe/protocol/disconnect.hpp"
 #include "network/mcbe/protocol/network_settings.hpp"
 #include "network/mcbe/protocol/play_status.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
@@ -15,6 +16,7 @@
 #include "network/mcbe/protocol/resource_pack_stack.hpp"
 #include "network/mcbe/protocol/resource_packs_info.hpp"
 #include "network/mcbe/protocol/server_to_client_handshake.hpp"
+#include "network/mcbe/protocol/types/ViolationSeverity.hpp"
 #include "network/mcbe/protocol/types/login/LoginData.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackClientResponseStatus.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackInfoEntry.hpp"
@@ -39,6 +41,8 @@
 
 #include <cstdint>
 
+#include <wolfssl/options.h>
+
 #ifdef min
 #undef min
 #endif
@@ -61,6 +65,54 @@ std::string hexDump(const uint8_t* data, size_t len)
 
     return oss.str();
 }
+namespace AnsiColor {
+    const auto reset = "\033[0m";
+    const auto green = "\033[32m";
+    const auto red   = "\033[31m";
+    const auto yellow= "\033[33m";
+    const auto blue  = "\033[34m";
+}
+
+void debugByteBuffer(const std::vector<uint8_t>& buffer) {
+    if (buffer.empty()) return;
+    auto& out = std::cout;
+    const auto originalFlags = out.flags();
+    const auto originalFill = out.fill();
+    out << "           +-------------------------------------------------+\n";
+    out << "  Hex View |  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F |   ASCII View\n";
+    out << "+----------+-------------------------------------------------+----------------+\n";
+    for (size_t i = 0; i < buffer.size(); i += 16)
+    {
+        out << "| " << std::setw(8) << std::setfill('0') << std::hex << std::uppercase << i << " | ";
+        out.fill(' ');
+        for (int j = 0; j < 16; ++j)
+        {
+            if (i + j < buffer.size())
+            {
+                const uint8_t byte = buffer.at(i + j);
+                out << (isprint(byte) ? AnsiColor::green : AnsiColor::red)
+                    << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << static_cast<int>(byte)
+                    << AnsiColor::reset << " ";
+            }
+            else out << AnsiColor::yellow << "--" << AnsiColor::reset << " ";
+        }
+        out.fill(' ');
+        out << "|";
+        for (int j = 0; j < 16; ++j)
+        {
+            if (i + j < buffer.size())
+            {
+                if (const char c = static_cast<char>(buffer.at(i + j)); isprint(c))
+                    out << AnsiColor::blue << c << AnsiColor::reset;
+                else out << ".";
+            } else out << " ";
+        }
+        out << "|\n";
+    }
+    out << "+----------+-------------------------------------------------+----------------+\n";
+    out.flags(originalFlags);
+    out.fill(originalFill);
+}
 } // namespace
 
 namespace cyrex::nw::session
@@ -68,6 +120,7 @@ namespace cyrex::nw::session
 
 void NetworkSession::tick()
 {
+    // tick all the players
     flush();
 }
 
@@ -103,7 +156,7 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
         const auto* packetDef = m_packetFactory.find(packetId);
         if (!packetDef)
         {
-            cyrex::logging::error(LOG_MCBE, "unknown packet id");
+            cyrex::logging::error(LOG_MCBE, "unknown packet id 0x{:02x}", packetId);
             return;
         }
 
@@ -113,7 +166,7 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
             cyrex::logging::error(LOG_MCBE, "error decoding packet");
             return;
         }
-        packet->subClientId = packetHeader >> 10 & 0x03;
+        packet->subClientId = static_cast<protocol::SubClientId>(packetHeader >> 10 & 0x03);
         if (!packet->handle(*this))
         {
             cyrex::logging::error(LOG_MCBE, "error handling packet");
@@ -122,7 +175,7 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
     } while (in.remaining() > 0);
 }
 
-bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion)
+bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion) // move this
 {
     auto packet = std::make_unique<protocol::PlayStatusPacket>();
     packet->status = protocolVersion < protocol::ProtocolInfo::currentProtocol
@@ -131,6 +184,13 @@ bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protoc
 
     send(std::move(packet), true);
     return true;
+}
+
+void NetworkSession::disconnect(const std::string &message) // move this
+{
+    auto packet = std::make_unique<protocol::DisconnectPacket>();
+    packet->message = message;
+    send(std::move(packet), true);
 }
 
 void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool immediately)
@@ -290,14 +350,16 @@ static std::string createEncryptionJwt(protocol::AesEncryptor::EccKey* serverKey
                        .set_header_claim("x5u", jwt::claim(x5u))
                        .set_payload_claim("salt", jwt::claim(saltBase64))
                        .sign(jwt::algorithm::none());
-    std::string message = builder.substr(0, builder.size() - 1);
+    builder.pop_back();
     WC_RNG rng;
     if (wc_InitRng(&rng) != 0)
+    {
         throw std::runtime_error("RNG Init Failed");
+    }
     std::array<byte, 48> hash{};
     wc_Sha384 sha;
     wc_InitSha384(&sha);
-    wc_Sha384Update(&sha, reinterpret_cast<const byte*>(message.data()), message.size());
+    wc_Sha384Update(&sha, reinterpret_cast<const byte*>(builder.data()), builder.size());
     wc_Sha384Final(&sha, hash.data());
     std::vector<byte> derSig(200);
     auto derSigLen = static_cast<word32>(derSig.size());
@@ -326,11 +388,13 @@ static std::string createEncryptionJwt(protocol::AesEncryptor::EccKey* serverKey
     mp_clear(&r);
     mp_clear(&s);
     if (signatureRaw.empty())
+    {
         throw std::runtime_error("Signature decoding failed");
-    return message + "." + jwt::base::encode<jwt::alphabet::base64url>(signatureRaw);
+    }
+    return builder + "." + jwt::base::encode<jwt::alphabet::base64url>(signatureRaw);
 }
 
-bool NetworkSession::verifyLegacyJwtChains(const std::string& chainData, const std::string& clientDataJwt, const bool isOnline)
+bool NetworkSession::verifyLegacyJwtChains(const std::string& chainData, const std::string& clientDataJwt, const bool isOnline, const bool isEncryption)
 {
     const auto chains = nlohmann::json::parse(chainData).at("chain").get<std::vector<std::string>>();
     if (chains.size() != 3 && isOnline)
@@ -349,14 +413,24 @@ bool NetworkSession::verifyLegacyJwtChains(const std::string& chainData, const s
     {
         return false;
     }
+    if (encryptionEnabled || !isEncryption)
+    {
+        return true;
+    }
     const std::string playerPublicKey = jwt::base::decode<jwt::alphabet::base64>(identityPublicKeyDer);
     m_cipher = protocol::AesEncryptor(m_server.getServerPrivateKey(), playerPublicKey);
-    const std::string payload = createEncryptionJwt(m_cipher->serverKey, m_cipher->salt);
-    auto pS2Cjwt = std::make_unique<protocol::ServerToClientHandshakePacket>();
-    pS2Cjwt->jwt = payload;
-    send(std::move(pS2Cjwt), true);
-    encryptionEnabled = true;
-    std::cout << hexDump(m_cipher->key.data(), 32) << std::endl;
+    try{
+        const std::string payload = createEncryptionJwt(m_cipher->serverKey, m_cipher->salt);
+        auto serverToClientHandshake = std::make_unique<protocol::ServerToClientHandshakePacket>();
+        serverToClientHandshake->jwt = payload;
+        send(std::move(serverToClientHandshake), true);
+        encryptionEnabled = true;
+        std::cout << hexDump(m_cipher->key.data(), 32) << std::endl;
+    } catch (const std::exception& e)
+    {
+        cyrex::logging::error(LOG_MCBE, "failed exception %s", e.what());
+        return false;
+    }
     return true;
 }
 
@@ -369,15 +443,28 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
     }
     const auto authData = nlohmann::json::parse(authInfoJson);
     const protocol::AuthenticationInfo auth = authData.get<protocol::AuthenticationInfo>();
-    if (cyrex::Server::isEncryptionEnabled())
+    if (!verifyLegacyJwtChains(auth.Certificate, clientDataJwt, cyrex::Server::isOnlineMode(), Server::isEncryptionEnabled()))
     {
-        if (!verifyLegacyJwtChains(auth.Certificate, clientDataJwt, cyrex::Server::isOnlineMode()))
-        {
-            //TODO: kick
-            return false;
-        }
+        //TODO: kick
+        return false;
     }
-    else
+    if (!encryptionEnabled)
+    {
+        doLoginSuccess();
+    }
+    return true;
+}
+
+bool NetworkSession::handleSubClientLogin(const std::string& authInfoJson, const std::string& clientDataJwt) // i have no idea yet
+{
+    const auto authData = nlohmann::json::parse(authInfoJson);
+    const protocol::AuthenticationInfo auth = authData.get<protocol::AuthenticationInfo>();
+    if (!verifyLegacyJwtChains(auth.Certificate, clientDataJwt, cyrex::Server::isOnlineMode(), false))
+    {
+        //TODO: kick
+        return false;
+    }
+    if (!encryptionEnabled)
     {
         doLoginSuccess();
     }
@@ -386,13 +473,17 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
 
 bool NetworkSession::handleClientToServerHandshake()
 {
+    if (!encryptionEnabled)
+    {
+        cyrex::logging::error(LOG_MCBE, "client sent ClientToServerHandshakePacket without encryption enabled");
+        return false;
+    }
     doLoginSuccess();
     return true;
 }
 
-void NetworkSession::doLoginSuccess()
+void NetworkSession::doLoginSuccess() // move this
 {
-    std::vector<std::unique_ptr<Packet>> packets;
     auto playStatus = std::make_unique<protocol::PlayStatusPacket>();
     playStatus->status = protocol::PlayStatus::LoginSuccess;
 
@@ -443,6 +534,17 @@ void NetworkSession::doLoginSuccess()
     sendBatch(true, std::move(playStatus), std::move(resourcePacksInfo));
 }
 
+bool NetworkSession::handlePacketViolationWarning(const protocol::ViolationSeverity severity, std::int32_t packetId, std::string message)
+{
+    logging::error("PacketViolation: Severity > {} ID > 0x{:02X}({}) MSG > {}",
+        magic_enum::enum_name(severity),
+        packetId, cyrex::nw::protocol::toSimpleName(protocol::makePacketId(packetId)),
+        message
+        );
+    markedForDisconnect = true;
+    return true;
+}
+
 bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
 {
     if (!protocol::isSupportedProtocol(version))
@@ -466,7 +568,7 @@ bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
     return true;
 }
 
-bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk)
+bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk) // move this
 {
     using protocol::ResourcePackClientResponseStatus;
 
@@ -545,9 +647,9 @@ bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePa
     return true;
 }
 
-bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& request)
+bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& request) // move this
 {
-    protocol::ResourcePackMeta* packInfoPtr = nullptr;
+    const protocol::ResourcePackMeta* packInfoPtr = nullptr;
 
     auto packFinder = m_loadedPacks.find(request.packId);
 
@@ -560,8 +662,8 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
             return true;
         }
 
-        int maxSize = m_server.getResourcePackFactory().getMaxChunkSize();
-        int totalChunks = static_cast<int>((rawPack->getPackSize() + maxSize - 1) / maxSize);
+        int const maxSize = m_server.getResourcePackFactory().getMaxChunkSize();
+        int const totalChunks = static_cast<int>((rawPack->getPackSize() + maxSize - 1) / maxSize);
 
         auto packInfo = std::make_unique<protocol::ResourcePackMeta>(rawPack->getPackId(), rawPack, maxSize, totalChunks);
 
@@ -576,8 +678,6 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
 
     if (request.chunkIndex >= 0 && request.chunkIndex < packInfo.chunkCount)
     {
-        // packInfo.want[static_cast<size_t>(request.chunkIndex)] = true;
-
         m_pendingChunks.emplace_back(packInfo.packId, static_cast<int>(request.chunkIndex));
     }
 
@@ -597,7 +697,7 @@ bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::R
     return true;
 }
 
-void NetworkSession::processChunkQueue()
+void NetworkSession::processChunkQueue() // move this
 {
     if (m_queueProcessing)
         return;
@@ -623,7 +723,7 @@ void NetworkSession::processChunkQueue()
                 return;
             }
 
-            if (pack->sent[static_cast<size_t>(idx)])
+            if (pack->sent.at(static_cast<size_t>(idx)))
                 continue;
 
             const size_t startOffset = static_cast<size_t>(idx) * pack->maxChunkSize;
@@ -646,10 +746,9 @@ void NetworkSession::processChunkQueue()
             pkt->data = std::move(chunk);
 
             send(std::move(pkt), true);
+            pack->sent.at(static_cast<size_t>(idx)) = true;
 
-            pack->sent[static_cast<size_t>(idx)] = true;
-
-            while (pack->nextToSend < pack->chunkCount && pack->sent[static_cast<size_t>(pack->nextToSend)])
+            while (pack->nextToSend < pack->chunkCount && pack->sent.at(static_cast<size_t>(pack->nextToSend)))
                 pack->nextToSend++;
 
             if (pack->nextToSend >= pack->chunkCount)

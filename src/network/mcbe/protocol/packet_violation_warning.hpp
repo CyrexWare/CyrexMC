@@ -36,8 +36,7 @@ public:
 
     bool handle(session::NetworkSession& session) override
     {
-        // session.
-        // TODO: handle
+        session.handlePacketViolationWarning(severity, packetId, message);
         return true;
     }
 };

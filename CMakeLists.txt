@@ -109,6 +109,15 @@ set(BENCHMARK_ENABLE_EXCEPTIONS ON CACHE BOOL "" FORCE)
 set(SNAPPY_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(snappy)
 
+FetchContent_Declare(
+        cpr
+        GIT_REPOSITORY https://github.com/CyrexWare/cpr
+        GIT_TAG wolfssl
+)
+SET(CPR_CURL_USE_LIBPSL FALSE)
+set(CPR_FORCE_WOLFSSL_BACKEND ON CACHE INTERNAL "")
+FetchContent_MakeAvailable(cpr)
+
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/src/**.cpp"
     "${PROJECT_SOURCE_DIR}/src/**.hpp"
@@ -153,6 +162,7 @@ target_link_libraries(CyrexMC PRIVATE
     jwt-cpp
     glm::glm-header-only
     stduuid
+#    cpr
 )
 
 CyrexMC_set_option(

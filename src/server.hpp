@@ -55,11 +55,11 @@ public:
     void setDefaultGameMode(cyrex::nw::protocol::GameMode mode);
     void setDefaultGameModeFromString(std::string_view mode);
 
-    void addPlayer(const RakNet::RakNetGUID& guid);
-    void removePlayer(const RakNet::RakNetGUID& guid);
-    [[nodiscard]] bool hasPlayer(const RakNet::RakNetGUID& guid) const;
+    // void addPlayer(const Player& guid);
+    // void removePlayer(const Player& guid);
+    // [[nodiscard]] bool hasPlayer(const Player& guid) const;
     [[nodiscard]] std::size_t getPlayerCount() const;
-    [[nodiscard]] const std::vector<RakNet::RakNetGUID>& getAllPlayers() const;
+    // [[nodiscard]] const std::vector<Player>& getAllPlayers() const;
 
     void stop();
     void run();
@@ -78,7 +78,7 @@ private:
     std::unique_ptr<nw::raknet::RaknetHandler> m_raknet;
     std::unique_ptr<nw::resourcepacks::ResourcePackFactory> m_resourcePackFactory;
     nw::protocol::AesEncryptor::EccKeyPtr m_serverPrivateKey;
-    std::vector<RakNet::RakNetGUID> m_players;
+    // std::vector<Player> m_players;
     std::uint64_t m_serverUniqueId;
     std::atomic<bool> m_running;
     std::unique_ptr<command::CommandManager> m_commands;
