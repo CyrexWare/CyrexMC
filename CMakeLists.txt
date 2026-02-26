@@ -69,7 +69,7 @@ set(GLM_ENABLE_CXX_17 ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glm)
 
 FetchContent_Declare(
-    wolfssl
+    WolfSSL
     GIT_REPOSITORY https://github.com/wolfSSL/wolfssl
     GIT_TAG v5.8.4-stable
     OVERRIDE_FIND_PACKAGE
@@ -84,7 +84,7 @@ set(WOLFSSL_BASE64_ENCODE ON CACHE BOOL "" FORCE)
 set(WOLFSSL_OPENSSLEXTRA ON CACHE BOOL "" FORCE)
 set(WOLFSSL_CRYPT_TESTS OFF CACHE BOOL "" FORCE)
 set(WOLFSSL_CERTGEN ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(wolfssl)
+FetchContent_MakeAvailable(WolfSSL)
 
 SET(JWT_SSL_LIBRARY "wolfSSL" CACHE STRING "doc" FORCE)
 FetchContent_Declare(
@@ -115,7 +115,6 @@ FetchContent_Declare(
         GIT_TAG wolfssl
 )
 SET(CPR_CURL_USE_LIBPSL FALSE)
-set(CPR_FORCE_WOLFSSL_BACKEND ON CACHE INTERNAL "")
 FetchContent_MakeAvailable(cpr)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
@@ -162,7 +161,7 @@ target_link_libraries(CyrexMC PRIVATE
     jwt-cpp
     glm::glm-header-only
     stduuid
-#    cpr
+    cpr
 )
 
 CyrexMC_set_option(
