@@ -179,7 +179,8 @@ private:
         if (open == std::string_view::npos || close == std::string_view::npos || close <= open)
             return std::nullopt;
         std::string_view rest = line.substr(close + 2);
-        std::istringstream iss(std::string(rest));
+        std::string s{rest};
+        std::istringstream iss{s};
         std::vector<std::string> tokens;
         std::string tok;
         while (iss >> tok)
