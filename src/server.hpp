@@ -3,8 +3,10 @@
 #include "command/command_manager.hpp"
 #include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/protocol/types/GameMode.hpp"
+#include "network/mcbe/protocol/types/SubClientId.hpp"
 #include "network/mcbe/resourcepacks/loader/resource_pack_loader_def.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
+#include "network/session/network_session.hpp"
 #include "util/server_properties.hpp"
 
 #include <RakNet/RakNetTypes.h>
@@ -20,6 +22,12 @@ namespace cyrex::nw::raknet
 {
 class RaknetHandler;
 }
+
+namespace cyrex::player
+{
+class Player;
+}
+
 
 namespace cyrex
 {
@@ -55,11 +63,11 @@ public:
     void setDefaultGameMode(cyrex::nw::protocol::GameMode mode);
     void setDefaultGameModeFromString(std::string_view mode);
 
-    // void addPlayer(const Player& guid);
-    // void removePlayer(const Player& guid);
-    // [[nodiscard]] bool hasPlayer(const Player& guid) const;
     [[nodiscard]] std::size_t getPlayerCount() const;
-    // [[nodiscard]] const std::vector<Player>& getAllPlayers() const;
+    cyrex::player::Player& createPlayer(nw::protocol::SubClientId id, nw::session::NetworkSession* session);
+    void removePlayer(player::Player& player);
+    const std::vector<std::unique_ptr<cyrex::player::Player>>& getPlayers() const noexcept;
+    void broadcastPacketToAll(const nw::protocol::Packet& packet, player::Player* exclude = nullptr);
 
     void stop();
     void run();
@@ -78,10 +86,10 @@ private:
     std::unique_ptr<nw::raknet::RaknetHandler> m_raknet;
     std::unique_ptr<nw::resourcepacks::ResourcePackFactory> m_resourcePackFactory;
     nw::protocol::AesEncryptor::EccKeyPtr m_serverPrivateKey;
-    // std::vector<Player> m_players;
     std::uint64_t m_serverUniqueId;
     std::atomic<bool> m_running;
     std::unique_ptr<command::CommandManager> m_commands;
     std::unordered_set<std::unique_ptr<nw::resourcepacks::ResourcePackLoaderDef>> m_loaders;
+    std::vector<std::unique_ptr<player::Player>> m_players;
 };
 } // namespace cyrex

@@ -24,6 +24,7 @@
 #include "network/mcbe/protocol/types/packs/ResourcePackStackEntry.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_def.hpp"
 #include "network/raknet/handler/raknet_handler.hpp"
+#include "player/player.hpp"
 #include "util/uuid.hpp"
 
 #include <algorithm>
@@ -38,10 +39,9 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <wolfssl/options.h>
 
 #include <cstdint>
-
-#include <wolfssl/options.h>
 
 #ifdef min
 #undef min
@@ -65,16 +65,19 @@ std::string hexDump(const uint8_t* data, size_t len)
 
     return oss.str();
 }
-namespace AnsiColor {
-    const auto reset = "\033[0m";
-    const auto green = "\033[32m";
-    const auto red   = "\033[31m";
-    const auto yellow= "\033[33m";
-    const auto blue  = "\033[34m";
-}
+namespace AnsiColor
+{
+const auto reset = "\033[0m";
+const auto green = "\033[32m";
+const auto red = "\033[31m";
+const auto yellow = "\033[33m";
+const auto blue = "\033[34m";
+} // namespace AnsiColor
 
-void debugByteBuffer(const std::vector<uint8_t>& buffer) {
-    if (buffer.empty()) return;
+void debugByteBuffer(const std::vector<uint8_t>& buffer)
+{
+    if (buffer.empty())
+        return;
     auto& out = std::cout;
     const auto originalFlags = out.flags();
     const auto originalFill = out.fill();
@@ -90,11 +93,11 @@ void debugByteBuffer(const std::vector<uint8_t>& buffer) {
             if (i + j < buffer.size())
             {
                 const uint8_t byte = buffer.at(i + j);
-                out << (isprint(byte) ? AnsiColor::green : AnsiColor::red)
-                    << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << static_cast<int>(byte)
-                    << AnsiColor::reset << " ";
+                out << (isprint(byte) ? AnsiColor::green : AnsiColor::red) << std::setw(2) << std::setfill('0')
+                    << std::hex << std::uppercase << static_cast<int>(byte) << AnsiColor::reset << " ";
             }
-            else out << AnsiColor::yellow << "--" << AnsiColor::reset << " ";
+            else
+                out << AnsiColor::yellow << "--" << AnsiColor::reset << " ";
         }
         out.fill(' ');
         out << "|";
@@ -104,8 +107,11 @@ void debugByteBuffer(const std::vector<uint8_t>& buffer) {
             {
                 if (const char c = static_cast<char>(buffer.at(i + j)); isprint(c))
                     out << AnsiColor::blue << c << AnsiColor::reset;
-                else out << ".";
-            } else out << " ";
+                else
+                    out << ".";
+            }
+            else
+                out << " ";
         }
         out << "|\n";
     }
@@ -175,22 +181,15 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
     } while (in.remaining() > 0);
 }
 
-bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion) // move this
+bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion)
 {
-    auto packet = std::make_unique<protocol::PlayStatusPacket>();
-    packet->status = protocolVersion < protocol::ProtocolInfo::currentProtocol
-                         ? protocol::PlayStatus::LoginFailedClient
-                         : protocol::PlayStatus::LoginFailedServer;
+    auto packet = std::make_unique<nw::protocol::PlayStatusPacket>();
+    packet->status = protocolVersion < nw::protocol::ProtocolInfo::currentProtocol
+                         ? nw::protocol::PlayStatus::LoginFailedClient
+                         : nw::protocol::PlayStatus::LoginFailedServer;
 
     send(std::move(packet), true);
     return true;
-}
-
-void NetworkSession::disconnect(const std::string &message) // move this
-{
-    auto packet = std::make_unique<protocol::DisconnectPacket>();
-    packet->message = message;
-    send(std::move(packet), true);
 }
 
 void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool immediately)
@@ -209,30 +208,6 @@ void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool i
         return;
     }
     m_sendQueue.push_back(std::move(packet));
-}
-
-template <typename... Packets>
-void NetworkSession::sendBatch(const bool immediately, Packets&&... packets)
-{
-    std::vector<std::unique_ptr<protocol::Packet>> batch;
-    batch.reserve(sizeof...(packets));
-    (batch.push_back(std::forward<Packets>(packets)), ...);
-    if (immediately)
-    {
-        BinaryWriter packetBuffer;
-        for (const auto& packet : batch)
-        {
-            packet->encode(packetBuffer);
-        }
-        sendInternal(packetBuffer);
-        return;
-    }
-
-    m_sendQueue.reserve(m_sendQueue.size() + batch.size());
-    for (auto& packet : batch)
-    {
-        m_sendQueue.push_back(std::move(packet));
-    }
 }
 
 void NetworkSession::flush()
@@ -394,7 +369,10 @@ static std::string createEncryptionJwt(protocol::AesEncryptor::EccKey* serverKey
     return builder + "." + jwt::base::encode<jwt::alphabet::base64url>(signatureRaw);
 }
 
-bool NetworkSession::verifyLegacyJwtChains(const std::string& chainData, const std::string& clientDataJwt, const bool isOnline, const bool isEncryption)
+bool NetworkSession::verifyLegacyJwtChains(const std::string& chainData,
+                                           const std::string& clientDataJwt,
+                                           const bool isOnline,
+                                           const bool isEncryption)
 {
     const auto chains = nlohmann::json::parse(chainData).at("chain").get<std::vector<std::string>>();
     if (chains.size() != 3 && isOnline)
@@ -419,7 +397,8 @@ bool NetworkSession::verifyLegacyJwtChains(const std::string& chainData, const s
     }
     const std::string playerPublicKey = jwt::base::decode<jwt::alphabet::base64>(identityPublicKeyDer);
     m_cipher = protocol::AesEncryptor(m_server.getServerPrivateKey(), playerPublicKey);
-    try{
+    try
+    {
         const std::string payload = createEncryptionJwt(m_cipher->serverKey, m_cipher->salt);
         auto serverToClientHandshake = std::make_unique<protocol::ServerToClientHandshakePacket>();
         serverToClientHandshake->jwt = payload;
@@ -450,7 +429,12 @@ bool NetworkSession::handleLogin(const uint32_t version, const std::string& auth
     }
     if (!encryptionEnabled)
     {
-        doLoginSuccess();
+        auto& player = m_server.createPlayer(protocol::SubClientId::PrimaryClient, this);
+        m_players[protocol::SubClientId::PrimaryClient] = &player;
+        // not sure if we need this or not
+        m_primaryLoggedIn = true;
+
+        player.doLoginSuccess();
     }
     return true;
 }
@@ -466,7 +450,8 @@ bool NetworkSession::handleSubClientLogin(const std::string& authInfoJson, const
     }
     if (!encryptionEnabled)
     {
-        doLoginSuccess();
+        // TODO: handle subclient logins
+        //player.doLoginSuccess();
     }
     return true;
 }
@@ -478,70 +463,24 @@ bool NetworkSession::handleClientToServerHandshake()
         cyrex::logging::error(LOG_MCBE, "client sent ClientToServerHandshakePacket without encryption enabled");
         return false;
     }
-    doLoginSuccess();
+    auto& player = m_server.createPlayer(protocol::SubClientId::PrimaryClient, this);
+    m_players[protocol::SubClientId::PrimaryClient] = &player;
+    // not sure if we need this or not
+    m_primaryLoggedIn = true;
+    player.doLoginSuccess();
     return true;
 }
 
-void NetworkSession::doLoginSuccess() // move this
-{
-    auto playStatus = std::make_unique<protocol::PlayStatusPacket>();
-    playStatus->status = protocol::PlayStatus::LoginSuccess;
-
-    auto resourcePacksInfo = std::make_unique<protocol::ResourcePacksInfoPacket>();
-    const auto& defs = m_server.getResourcePackFactory().getResourceStack();
-    resourcePacksInfo->resourcePackEntries.reserve(defs.size());
-
-    for (const auto& defPtr : defs)
-    {
-        if (!defPtr)
-            continue;
-
-        const auto& def = *defPtr;
-
-        int chunkCount = static_cast<int>(
-            std::ceil(static_cast<double>(def.getPackSize()) / m_server.getResourcePackFactory().getMaxChunkSize()));
-
-        logging::log("chunk={}", chunkCount);
-
-        auto& [packId,
-               packVersion,
-               packSize,
-               encryptionKey,
-               subPackName,
-               contentIdentity,
-               scripting,
-               addonPack,
-               raytracingCapable,
-               cdnUrl] = resourcePacksInfo->resourcePackEntries.emplace_back();
-
-        packId = def.getPackId();
-        packVersion = def.getPackVersion();
-        packSize = def.getPackSize();
-        encryptionKey = def.getEncryptionKey();
-        subPackName = "";
-        contentIdentity = uuid::toString(packId);
-        scripting = def.usesScript();
-        addonPack = def.isAddonPack();
-        raytracingCapable = def.isRaytracingCapable();
-        cdnUrl = def.cdnUrl();
-    }
-
-    resourcePacksInfo->mustAccept = m_server.shouldForceResources();
-    resourcePacksInfo->disableVibrantVisuals = false;
-
-    resourcePacksInfo->worldTemplateId = uuid::randomUUID();
-    resourcePacksInfo->worldTemplateVersion = "";
-    sendBatch(true, std::move(playStatus), std::move(resourcePacksInfo));
-}
-
-bool NetworkSession::handlePacketViolationWarning(const protocol::ViolationSeverity severity, std::int32_t packetId, std::string message)
+bool NetworkSession::handlePacketViolationWarning(const protocol::ViolationSeverity severity,
+                                                  std::int32_t packetId,
+                                                  std::string message)
 {
     logging::error("PacketViolation: Severity > {} ID > 0x{:02X}({}) MSG > {}",
-        magic_enum::enum_name(severity),
-        packetId, cyrex::nw::protocol::toSimpleName(protocol::makePacketId(packetId)),
-        message
-        );
-    markedForDisconnect = true;
+                   magic_enum::enum_name(severity),
+                   packetId,
+                   cyrex::nw::protocol::toSimpleName(protocol::makePacketId(packetId)),
+                   message);
+    //m_markedForDisconnect = true;
     return true;
 }
 
@@ -566,218 +505,6 @@ bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
     compressionEnabled = true;
 
     return true;
-}
-
-bool NetworkSession::handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk) // move this
-{
-    using protocol::ResourcePackClientResponseStatus;
-
-    switch (pk.responseStatus)
-    {
-        case ResourcePackClientResponseStatus::Refused:
-        {
-            logging::warn("client refused resource packs");
-            if (m_server.shouldForceResources())
-                markedForDisconnect = true;
-            break;
-        }
-
-        case ResourcePackClientResponseStatus::SendPacks:
-        {
-            for (const auto& entry : pk.packEntries)
-            {
-                auto resourcePack = m_server.getResourcePackFactory().getPackById(entry.uuid);
-                if (!resourcePack)
-                {
-                    markedForDisconnect = true;
-                    return true;
-                }
-
-                const int maxChunkSize = m_server.getResourcePackFactory().getMaxChunkSize();
-                const int chunkCount = static_cast<int>(
-                    std::ceil(static_cast<double>(resourcePack->getPackSize()) / maxChunkSize));
-
-                auto data = std::make_unique<protocol::ResourcePackMeta>(resourcePack->getPackId(),
-                                                                         resourcePack,
-                                                                         maxChunkSize,
-                                                                         chunkCount);
-
-                m_packQueue.push_back(data->packId);
-                m_loadedPacks.emplace(data->packId, std::move(data));
-
-                auto dataInfoPkt = std::make_unique<protocol::ResourcePackDataInfoPacket>();
-                dataInfoPkt->packId = resourcePack->getPackId();
-                dataInfoPkt->packVersion = resourcePack->getPackVersion();
-                dataInfoPkt->maxChunkSize = maxChunkSize;
-                dataInfoPkt->chunkCount = chunkCount;
-                dataInfoPkt->compressedPackSize = resourcePack->getPackSize();
-                dataInfoPkt->sha256 = resourcePack->getSha256();
-                send(std::move(dataInfoPkt), false);
-            }
-            break;
-        }
-
-        case ResourcePackClientResponseStatus::HaveAllPacks:
-        {
-            auto stackPkt = std::make_unique<protocol::ResourcePackStackPacket>();
-            stackPkt->mustAccept = m_server.shouldForceResources();
-
-            const auto& defStack = m_server.getResourcePackFactory().getResourceStack();
-            stackPkt->resourcePackStack.reserve(defStack.size());
-
-            for (const auto& def : defStack)
-            {
-                auto& [packId, packVersion, subPackName] = stackPkt->resourcePackStack.emplace_back();
-                packId = uuid::toString(def->getPackId());
-                packVersion = def->getPackVersion();
-                subPackName = def->getSubPackName();
-            }
-
-            stackPkt->baseGameVersion = protocol::ProtocolInfo::minecraftVersionNetwork;
-            stackPkt->experiments = {};
-            send(std::move(stackPkt), true);
-            break;
-        }
-
-        case ResourcePackClientResponseStatus::Completed:
-            logging::log("client has completed process");
-            break;
-    }
-
-    return true;
-}
-
-bool NetworkSession::handleResourcePackChunkRequest(const cyrex::nw::protocol::ResourcePackChunkRequestPacket& request) // move this
-{
-    const protocol::ResourcePackMeta* packInfoPtr = nullptr;
-
-    auto packFinder = m_loadedPacks.find(request.packId);
-
-    if (packFinder == m_loadedPacks.end())
-    {
-        const auto rawPack = m_server.getResourcePackFactory().getPackById(request.packId);
-        if (!rawPack)
-        {
-            markedForDisconnect = true;
-            return true;
-        }
-
-        int const maxSize = m_server.getResourcePackFactory().getMaxChunkSize();
-        int const totalChunks = static_cast<int>((rawPack->getPackSize() + maxSize - 1) / maxSize);
-
-        auto packInfo = std::make_unique<protocol::ResourcePackMeta>(rawPack->getPackId(), rawPack, maxSize, totalChunks);
-
-        packInfoPtr = m_loadedPacks.emplace(packInfo->packId, std::move(packInfo)).first->second.get();
-    }
-    else
-    {
-        packInfoPtr = packFinder->second.get();
-    }
-
-    auto& packInfo = *packInfoPtr;
-
-    if (request.chunkIndex >= 0 && request.chunkIndex < packInfo.chunkCount)
-    {
-        m_pendingChunks.emplace_back(packInfo.packId, static_cast<int>(request.chunkIndex));
-    }
-
-    if (m_currentPack.is_nil())
-    {
-        m_currentPack = packInfo.packId;
-
-        if (std::ranges::find(m_packQueue, packInfo.packId) == m_packQueue.end())
-            m_packQueue.push_back(packInfo.packId);
-    }
-    else if (std::ranges::find(m_packQueue, packInfo.packId) == m_packQueue.end())
-    {
-        m_packQueue.push_back(packInfo.packId);
-    }
-
-    processChunkQueue();
-    return true;
-}
-
-void NetworkSession::processChunkQueue() // move this
-{
-    if (m_queueProcessing)
-        return;
-
-    m_queueProcessing = true;
-
-    try
-    {
-        while (!m_pendingChunks.empty())
-        {
-            auto [packId, idx] = m_pendingChunks.front();
-            m_pendingChunks.pop_front();
-
-            auto packIter = m_loadedPacks.find(packId);
-            if (packIter == m_loadedPacks.end())
-                continue;
-
-            const auto& pack = packIter->second;
-            if (idx < 0 || idx >= pack->chunkCount)
-            {
-                markedForDisconnect = true;
-                m_queueProcessing = false;
-                return;
-            }
-
-            if (pack->sent.at(static_cast<size_t>(idx)))
-                continue;
-
-            const size_t startOffset = static_cast<size_t>(idx) * pack->maxChunkSize;
-            const size_t chunkSize = std::min(static_cast<size_t>(pack->maxChunkSize),
-                                              pack->pack->getPackSize() - startOffset);
-
-            std::string chunk = pack->pack->getPackChunkString(startOffset, chunkSize);
-            if (chunk.empty())
-            {
-                markedForDisconnect = true;
-                m_queueProcessing = false;
-                return;
-            }
-
-            auto pkt = std::make_unique<cyrex::nw::protocol::ResourcePackChunkDataPacket>();
-            pkt->packId = pack->packId;
-            pkt->packVersion = pack->pack->getPackVersion();
-            pkt->chunkIndex = idx;
-            pkt->progress = startOffset;
-            pkt->data = std::move(chunk);
-
-            send(std::move(pkt), true);
-            pack->sent.at(static_cast<size_t>(idx)) = true;
-
-            while (pack->nextToSend < pack->chunkCount && pack->sent.at(static_cast<size_t>(pack->nextToSend)))
-                pack->nextToSend++;
-
-            if (pack->nextToSend >= pack->chunkCount)
-                nextPack();
-        }
-    } catch (...)
-    {
-        m_queueProcessing = false;
-        throw;
-    }
-
-    m_queueProcessing = false;
-}
-
-void NetworkSession::nextPack()
-{
-    if (!m_packQueue.empty())
-    {
-        if (m_packQueue.front() == m_currentPack)
-            m_packQueue.pop_front();
-        else
-            m_packQueue.erase(std::ranges::remove(m_packQueue, m_currentPack).begin(), m_packQueue.end());
-
-        m_currentPack = m_packQueue.empty() ? uuid::UUID{} : m_packQueue.front();
-    }
-    else
-    {
-        m_currentPack = uuid::UUID{};
-    }
 }
 
 } // namespace cyrex::nw::session

@@ -1,23 +1,36 @@
 #include "server.hpp"
 
+#include "info.hpp"
 #include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "network/mcbe/resourcepacks/loader/resource_pack_loader_def.hpp"
 #include "network/mcbe/resourcepacks/loader/zipped_resource_pack_loader.hpp"
 #include "network/mcbe/resourcepacks/resource_pack_factory.hpp"
 #include "network/raknet/handler/raknet_handler.hpp"
+#include "network/session/network_session.hpp"
+#include "player/player.hpp"
+#include "util/cpu.hpp"
 #include "wolfcrypt/ecc.h"
 #include "wolfcrypt/random.h"
 
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <random>
+#include <sstream>
+#include <string>
 #include <thread>
 #include <unordered_set>
 #include <utility>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 
 cyrex::Server::Config cyrex::Server::Config::fromProperties(const cyrex::util::ServerProperties& props)
 {
@@ -112,33 +125,42 @@ void cyrex::Server::setDefaultGameModeFromString(const std::string_view mode)
     m_config.defaultGameMode = cyrex::nw::protocol::fromString(mode);
 }
 
-// void cyrex::Server::addPlayer(const Player& guid)
-// {
-//     if (!hasPlayer(guid))
-//         m_players.push_back(guid);
-// }
-//
-// void cyrex::Server::removePlayer(const Player& guid) // player class call this
-// {
-//     const auto it = std::ranges::remove(m_players, guid).begin();
-//     m_players.erase(it, m_players.end());
-// }
-//
-// bool cyrex::Server::hasPlayer(const Player& guid) const
-// {
-//     return std::ranges::find(m_players, guid) != m_players.end();
-// }
+cyrex::player::Player& cyrex::Server::createPlayer(cyrex::player::Player::SubClientId id, nw::session::NetworkSession* session)
+{
+    m_players.push_back(std::make_unique<cyrex::player::Player>(id, session, *this));
+    return *m_players.back();
+}
+
+void cyrex::Server::removePlayer(cyrex::player::Player& player)
+{
+    m_players.erase(std::remove_if(m_players.begin(),
+                                   m_players.end(),
+                                   [&player](const std::unique_ptr<cyrex::player::Player>& p)
+                                   { return p.get() == &player; }),
+                    m_players.end());
+}
 
 std::size_t cyrex::Server::getPlayerCount() const
 {
-    // return m_players.size();
-    return 0;
+    return m_players.size();
 }
 
-// const std::vector<Player>& cyrex::Server::getAllPlayers() const
-// {
-//     return m_players;
-// }
+const std::vector<std::unique_ptr<cyrex::player::Player>>& cyrex::Server::getPlayers() const noexcept
+{
+    return m_players;
+}
+
+void cyrex::Server::broadcastPacketToAll(const nw::protocol::Packet& packet, cyrex::player::Player* exclude)
+{
+    for (const auto& player : m_players)
+    {
+        if (exclude && player.get() == exclude)
+            continue;
+
+        auto cloned = packet.getDef().create();
+        player->sendPacket(std::move(cloned));
+    }
+}
 
 cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory()
 {
@@ -190,11 +212,26 @@ void cyrex::Server::commandLoop() const
 
 void cyrex::Server::run()
 {
+    cyrex::util::CPU cpu;
+
     std::thread commandThread(&cyrex::Server::commandLoop, this);
 
     while (m_running)
     {
         m_raknet->poll();
+
+        double load = cpu.getUsage();
+
+        std::ostringstream title;
+        title << "CyrexMC v" << Info::version().toString() << " | Load: " << std::fixed << std::setprecision(1) << load
+              << "%";
+
+#ifdef _WIN32
+        SetConsoleTitleA(title.str().c_str());
+#else
+        std::cout << "\033]0;" << title.str() << "\007";
+#endif
+
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 

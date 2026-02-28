@@ -1,5 +1,6 @@
 #pragma once
 
+#include "network/io/binary_writer.hpp"
 #include "network/mcbe/compression/compressor.hpp"
 #include "network/mcbe/encryption/encryption.hpp"
 #include "network/mcbe/packet.hpp"
@@ -8,6 +9,7 @@
 #include "network/mcbe/protocol/resource_pack_chunk_request.hpp"
 #include "network/mcbe/protocol/resource_pack_client_response.hpp"
 #include "network/mcbe/protocol/types/CompressionAlgorithm.hpp"
+#include "network/mcbe/protocol/types/SubClientId.hpp"
 #include "network/mcbe/protocol/types/ViolationSeverity.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackClientResponseStatus.hpp"
 #include "network/mcbe/protocol/types/packs/ResourcePackMeta.hpp"
@@ -25,6 +27,11 @@
 namespace cyrex::nw::protocol
 {
 class ResourcePackChunkRequestPacket;
+}
+
+namespace cyrex::player
+{
+class Player;
 }
 
 namespace cyrex::nw::session
@@ -62,25 +69,40 @@ public:
 
     bool encryptionEnabled = false;
     Phase phase = Phase::PRELOGIN;
-    bool markedForDisconnect = false;
 
     void onRaw(const RakNet::Packet& packet, const uint8_t* data, size_t len);
     void send(std::unique_ptr<protocol::Packet> packet, bool immediately = false);
-    template <class... Packets>
-    void sendBatch(bool immediately, Packets&&... packets);
+    template <typename... Packets>
+    void sendBatch(const bool immediately, Packets&&... packets)
+    {
+        std::vector<std::unique_ptr<protocol::Packet>> batch;
+        batch.reserve(sizeof...(packets));
+        (batch.push_back(std::forward<Packets>(packets)), ...);
+        if (immediately)
+        {
+            io::BinaryWriter packetBuffer;
+            for (const auto& packet : batch)
+            {
+                packet->encode(packetBuffer);
+            }
+            sendInternal(packetBuffer);
+            return;
+        }
+
+        m_sendQueue.reserve(m_sendQueue.size() + batch.size());
+        for (auto& packet : batch)
+        {
+            m_sendQueue.push_back(std::move(packet));
+        }
+    }
+
     void flush();
-    bool disconnectUserForIncompatibleProtocol(uint32_t);
-    void disconnect(const std::string& message);
+    bool disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion);
     bool handleLogin(uint32_t version, const std::string& authInfoJson, const std::string& clientDataJwt);
     bool handleSubClientLogin(const std::string& authInfoJson, const std::string& clientDataJwt);
     bool handleClientToServerHandshake();
-    void doLoginSuccess();
     bool handlePacketViolationWarning(protocol::ViolationSeverity severity, std::int32_t packetId, std::string message);
     bool handleRequestNetworkSettings(uint32_t version);
-    bool handleResourcePackClientResponse(const protocol::ResourcePackClientResponsePacket& pk);
-    bool handleResourcePackChunkRequest(const protocol::ResourcePackChunkRequestPacket& pk);
-    void nextPack();
-    void processChunkQueue();
     void tick();
 
     void setProtocolId(const std::uint32_t protocolId)
@@ -108,11 +130,13 @@ public:
         return *m_cipher;
     }
 
-    //Player getPlayer()
-    // {
-    //     find clientid in map (m_player)
-    //     return player if not find mark the main player disconnect
-    // }
+    [[nodiscard]] cyrex::player::Player* getPlayer(protocol::SubClientId id = protocol::SubClientId::PrimaryClient) noexcept
+    {
+        if (auto it = m_players.find(id); it != m_players.end())
+            return it->second;
+
+        return nullptr;
+    }
 
 private:
     void sendInternal(const io::BinaryWriter& payload);
@@ -127,14 +151,8 @@ private:
 
     std::uint32_t m_protocolId{0};
     std::optional<protocol::AesEncryptor> m_cipher;
-    // std::map<protocol::SubClientId, player> m_player; maybe weakptr idk
+    std::map<protocol::SubClientId, cyrex::player::Player*> m_players;
+    bool m_primaryLoggedIn{false};
     protocol::PacketFactory m_packetFactory;
-
-    std::map<uuid::UUID, std::unique_ptr<protocol::ResourcePackMeta>> m_loadedPacks;
-    std::deque<uuid::UUID> m_packQueue;
-    std::deque<std::pair<uuid::UUID, int>> m_pendingChunks;
-
-    uuid::UUID m_currentPack{};
-    bool m_queueProcessing = false;
 };
 } // namespace cyrex::nw::session

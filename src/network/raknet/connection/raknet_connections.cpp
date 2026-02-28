@@ -2,8 +2,10 @@
 
 #include "log/logging.hpp"
 #include "network/mcbe/compression/zlib_compressor.hpp"
+#include "network/mcbe/protocol/types/SubClientId.hpp"
 #include "network/raknet/handler/raknet_handler.hpp"
 #include "network/session/network_session.hpp"
+#include "player/player.hpp"
 
 #include <iostream>
 #include <ranges>
@@ -28,7 +30,10 @@ void cyrex::nw::raknet::RaknetConnections::onDisconnect(const RakNet::RakNetGUID
     if (it == m_sessions.end())
         return;
 
-    it->second->markedForDisconnect = true;
+    auto* player = it->second->getPlayer(protocol::SubClientId::PrimaryClient);
+    if (player)
+        player->markForDisconnect();
+
     cyrex::logging::log(LOG_RAKNET, "Client disconnected");
 }
 
@@ -44,13 +49,19 @@ void cyrex::nw::raknet::RaknetConnections::cleanup()
 {
     for (auto it = m_sessions.begin(); it != m_sessions.end();)
     {
-        if (it->second->markedForDisconnect)
+        auto* session = it->second.get();
+        auto* player = session->getPlayer(protocol::SubClientId::PrimaryClient);
+
+        if (player && player->isMarkedForDisconnect())
+        {
             it = m_sessions.erase(it);
+        }
         else
+        {
             ++it;
+        }
     }
 }
-
 
 cyrex::nw::session::NetworkSession* cyrex::nw::raknet::RaknetConnections::get(const RakNet::RakNetGUID& guid)
 {

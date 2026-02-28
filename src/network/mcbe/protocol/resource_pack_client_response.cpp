@@ -1,8 +1,9 @@
 #include "resource_pack_client_response.hpp"
 
 #include "network/session/network_session.hpp"
+#include "player/player.hpp"
 
 bool cyrex::nw::protocol::ResourcePackClientResponsePacket::handle(session::NetworkSession& session)
 {
-    return session.handleResourcePackClientResponse(*this);
+    return session.getPlayer(subClientId)->handleResourcePackClientResponse(*this);
 }

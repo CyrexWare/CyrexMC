@@ -4,6 +4,7 @@
 #include "network/mcbe/protocol/protocol_info.hpp"
 #include "server.hpp"
 #include "util/server_properties.hpp"
+#include "util/cpu.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -68,7 +69,6 @@ void onSignal(int)
 int main()
 {
     using namespace cyrex::util;
-
     if (std::filesystem::exists(lockFile))
     {
         uint64_t pid = 0;
