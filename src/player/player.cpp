@@ -124,9 +124,9 @@ bool Player::handleResourcePackClientResponse(const network::protocol::ResourceP
                 const int chunkCount = static_cast<int>(std::ceil(double(resourcePack->getPackSize()) / maxChunkSize));
 
                 auto data = std::make_unique<network::protocol::ResourcePackMeta>(resourcePack->getPackId(),
-                                                                             resourcePack,
-                                                                             maxChunkSize,
-                                                                             chunkCount);
+                                                                                  resourcePack,
+                                                                                  maxChunkSize,
+                                                                                  chunkCount);
 
                 m_packQueue.push_back(data->packId);
                 m_loadedPacks.emplace(data->packId, std::move(data));
