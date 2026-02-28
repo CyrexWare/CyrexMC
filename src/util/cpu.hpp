@@ -181,12 +181,12 @@ private:
         std::string_view rest = line.substr(close + 2);
         std::istringstream iss(std::string(rest));
         std::vector<std::string> tokens;
-        for (std::string tok; iss >> tok;)
+        std::string tok;
+        while (iss >> tok)
             tokens.push_back(std::move(tok));
         if (tokens.size() <= 12)
             return std::nullopt;
-        uint64_t utime = 0;
-        uint64_t stime = 0;
+        uint64_t utime = 0, stime = 0;
         try
         {
             utime = static_cast<uint64_t>(std::stoull(tokens[11]));
