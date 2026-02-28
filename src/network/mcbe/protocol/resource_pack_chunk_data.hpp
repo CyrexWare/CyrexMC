@@ -6,12 +6,12 @@
 
 #include <string>
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 class ResourcePackChunkDataPacket final :
@@ -45,4 +45,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

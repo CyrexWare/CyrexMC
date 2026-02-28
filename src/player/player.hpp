@@ -16,12 +16,12 @@
 #include <utility>
 #include <vector>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 class ResourcePackChunkRequestPacket;
 class ResourcePackClientResponsePacket;
 class Packet;
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol
 
 namespace cyrex
 {
@@ -34,12 +34,12 @@ namespace cyrex::player
 class Player final : public actor::Actor
 {
 private:
-    nw::protocol::SubClientId m_subClientId;
-    nw::session::NetworkSession* m_session;
+    network::protocol::SubClientId m_subClientId;
+    network::session::NetworkSession* m_session;
     cyrex::Server& m_server;
     bool m_markedForDisconnect{false};
 
-    std::map<uuid::UUID, std::unique_ptr<nw::protocol::ResourcePackMeta>> m_loadedPacks;
+    std::map<uuid::UUID, std::unique_ptr<network::protocol::ResourcePackMeta>> m_loadedPacks;
     std::deque<uuid::UUID> m_packQueue;
     std::deque<std::pair<uuid::UUID, int>> m_pendingChunks;
 
@@ -47,13 +47,13 @@ private:
     bool m_queueProcessing = false;
 
 public:
-    using SubClientId = nw::protocol::SubClientId;
+    using SubClientId = network::protocol::SubClientId;
 
-    Player(SubClientId id, nw::session::NetworkSession* session, cyrex::Server& server) noexcept;
+    Player(SubClientId id, network::session::NetworkSession* session, cyrex::Server& server) noexcept;
 
     SubClientId getSubClientId() const noexcept;
 
-    void sendPacket(std::unique_ptr<nw::protocol::Packet> packet, bool immediately = false);
+    void sendPacket(std::unique_ptr<network::protocol::Packet> packet, bool immediately = false);
 
     template <class... Packets>
     void sendPacketBatch(bool immediately, Packets&&... packets);
@@ -63,8 +63,8 @@ public:
 
     void doLoginSuccess();
     void processChunkQueue();
-    bool handleResourcePackChunkRequest(const nw::protocol::ResourcePackChunkRequestPacket& request);
-    bool handleResourcePackClientResponse(const nw::protocol::ResourcePackClientResponsePacket& pk);
+    bool handleResourcePackChunkRequest(const network::protocol::ResourcePackChunkRequestPacket& request);
+    bool handleResourcePackClientResponse(const network::protocol::ResourcePackClientResponsePacket& pk);
     void nextPack();
 
     void disconnect(const std::string& message);

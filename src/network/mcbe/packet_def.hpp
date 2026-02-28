@@ -7,12 +7,12 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 class Packet;
 
@@ -40,4 +40,4 @@ public:
     std::unique_ptr<Packet> decode(io::BinaryReader& in) const;
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

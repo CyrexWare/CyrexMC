@@ -5,7 +5,7 @@
 #include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 class ResourcePackChunkRequestPacket final :
@@ -31,4 +31,4 @@ public:
     bool handle(session::NetworkSession& session) override;
 };
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

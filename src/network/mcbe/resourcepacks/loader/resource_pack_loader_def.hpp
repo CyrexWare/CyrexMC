@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-namespace cyrex::nw::resourcepacks
+namespace cyrex::network::resourcepacks
 {
 
 class ResourcePackLoaderDef
@@ -15,4 +15,4 @@ public:
     virtual std::vector<std::unique_ptr<ResourcePackDef>> loadPacks() = 0;
 };
 
-} // namespace cyrex::nw::resourcepacks
+} // namespace cyrex::network::resourcepacks

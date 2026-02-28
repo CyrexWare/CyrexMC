@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 enum class SubClientId : std::uint8_t
 {
@@ -11,4 +11,4 @@ enum class SubClientId : std::uint8_t
     Client3,
     Client4
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

@@ -4,7 +4,7 @@
 #include "snappy_compressor.hpp"
 #include "zlib_compressor.hpp"
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 inline Compressor* getCompressor(CompressionAlgorithm algo)
 {
@@ -21,4 +21,4 @@ inline Compressor* getCompressor(CompressionAlgorithm algo)
 
     return nullptr;
 }
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

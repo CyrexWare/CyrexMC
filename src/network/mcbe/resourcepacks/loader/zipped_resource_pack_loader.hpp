@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::resourcepacks
+namespace cyrex::network::resourcepacks
 {
 
 class ZippedResourcePackLoader : public ResourcePackLoaderDef
@@ -22,4 +22,4 @@ public:
     std::vector<std::unique_ptr<ResourcePackDef>> loadPacks() override;
 };
 
-} // namespace cyrex::nw::resourcepacks
+} // namespace cyrex::network::resourcepacks

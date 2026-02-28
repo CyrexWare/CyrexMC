@@ -47,7 +47,7 @@
 #undef min
 #endif
 
-using namespace cyrex::nw::io;
+using namespace cyrex::network::io;
 
 namespace
 {
@@ -121,7 +121,7 @@ void debugByteBuffer(const std::vector<uint8_t>& buffer)
 }
 } // namespace
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 
 void NetworkSession::tick()
@@ -141,12 +141,12 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
         in.offset += packetLength;
         const std::uint32_t packetHeader = packetBuffer.readVarUInt();
         const std::uint32_t packetId = packetHeader & 0x3FF;
-        cyrex::logging::info(LOG_MCBE, "packet length = {}", packetLength);
-        cyrex::logging::info(LOG_MCBE,
-                             "packet id = {}0x{:02X} ({})",
-                             logging::Color::GOLD,
-                             packetId,
-                             cyrex::nw::protocol::toSimpleName(cyrex::nw::protocol::makePacketId(packetId)));
+        logging::info(LOG_MCBE, "packet length = {}", packetLength);
+        logging::info(LOG_MCBE,
+                      "packet id = {}0x{:02X} ({})",
+                      logging::Color::GOLD,
+                      packetId,
+                      protocol::toReadablePacketName(network::protocol::makePacketId(packetId)));
 
         if (packetId != 0x01)
         {
@@ -156,26 +156,26 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
             ss << "raw payload (" << payloadSize << " bytes): ";
             for (size_t i = 0; i < payloadSize; ++i)
                 ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(payload[i]) << " ";
-            cyrex::logging::info(LOG_MCBE, "{}", ss.str());
+            logging::info(LOG_MCBE, "{}", ss.str());
         }
 
         const auto* packetDef = m_packetFactory.find(packetId);
         if (!packetDef)
         {
-            cyrex::logging::error(LOG_MCBE, "unknown packet id 0x{:02x}", packetId);
+            logging::error(LOG_MCBE, "unknown packet id 0x{:02x}", packetId);
             return;
         }
 
         const auto packet = packetDef->decode(packetBuffer);
         if (!packet)
         {
-            cyrex::logging::error(LOG_MCBE, "error decoding packet");
+            logging::error(LOG_MCBE, "error decoding packet");
             return;
         }
         packet->subClientId = static_cast<protocol::SubClientId>(packetHeader >> 10 & 0x03);
         if (!packet->handle(*this))
         {
-            cyrex::logging::error(LOG_MCBE, "error handling packet");
+            logging::error(LOG_MCBE, "error handling packet");
             return;
         }
     } while (in.remaining() > 0);
@@ -183,10 +183,10 @@ void NetworkSession::onRaw(const Packet& /*packet*/, const uint8_t* data, const 
 
 bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protocolVersion)
 {
-    auto packet = std::make_unique<nw::protocol::PlayStatusPacket>();
-    packet->status = protocolVersion < nw::protocol::ProtocolInfo::currentProtocol
-                         ? nw::protocol::PlayStatus::LoginFailedClient
-                         : nw::protocol::PlayStatus::LoginFailedServer;
+    auto packet = std::make_unique<network::protocol::PlayStatusPacket>();
+    packet->status = protocolVersion < network::protocol::ProtocolInfo::currentProtocol
+                         ? network::protocol::PlayStatus::LoginFailedClient
+                         : network::protocol::PlayStatus::LoginFailedServer;
 
     send(std::move(packet), true);
     return true;
@@ -194,10 +194,10 @@ bool NetworkSession::disconnectUserForIncompatibleProtocol(const uint32_t protoc
 
 void NetworkSession::send(std::unique_ptr<protocol::Packet> packet, const bool immediately)
 {
-    cyrex::logging::info("queueing packet with id = {}0x{:02X} ({})",
-                         logging::Color::GOLD,
-                         packet->getDef().networkId,
-                         cyrex::nw::protocol::toSimpleName(protocol::makePacketId(packet->getDef().networkId)));
+    logging::info("queueing packet with id = {}0x{:02X} ({})",
+                  logging::Color::GOLD,
+                  packet->getDef().networkId,
+                  protocol::toReadablePacketName(protocol::makePacketId(packet->getDef().networkId)));
     if (immediately)
     {
         BinaryWriter packetBuffer;
@@ -478,7 +478,7 @@ bool NetworkSession::handlePacketViolationWarning(const protocol::ViolationSever
     logging::error("PacketViolation: Severity > {} ID > 0x{:02X}({}) MSG > {}",
                    magic_enum::enum_name(severity),
                    packetId,
-                   cyrex::nw::protocol::toSimpleName(protocol::makePacketId(packetId)),
+                   cyrex::network::protocol::toReadablePacketName(protocol::makePacketId(packetId)),
                    message);
     //m_markedForDisconnect = true;
     return true;
@@ -507,4 +507,4 @@ bool NetworkSession::handleRequestNetworkSettings(const uint32_t version)
     return true;
 }
 
-} // namespace cyrex::nw::session
+} // namespace cyrex::network::session

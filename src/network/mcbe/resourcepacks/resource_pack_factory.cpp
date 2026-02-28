@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace cyrex::nw::resourcepacks
+namespace cyrex::network::resourcepacks
 {
 
 ResourcePackFactory::ResourcePackFactory(const std::unordered_set<ResourcePackLoaderDef*>& loadersSet) :
@@ -63,4 +63,4 @@ void ResourcePackFactory::registerPackLoader(ResourcePackLoaderDef* loader)
     loaders.insert(loader);
 }
 
-} // namespace cyrex::nw::resourcepacks
+} // namespace cyrex::network::resourcepacks

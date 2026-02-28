@@ -24,7 +24,7 @@
 #include <memory>
 #include <uuid.h>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 class ResourcePackChunkRequestPacket;
 }
@@ -34,7 +34,7 @@ namespace cyrex::player
 class Player;
 }
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 
 // need getter/setter commands for this and proper usage
@@ -155,4 +155,4 @@ private:
     bool m_primaryLoggedIn{false};
     protocol::PacketFactory m_packetFactory;
 };
-} // namespace cyrex::nw::session
+} // namespace cyrex::network::session

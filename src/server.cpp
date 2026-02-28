@@ -53,9 +53,9 @@ cyrex::Server::Server(Config config) :
     m_serverUniqueId(generateServerId()),
     m_running(true)
 {
-    m_raknet = std::make_unique<nw::raknet::RaknetHandler>(*this);
+    m_raknet = std::make_unique<network::raknet::RaknetHandler>(*this);
 
-    using namespace cyrex::nw::resourcepacks;
+    using namespace network::resourcepacks;
 
     m_loaders.insert(std::make_unique<ZippedResourcePackLoader>(std::filesystem::path("resource_packs")));
     std::unordered_set<ResourcePackLoaderDef*> rawLoaders;
@@ -65,10 +65,10 @@ cyrex::Server::Server(Config config) :
     }
 
     m_resourcePackFactory = std::make_unique<ResourcePackFactory>(rawLoaders);
-    m_serverPrivateKey = nw::protocol::AesEncryptor::generateServerKeypair();
+    m_serverPrivateKey = network::protocol::AesEncryptor::generateServerKeypair();
     // }
 
-    m_commands = std::make_unique<cyrex::command::CommandManager>(*this);
+    m_commands = std::make_unique<command::CommandManager>(*this);
     m_commands->registerDefaults();
 }
 
@@ -110,22 +110,23 @@ const std::string& cyrex::Server::getMotd() const
     return m_config.motd;
 }
 
-cyrex::nw::protocol::GameMode cyrex::Server::getDefaultGameMode() const
+cyrex::network::protocol::GameMode cyrex::Server::getDefaultGameMode() const
 {
     return m_config.defaultGameMode;
 }
 
-void cyrex::Server::setDefaultGameMode(cyrex::nw::protocol::GameMode mode)
+void cyrex::Server::setDefaultGameMode(cyrex::network::protocol::GameMode mode)
 {
     m_config.defaultGameMode = mode;
 }
 
 void cyrex::Server::setDefaultGameModeFromString(const std::string_view mode)
 {
-    m_config.defaultGameMode = cyrex::nw::protocol::fromString(mode);
+    m_config.defaultGameMode = cyrex::network::protocol::parseGameMode(mode);
 }
 
-cyrex::player::Player& cyrex::Server::createPlayer(cyrex::player::Player::SubClientId id, nw::session::NetworkSession* session)
+cyrex::player::Player& cyrex::Server::createPlayer(cyrex::player::Player::SubClientId id,
+                                                   network::session::NetworkSession* session)
 {
     m_players.push_back(std::make_unique<cyrex::player::Player>(id, session, *this));
     return *m_players.back();
@@ -150,7 +151,7 @@ const std::vector<std::unique_ptr<cyrex::player::Player>>& cyrex::Server::getPla
     return m_players;
 }
 
-void cyrex::Server::broadcastPacketToAll(const nw::protocol::Packet& packet, cyrex::player::Player* exclude)
+void cyrex::Server::broadcastPacketToAll(const network::protocol::Packet& packet, player::Player* exclude)
 {
     for (const auto& player : m_players)
     {
@@ -162,17 +163,17 @@ void cyrex::Server::broadcastPacketToAll(const nw::protocol::Packet& packet, cyr
     }
 }
 
-cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory()
+cyrex::network::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory()
 {
     return *m_resourcePackFactory;
 }
 
-const cyrex::nw::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory() const
+const cyrex::network::resourcepacks::ResourcePackFactory& cyrex::Server::getResourcePackFactory() const
 {
     return *m_resourcePackFactory;
 }
 
-cyrex::nw::protocol::AesEncryptor::EccKey* cyrex::Server::getServerPrivateKey() const
+cyrex::network::protocol::AesEncryptor::EccKey* cyrex::Server::getServerPrivateKey() const
 {
     return m_serverPrivateKey.get();
 }
@@ -212,9 +213,9 @@ void cyrex::Server::commandLoop() const
 
 void cyrex::Server::run()
 {
-    cyrex::util::CPU cpu;
+    util::CPU cpu;
 
-    std::thread commandThread(&cyrex::Server::commandLoop, this);
+    std::thread commandThread(&Server::commandLoop, this);
 
     while (m_running)
     {

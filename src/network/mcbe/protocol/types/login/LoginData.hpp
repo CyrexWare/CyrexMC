@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 enum class authenticationType : std::int32_t
@@ -105,87 +105,87 @@ struct AuthIdentityData
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
-                                    ClientDataAnimationFrame,
-                                    ImageHeight,
-                                    ImageWidth,
-                                    Frames,
-                                    Type,
-                                    Image,
-                                    AnimationExpression);
+    ClientDataAnimationFrame,
+    ImageHeight,
+    ImageWidth,
+    Frames,
+    Type,
+    Image,
+    AnimationExpression);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
-                                    ClientDataPersonaSkinPiece,
-                                    PieceId,
-                                    PieceType,
-                                    PackId,
-                                    IsDefault,
-                                    ProductId);
+    ClientDataPersonaSkinPiece,
+    PieceId,
+    PieceType,
+    PackId,
+    IsDefault,
+    ProductId);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
-                                    ClientDataPersonaPieceTintColor,
-                                    PieceType,
-                                    Colors);
+    ClientDataPersonaPieceTintColor,
+    PieceType,
+    Colors);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
-                                    NetworkSkinData,
-                                    AnimatedImageData,
-                                    ArmSize,
-                                    CapeData,
-                                    CapeId,
-                                    CapeImageHeight,
-                                    CapeImageWidth,
-                                    CapeOnClassicSkin,
-                                    ClientRandomId,
-                                    CompatibleWithClientSideChunkGen,
-                                    CurrentInputMode,
-                                    DefaultInputMode,
-                                    DeviceId,
-                                    DeviceModel,
-                                    DeviceOS,
-                                    GameVersion,
-                                    GraphicsMode,
-                                    GuiScale,
-                                    IsEditorMode,
-                                    LanguageCode,
-                                    MaxViewDistance,
-                                    MemoryTier,
-                                    OverrideSkin,
-                                    PersonaPieces,
-                                    PersonaSkin,
-                                    PieceTintColors,
-                                    PlatformOfflineId,
-                                    PlatformOnlineId,
-                                    PlatformType,
-                                    PremiumSkin,
-                                    SelfSignedId,
-                                    ServerAddress,
-                                    SkinAnimationData,
-                                    SkinColor,
-                                    SkinData,
-                                    SkinGeometryData,
-                                    SkinGeometryDataEngineVersion,
-                                    SkinId,
-                                    SkinImageHeight,
-                                    SkinImageWidth,
-                                    SkinResourcePatch,
-                                    ThirdPartyName,
-                                    TrustedSkin,
-                                    UIProfile);
+    NetworkSkinData,
+    AnimatedImageData,
+    ArmSize,
+    CapeData,
+    CapeId,
+    CapeImageHeight,
+    CapeImageWidth,
+    CapeOnClassicSkin,
+    ClientRandomId,
+    CompatibleWithClientSideChunkGen,
+    CurrentInputMode,
+    DefaultInputMode,
+    DeviceId,
+    DeviceModel,
+    DeviceOS,
+    GameVersion,
+    GraphicsMode,
+    GuiScale,
+    IsEditorMode,
+    LanguageCode,
+    MaxViewDistance,
+    MemoryTier,
+    OverrideSkin,
+    PersonaPieces,
+    PersonaSkin,
+    PieceTintColors,
+    PlatformOfflineId,
+    PlatformOnlineId,
+    PlatformType,
+    PremiumSkin,
+    SelfSignedId,
+    ServerAddress,
+    SkinAnimationData,
+    SkinColor,
+    SkinData,
+    SkinGeometryData,
+    SkinGeometryDataEngineVersion,
+    SkinId,
+    SkinImageHeight,
+    SkinImageWidth,
+    SkinResourcePatch,
+    ThirdPartyName,
+    TrustedSkin,
+    UIProfile);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( // NOLINT
-                                    AuthenticationInfo,
-                                    AuthenticationType,
-                                    Certificate,
-                                    Token);
+    AuthenticationInfo,
+    AuthenticationType,
+    Certificate,
+    Token);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT( // NOLINT
-                                    AuthIdentityData,
-                                    displayName,
-                                    identity,
-                                    sandboxId,
-                                    titleId,
-                                    XUID);
+    AuthIdentityData,
+    displayName,
+    identity,
+    sandboxId,
+    titleId,
+    XUID);
 
 // NOLINTEND(readability-identifier-naming)
 
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

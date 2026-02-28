@@ -10,10 +10,10 @@
 #include <RakNet/MessageIdentifiers.h>
 #include <string>
 
-namespace cyrex::nw::raknet
+namespace cyrex::network::raknet
 {
 
-RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
+RaknetHandler::RaknetHandler(Server& server) : m_server(server)
 {
     m_peer = std::make_unique<RaknetPeer>();
 
@@ -35,17 +35,17 @@ RaknetHandler::RaknetHandler(cyrex::Server& server) : m_server(server)
 
     m_transportImpl = std::make_unique<RaknetTransport>(m_peer->get());
 
-    cyrex::logging::log(LOG_RAKNET, "Server began to listen on {} [IPv4]", m_server.getPort());
+    logging::log(LOG_RAKNET, "Server began to listen on {} [IPv4]", m_server.getPort());
 }
 
 RaknetHandler::~RaknetHandler() = default;
 
-cyrex::nw::protocol::Transport* RaknetHandler::transport() const
+protocol::Transport* RaknetHandler::transport() const
 {
     return m_transportImpl.get();
 }
 
-cyrex::Server& RaknetHandler::getServer() const
+Server& RaknetHandler::getServer() const
 {
     return m_server;
 }
@@ -88,4 +88,4 @@ void RaknetHandler::handlePacket(Packet* packet)
     }
 }
 
-} // namespace cyrex::nw::raknet
+} // namespace cyrex::network::raknet

@@ -4,7 +4,7 @@
 // #include "network/mcbe/packetids.hpp"
 #include "network/session/network_session.hpp"
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 
@@ -39,4 +39,4 @@ public:
         return true;
     }
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

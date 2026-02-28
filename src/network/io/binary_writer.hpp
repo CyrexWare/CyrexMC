@@ -14,7 +14,7 @@
 
 #include <cstdint>
 
-namespace cyrex::nw::io
+namespace cyrex::network::io
 {
 
 class BinaryWriter
@@ -275,4 +275,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::io
+} // namespace cyrex::network::io

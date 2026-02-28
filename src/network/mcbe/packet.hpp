@@ -7,12 +7,12 @@
 #include "packet_direction.hpp"
 #include "protocol/types/SubClientId.hpp"
 
-namespace cyrex::nw::session
+namespace cyrex::network::session
 {
 class NetworkSession;
 }
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 
 class PacketDef;
@@ -66,4 +66,4 @@ public:
 private:
     PacketImpl() = default;
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

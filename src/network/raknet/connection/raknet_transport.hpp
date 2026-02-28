@@ -5,10 +5,10 @@
 #include <RakNet/RakNetTypes.h>
 #include <RakNet/RakPeerInterface.h>
 
-namespace cyrex::nw::raknet
+namespace cyrex::network::raknet
 {
 
-class RaknetTransport : public cyrex::nw::protocol::Transport
+class RaknetTransport : public cyrex::network::protocol::Transport
 {
 public:
     explicit RaknetTransport(RakNet::RakPeerInterface* peer) : m_peer(peer)
@@ -20,4 +20,4 @@ public:
 private:
     RakNet::RakPeerInterface* m_peer = nullptr;
 };
-} // namespace cyrex::nw::raknet
+} // namespace cyrex::network::raknet

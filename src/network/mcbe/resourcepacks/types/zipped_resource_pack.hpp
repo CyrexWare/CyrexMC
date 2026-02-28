@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::resourcepacks
+namespace cyrex::network::resourcepacks
 {
 
 class ZippedResourcePack : public ResourcePack
@@ -36,4 +36,4 @@ private:
     std::vector<uint8_t> computeSha256FromFile() const;
 };
 
-} // namespace cyrex::nw::resourcepacks
+} // namespace cyrex::network::resourcepacks

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace cyrex::nw::resourcepacks
+namespace cyrex::network::resourcepacks
 {
 
 class ResourcePackDef
@@ -53,4 +53,4 @@ public:
     }
 };
 
-} // namespace cyrex::nw::resourcepacks
+} // namespace cyrex::network::resourcepacks

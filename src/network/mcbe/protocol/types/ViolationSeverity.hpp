@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace cyrex::nw::protocol
+namespace cyrex::network::protocol
 {
 enum class ViolationSeverity : int32_t
 {
@@ -9,4 +9,4 @@ enum class ViolationSeverity : int32_t
     FinalWarning,
     TerminatingConnection
 };
-} // namespace cyrex::nw::protocol
+} // namespace cyrex::network::protocol

@@ -19,7 +19,7 @@
 namespace cyrex::player
 {
 
-Player::Player(SubClientId id, nw::session::NetworkSession* session, cyrex::Server& server) noexcept :
+Player::Player(SubClientId id, network::session::NetworkSession* session, cyrex::Server& server) noexcept :
     m_subClientId(id),
     m_session(session),
     m_server(server)
@@ -31,7 +31,7 @@ Player::SubClientId Player::getSubClientId() const noexcept
     return m_subClientId;
 }
 
-void Player::sendPacket(std::unique_ptr<nw::protocol::Packet> packet, bool immediately)
+void Player::sendPacket(std::unique_ptr<network::protocol::Packet> packet, bool immediately)
 {
     if (!m_session)
         return;
@@ -61,10 +61,10 @@ bool Player::isMarkedForDisconnect() const noexcept
 
 void Player::doLoginSuccess()
 {
-    auto playStatus = std::make_unique<cyrex::nw::protocol::PlayStatusPacket>();
-    playStatus->status = cyrex::nw::protocol::PlayStatus::LoginSuccess;
+    auto playStatus = std::make_unique<cyrex::network::protocol::PlayStatusPacket>();
+    playStatus->status = cyrex::network::protocol::PlayStatus::LoginSuccess;
 
-    auto resourcePacksInfo = std::make_unique<cyrex::nw::protocol::ResourcePacksInfoPacket>();
+    auto resourcePacksInfo = std::make_unique<cyrex::network::protocol::ResourcePacksInfoPacket>();
     const auto& defs = m_server.getResourcePackFactory().getResourceStack();
     resourcePacksInfo->resourcePackEntries.reserve(defs.size());
 
@@ -98,9 +98,9 @@ void Player::doLoginSuccess()
     sendPacketBatch(true, std::move(playStatus), std::move(resourcePacksInfo));
 }
 
-bool Player::handleResourcePackClientResponse(const nw::protocol::ResourcePackClientResponsePacket& pk)
+bool Player::handleResourcePackClientResponse(const network::protocol::ResourcePackClientResponsePacket& pk)
 {
-    using namespace nw::protocol;
+    using namespace network::protocol;
 
     switch (pk.responseStatus)
     {
@@ -123,7 +123,7 @@ bool Player::handleResourcePackClientResponse(const nw::protocol::ResourcePackCl
                 const int maxChunkSize = m_server.getResourcePackFactory().getMaxChunkSize();
                 const int chunkCount = static_cast<int>(std::ceil(double(resourcePack->getPackSize()) / maxChunkSize));
 
-                auto data = std::make_unique<nw::protocol::ResourcePackMeta>(resourcePack->getPackId(),
+                auto data = std::make_unique<network::protocol::ResourcePackMeta>(resourcePack->getPackId(),
                                                                              resourcePack,
                                                                              maxChunkSize,
                                                                              chunkCount);
@@ -131,7 +131,7 @@ bool Player::handleResourcePackClientResponse(const nw::protocol::ResourcePackCl
                 m_packQueue.push_back(data->packId);
                 m_loadedPacks.emplace(data->packId, std::move(data));
 
-                auto dataInfoPkt = std::make_unique<nw::protocol::ResourcePackDataInfoPacket>();
+                auto dataInfoPkt = std::make_unique<network::protocol::ResourcePackDataInfoPacket>();
                 dataInfoPkt->packId = resourcePack->getPackId();
                 dataInfoPkt->packVersion = resourcePack->getPackVersion();
                 dataInfoPkt->maxChunkSize = maxChunkSize;
@@ -144,7 +144,7 @@ bool Player::handleResourcePackClientResponse(const nw::protocol::ResourcePackCl
 
         case ResourcePackClientResponseStatus::HaveAllPacks:
         {
-            auto stackPkt = std::make_unique<nw::protocol::ResourcePackStackPacket>();
+            auto stackPkt = std::make_unique<network::protocol::ResourcePackStackPacket>();
             stackPkt->mustAccept = m_server.shouldForceResources();
             const auto& defStack = m_server.getResourcePackFactory().getResourceStack();
             stackPkt->resourcePackStack.reserve(defStack.size());
@@ -155,7 +155,7 @@ bool Player::handleResourcePackClientResponse(const nw::protocol::ResourcePackCl
                 entry.packVersion = def->getPackVersion();
                 entry.subPackName = def->getSubPackName();
             }
-            stackPkt->baseGameVersion = nw::protocol::ProtocolInfo::minecraftVersionNetwork;
+            stackPkt->baseGameVersion = network::protocol::ProtocolInfo::minecraftVersionNetwork;
             stackPkt->experiments = {};
             sendPacket(std::move(stackPkt), true);
             break;
@@ -169,9 +169,9 @@ bool Player::handleResourcePackClientResponse(const nw::protocol::ResourcePackCl
     return true;
 }
 
-bool Player::handleResourcePackChunkRequest(const nw::protocol::ResourcePackChunkRequestPacket& request)
+bool Player::handleResourcePackChunkRequest(const network::protocol::ResourcePackChunkRequestPacket& request)
 {
-    const nw::protocol::ResourcePackMeta* packInfoPtr = nullptr;
+    const network::protocol::ResourcePackMeta* packInfoPtr = nullptr;
     auto packFinder = m_loadedPacks.find(request.packId);
 
     if (packFinder == m_loadedPacks.end())
@@ -185,7 +185,7 @@ bool Player::handleResourcePackChunkRequest(const nw::protocol::ResourcePackChun
 
         const int maxSize = m_server.getResourcePackFactory().getMaxChunkSize();
         const int totalChunks = static_cast<int>((rawPack->getPackSize() + maxSize - 1) / maxSize);
-        auto packInfo = std::make_unique<nw::protocol::ResourcePackMeta>(rawPack->getPackId(), rawPack, maxSize, totalChunks);
+        auto packInfo = std::make_unique<network::protocol::ResourcePackMeta>(rawPack->getPackId(), rawPack, maxSize, totalChunks);
         packInfoPtr = m_loadedPacks.emplace(packInfo->packId, std::move(packInfo)).first->second.get();
     }
     else
@@ -229,7 +229,7 @@ void Player::processChunkQueue()
                 m_queueProcessing = false;
                 return;
             }
-            if (pack->sent.at(static_cast<size_t>(idx)))
+            if (pack->chunks[static_cast<size_t>(idx)].sent)
                 continue;
 
             const size_t startOffset = static_cast<size_t>(idx) * pack->maxChunkSize;
@@ -244,7 +244,7 @@ void Player::processChunkQueue()
                 return;
             }
 
-            auto pkt = std::make_unique<nw::protocol::ResourcePackChunkDataPacket>();
+            auto pkt = std::make_unique<network::protocol::ResourcePackChunkDataPacket>();
             pkt->packId = pack->packId;
             pkt->packVersion = pack->pack->getPackVersion();
             pkt->chunkIndex = idx;
@@ -252,9 +252,9 @@ void Player::processChunkQueue()
             pkt->data = std::move(chunk);
 
             sendPacket(std::move(pkt), true);
-            pack->sent.at(static_cast<size_t>(idx)) = true;
+            pack->chunks[static_cast<size_t>(idx)].sent = true;
 
-            while (pack->nextToSend < pack->chunkCount && pack->sent.at(static_cast<size_t>(pack->nextToSend)))
+            while (pack->nextToSend < pack->chunkCount && pack->chunks[static_cast<size_t>(pack->nextToSend)].sent)
                 pack->nextToSend++;
 
             if (pack->nextToSend >= pack->chunkCount)
@@ -288,7 +288,7 @@ void Player::nextPack()
 
 void Player::disconnect(const std::string& message)
 {
-    auto packet = std::make_unique<nw::protocol::DisconnectPacket>();
+    auto packet = std::make_unique<network::protocol::DisconnectPacket>();
     packet->message = message;
     sendPacket(std::move(packet), true);
 }

@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <filesystem>
 
-namespace cyrex::nw::resourcepacks
+namespace cyrex::network::resourcepacks
 {
 
 std::vector<std::unique_ptr<ResourcePackDef>> ZippedResourcePackLoader::loadPacks()
@@ -74,4 +74,4 @@ std::vector<std::unique_ptr<ResourcePackDef>> ZippedResourcePackLoader::loadPack
     return loadedPacks;
 }
 
-} // namespace cyrex::nw::resourcepacks
+} // namespace cyrex::network::resourcepacks
